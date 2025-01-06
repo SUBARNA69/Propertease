@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PROPERTEASE - Real Estate</title>
+
+    <!-- Include any necessary CSS files here -->
+    <link href="~/lib/flowbite/flowbite.css" rel="stylesheet" />
+    <link href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Include any necessary JS files here -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/flowbite/flowbite.min.js"></script>
+</head>
+<body>
+    <header>
+        <nav class="bg-white border-gray-200 dark:bg-gray-900">
+            <div class="p-4 mx-auto flex max-w-screen-xl flex-wrap items-center justify-between">
+                <!-- Left side: PROPERTEASE -->
+                <a asp-controller="Home" asp-action="Home" class="text-2xl w-1/3   font-semibold dark:text-white">PROPERTEASE</a>
+
+                <!-- Center: Home, Properties, About -->
+              
+
+                <!-- Right side: Conditional Login/Profile -->
+                @* <div class="relative"> *@
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                            <div class="flex space-x-8">
+                                <a asp-controller="Home" asp-action="Home" class="text-gray-900 hover:text-blue-500">Home</a>
+                                <a asp-controller="Home" asp-action="Properties" class="text-gray-900 hover:text-blue-500">Properties</a>
+                                <a asp-controller="Home" asp-action="About" class="text-gray-900 hover:text-blue-500">About</a>
+                            </div>
+                            <!-- Profile button for logged-in users -->
+                                <button id="profile-button" class="bg-gray-800 text-white rounded-full p-2">
+                                    <span class="sr-only">Open user menu</span>
+                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                                    </svg>
+                                </button>
+
+                                <!-- Profile Dropdown -->
+                                <div id="profile-dropdown" class="hidden absolute right-0 top-[72px] bg-white rounded-lg shadow-lg w-48">
+                                    <ul>
+                                        <li><a asp-action="Profile" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a></li>
+                                        <li><a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a></li>
+                                        <li>
+                                            <a asp-controller="User" asp-action="Logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                    }
+                    else
+                    {
+                        <!-- Login button for non-logged-in users -->
+                        <a asp-controller="User" asp-action="Login" class="bg-blue-500 text-white rounded-full px-4 py-2 hover:bg-blue-600">Login</a>
+                    }
+                @* </div> *@
+            </div>
+        </nav>
+    </header>
+
+    <div class="mt-5 container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - PROPERTEASE - <a href="#">Privacy</a>
+        </div>
+    </footer>
+
+    <!-- Toggle profile dropdown with jQuery -->
+    <script>
+        $(document).ready(function () {
+            $('#profile-button').click(function () {
+                $('#profile-dropdown').toggleClass('hidden');
+            });
+        });
+        @RenderSection("Scripts", required: false)
+    </script>
+</body>
+</html>

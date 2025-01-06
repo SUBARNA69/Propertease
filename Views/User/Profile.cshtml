@@ -1,0 +1,42 @@
+﻿@model Propertease.Models.User
+
+@{
+    ViewData["Title"] = "User Profile";
+}
+
+<div class="max-w-lg mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-2xl font-bold mb-4">User Profile</h2>
+
+    <!-- Profile Image Display -->
+    <div class="flex justify-center mb-6">
+        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300">
+            @if (!string.IsNullOrEmpty(Model.Image))
+            {
+                <img src="~/Images/@Model.Image" alt="Profile Image" class="w-full h-full object-cover" />
+            }
+            else
+            {
+                <img src="https://via.placeholder.com/150" alt="Default Profile Image" class="w-full h-full object-cover" />
+            }
+        </div>
+    </div>
+
+    <!-- User Information -->
+    <div class="space-y-2">
+        <div class="text-lg font-medium">Name: @Model.FullName</div>
+        <div class="text-lg font-medium">Email: @Model.Email</div>
+        <div class="text-lg font-medium">Contact Number: @Model.ContactNumber</div>
+    </div>
+
+    <!-- Image Upload Form -->
+    <form asp-action="SaveImage" asp-controller="User" method="post" enctype="multipart/form-data" class="mt-6">
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
+            <input type="file" name="photo" class="block w-full text-sm text-gray-900 border rounded-lg cursor-pointer focus:outline-none" />
+        </div>
+
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Image</button>
+        <a asp-action="EditProfile" asp-controller="User" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Edit Profile</a>
+
+    </form>
+</div>

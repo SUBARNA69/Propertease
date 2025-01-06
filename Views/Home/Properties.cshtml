@@ -1,0 +1,47 @@
+﻿@* @model IEnumerable<PropertyViewModel> <!-- Assuming you pass a list of properties --> *@
+
+@{
+    ViewData["Title"] = "Properties";
+}
+
+<h1 class="text-2xl font-semibold mb-4">Available Properties</h1>
+
+<table class="table-auto w-full border-collapse border border-gray-200">
+    <thead>
+        <tr class="bg-gray-100">
+            <th class="border border-gray-300 px-4 py-2">#</th>
+            <th class="border border-gray-300 px-4 py-2">Name</th>
+            <th class="border border-gray-300 px-4 py-2">Type</th>
+            <th class="border border-gray-300 px-4 py-2">Location</th>
+            <th class="border border-gray-300 px-4 py-2">Price</th>
+            <th class="border border-gray-300 px-4 py-2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @* @if (Model != null && Model.Any()) *@
+        @* { *@
+        @*     int index = 1; *@
+        @*     foreach (var property in Model) *@
+        @*     { *@
+        @*         <tr> *@
+        @*             <td class="border border-gray-300 px-4 py-2">@index</td> *@
+        @*             <td class="border border-gray-300 px-4 py-2">@property.Name</td> *@
+        @*             <td class="border border-gray-300 px-4 py-2">@property.Type</td> *@
+        @*             <td class="border border-gray-300 px-4 py-2">@property.Location</td> *@
+        @*             <td class="border border-gray-300 px-4 py-2">Rs. @property.Price.ToString("N0")</td> *@
+        @*             <td class="border border-gray-300 px-4 py-2"> *@
+        @*                 <a asp-controller="Properties" asp-action="Details" asp-route-id="@property.Id" class="text-blue-500 hover:underline">View</a> *@
+        @*                 <a asp-controller="Properties" asp-action="Edit" asp-route-id="@property.Id" class="text-green-500 hover:underline ml-2">Edit</a> *@
+        @*             </td> *@
+        @*         </tr> *@
+        @*         index++; *@
+        @*     } *@
+        @* } *@
+        else
+        {
+            <tr>
+                <td colspan="6" class="text-center border border-gray-300 px-4 py-2">No properties available.</td>
+            </tr>
+        }
+    </tbody>
+</table>

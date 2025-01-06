@@ -1,0 +1,45 @@
+﻿@model Propertease.Models.User
+
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="max-w-lg mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
+    <h2 class="text-2xl font-bold mb-4">Edit Profile</h2>
+
+    <form asp-action="EditProfile" asp-controller="User" method="post" class="space-y-4">
+        <!-- Full Name -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Full Name</label>
+            <input asp-for="FullName" class="block w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+            <span asp-validation-for="FullName" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Email</label>
+            <input asp-for="Email" type="email" class="block w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+            <span asp-validation-for="Email" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Contact Number -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Contact Number</label>
+            <input asp-for="ContactNumber" type="tel" class="block w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500" />
+            <span asp-validation-for="ContactNumber" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Address -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Address</label>
+            <textarea asp-for="Address" rows="3" class="block w-full mt-1 p-2 border rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500"></textarea>
+            <span asp-validation-for="Address" class="text-red-500 text-sm"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-end">
+            <input type="submit" value="Save Changes" class="btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" />
+        </div>
+
+    </form>
+</div>
