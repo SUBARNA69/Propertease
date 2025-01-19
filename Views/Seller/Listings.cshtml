@@ -1,0 +1,66 @@
+﻿@model IEnumerable<Propertease.Models.Properties>
+
+<div class="container mx-auto p-6">
+    <h1 class="text-2xl font-semibold mb-4">My Listings</h1>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full bg-white border border-gray-200 rounded-lg shadow">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Property</th>
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Price</th>
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Description</th>
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Status</th> <!-- Added Status Column -->
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var property in Model)
+                    {
+                        <tr>
+                            <td class="px-6 py-4 border-b">
+                                <div class="flex items-center">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-lg mr-3">
+                                        @if (!string.IsNullOrEmpty(property.Photo))
+                                        {
+                                            <img src="~/Images/@property.Photo"
+                                                 alt="@property.Title"
+                                                 class="w-16 h-16 object-cover rounded-lg" />
+                                        }
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold">@property.Title</p>
+                                        <p class="text-gray-500 text-sm">@property.City, @property.District</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 border-b">₹@property.Price.ToString("N0")</td>
+                            <td class="px-6 py-4 border-b">@property.Description</td>
+                            <td class="px-6 py-4 border-b">
+                                <span class="px-2 py-1 rounded-lg text-sm font-medium
+                                    @(property.Status == "Pending" ? "bg-yellow-100 text-yellow-700" :
+                                    property.Status == "Approved" ? "bg-green-100 text-green-700" :
+                                    "bg-red-100 text-red-700")">
+                                    @property.Status
+                                </span>
+                            </td> <!-- Status Cell -->
+                            <td class="px-6 py-4 border-b">
+                                <div class="flex space-x-3">
+                                    <a href="/Seller/ViewPropertyDetails/@property.Id" class="text-blue-500 hover:underline">View</a>
+                                    <a href="#" class="text-yellow-500 hover:underline">Edit</a>
+                                    <a href="#" class="text-red-500 hover:underline">Delete</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-500">No listings available.</p>
+    }
+</div>

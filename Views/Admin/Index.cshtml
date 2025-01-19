@@ -1,0 +1,17 @@
+﻿// Action to view seller approval status
+public IActionResult ViewSellerApprovalStatus()
+{
+    // Get all users with their seller approval status
+    var users = _context.Users
+                        .Where(u => u.Role == "Seller")
+                        .Select(u => new 
+                        {
+                            u.Id,
+                            u.FullName,
+                            u.Email,
+                            u.IsSellerApproved
+                        })
+                        .ToList();
+
+    return View(users);  // Pass the users to the view
+}

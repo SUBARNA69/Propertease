@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Propertease.Models
@@ -8,8 +9,6 @@ namespace Propertease.Models
         // Required properties
         public int Id { get; set; }
 
-        [Required]
-        [StringLength(100, MinimumLength = 1)]
         public string FullName { get; set; }
 
         [Required]
@@ -25,14 +24,13 @@ namespace Propertease.Models
         public string? Role { get; set; }
 
         // Password and Confirm Password
-        [Required]
-        [StringLength(100, MinimumLength = 6)]  // Minimum 6 characters for password
         public string Password { get; set; }
 
         public string? Address {  get; set; }
         [NotMapped]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+        public ICollection<Properties>? Properties { get; set; } // Properties owned by the seller
 
     }
 }

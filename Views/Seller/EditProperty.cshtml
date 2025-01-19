@@ -1,0 +1,49 @@
+﻿@model Propertease.Models.AddProperties
+
+<div class="container mx-auto p-6">
+    <h1 class="text-2xl font-semibold mb-4">Edit Property</h1>
+
+    <form asp-action="EditProperty" asp-controller="Seller" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="PropertyId" />
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium" for="Title">Title</label>
+            <input asp-for="Title" class="w-full px-4 py-2 border rounded-lg" />
+            <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium" for="Description">Description</label>
+            <textarea asp-for="Description" class="w-full px-4 py-2 border rounded-lg"></textarea>
+            <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium" for="Price">Price</label>
+            <input asp-for="Price" type="number" class="w-full px-4 py-2 border rounded-lg" />
+            <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium" for="City">City</label>
+            <input asp-for="City" class="w-full px-4 py-2 border rounded-lg" />
+            <span asp-validation-for="City" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium" for="District">District</label>
+            <input asp-for="District" class="w-full px-4 py-2 border rounded-lg" />
+            <span asp-validation-for="District" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="mb-4">
+            <label class="block text-gray-700 font-medium" for="Photo">Photo</label>
+            <input type="file" name="photo" class="w-full px-4 py-2 border rounded-lg" />
+        </div>
+
+        <div class="flex space-x-4">
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Save Changes</button>
+            <a href="/Seller/Listings" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</a>
+        </div>
+    </form>
+</div>

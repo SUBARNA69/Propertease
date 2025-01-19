@@ -2,8 +2,7 @@ using Propertease.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Propertease.Security;
-using Microsoft.Extensions.Options;
-
+using Microsoft.AspNetCore.Identity.UI.Services;
 namespace Propertease
 {
     public class Program
@@ -13,7 +12,7 @@ namespace Propertease
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-
+            builder.Services.AddScoped<PropertyRepository>();
             builder.Services.AddDbContext<ProperteaseDbContext>(options =>
               options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
                      .EnableSensitiveDataLogging());
@@ -47,6 +46,7 @@ namespace Propertease
             app.UseAuthentication();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseStaticFiles();
 
             app.MapControllerRoute(
                 name: "default",

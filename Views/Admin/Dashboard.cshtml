@@ -1,0 +1,109 @@
+﻿@page
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.7.0/flowbite.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+
+    <div class="flex">
+        
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <h1 class="text-2xl font-bold">Welcome back, John!</h1>
+            <p class="text-gray-600">Here's what's happening with your platform today.</p>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-5 gap-4 mt-6">
+                <div class="p-4 bg-white shadow rounded">
+                    <h2 class="text-lg font-bold">Total Users</h2>
+                    <p class="text-2xl font-bold">2,543</p>
+                    <p class="text-sm text-green-500">+12% this month</p>
+                </div>
+                <div class="p-4 bg-white shadow rounded">
+                    <h2 class="text-lg font-bold">Active Properties</h2>
+                    <p class="text-2xl font-bold">1,234</p>
+                    <p class="text-sm text-green-500">+8% this month</p>
+                </div>
+                <div class="p-4 bg-white shadow rounded">
+                    <h2 class="text-lg font-bold">Pending Approvals</h2>
+                    <p class="text-2xl font-bold">48</p>
+                    <p class="text-sm text-gray-500">23 new today</p>
+                </div>
+                <div class="p-4 bg-white shadow rounded">
+                    <h2 class="text-lg font-bold">Flagged Properties</h2>
+                    <p class="text-2xl font-bold">15</p>
+                    <p class="text-sm text-red-500">5 new flags</p>
+                </div>
+                <div class="p-4 bg-white shadow rounded">
+                    <h2 class="text-lg font-bold">Monthly Revenue</h2>
+                    <p class="text-2xl font-bold">$84,245</p>
+                    <p class="text-sm text-green-500">+15% this month</p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="p-6 bg-white shadow rounded h-64">
+                    <h2 class="text-lg font-bold">User Growth</h2>
+                    <div class="flex items-center justify-center h-full text-gray-400">
+                        Chart: User Growth Over Time
+                    </div>
+                </div>
+                <div class="p-6 bg-white shadow rounded h-64">
+                    <h2 class="text-lg font-bold">Revenue Trends</h2>
+                    <div class="flex items-center justify-center h-full text-gray-400">
+                        Chart: Revenue Analysis
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="mt-6">
+                <h2 class="text-lg font-bold">Recent Activity</h2>
+                <div class="p-4 mt-2 bg-white shadow rounded">
+                    <ul>
+                        <li class="mb-2">
+                            <p><strong>New Property Listed:</strong> Sarah Johnson listed a new property in San Francisco <span class="text-gray-400">2h ago</span></p>
+                        </li>
+                        <li class="mb-2">
+                            <p><strong>Property Flagged:</strong> Property ID #45678 was flagged for review <span class="text-gray-400">4h ago</span></p>
+                        </li>
+                        <li>
+                            <p><strong>New User Registration:</strong> Mike Peters joined as a new agent <span class="text-gray-400">6h ago</span></p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="mt-6">
+                <h2 class="text-lg font-bold">Quick Actions</h2>
+                <div class="p-4 bg-white shadow rounded">
+                    <ul>
+                        <li class="mb-2">
+                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">✔ Approve Properties (12)</button>
+                        </li>
+                        <li class="mb-2">
+                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">🚩 Review Flags (5)</button>
+                        </li>
+                        <li class="mb-2">
+                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">✔ Verify Agents (8)</button>
+                        </li>
+                        <li>
+                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">📩 Support Tickets (3)</button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.7.0/flowbite.min.js"></script>
+</body>
+</html>

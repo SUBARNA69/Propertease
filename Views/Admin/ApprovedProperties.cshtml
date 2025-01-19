@@ -1,0 +1,49 @@
+﻿@model IEnumerable<Propertease.Models.Properties>
+
+<div class="container mx-auto p-6">
+    <h1 class="text-2xl font-semibold mb-4">Approved Properties</h1>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full bg-white border border-gray-200 rounded-lg shadow">
+                <thead>
+                    <tr>
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Property</th>
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Price</th>
+                        <th class="px-6 py-3 border-b text-left text-gray-500">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var property in Model)
+                    {
+                        <tr>
+                            <td class="px-6 py-4 border-b">
+                                <div class="flex items-center">
+                                    <div class="w-16 h-16 bg-gray-300 rounded-lg mr-3">
+                                        @if (!string.IsNullOrEmpty(property.Photo))
+                                        {
+                                            <img src="~/Images/@property.Photo"
+                                                 alt="@property.Title"
+                                                 class="w-16 h-16 object-cover rounded-lg" />
+                                        }
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold">@property.Title</p>
+                                        <p class="text-gray-500 text-sm">@property.City, @property.District</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 border-b">₹@property.Price.ToString("N0")</td>
+                            <td class="px-6 py-4 border-b">@property.Description</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p class="text-gray-500">No approved properties available.</p>
+    }
+</div>

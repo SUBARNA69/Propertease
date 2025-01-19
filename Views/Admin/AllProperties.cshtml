@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "AllProperties";
+}
+@model IEnumerable<Propertease.Models.Properties>
+
+<h2>All Properties</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Property Name</th>
+            <th>Property Type</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var property in Model)
+        {
+            <tr>
+                <td>@property.Title</td>
+                <td>@property.PropertyType</td>
+                <td>@property.Status</td>
+                <td>
+                    <a href="@Url.Action("ViewPropertyDetails", new { id = property.Id })" class="btn btn-info">View</a>
+                    <form action="@Url.Action("DeleteProperty", new { id = property.Id })" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this property?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

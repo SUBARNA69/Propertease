@@ -21,6 +21,183 @@ namespace Propertease.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Propertease.Models.Apartment", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int?>("Bathrooms")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Kitchens")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PropertyID")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("RoomSize")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("Rooms")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SittingRooms")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PropertyID");
+
+                    b.ToTable("Apartments");
+                });
+
+            modelBuilder.Entity("Propertease.Models.DashboardViewModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ActiveProperties")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FlaggedProperties")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MonthlyRevenue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PendingApprovals")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TotalUsers")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("dashboardViewModels");
+                });
+
+            modelBuilder.Entity("Propertease.Models.House", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<double?>("Area")
+                        .HasColumnType("float");
+
+                    b.Property<int?>("Bathrooms")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Bedrooms")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FacingDirection")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Floors")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Kitchens")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PropertyID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("SittingRooms")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PropertyID");
+
+                    b.ToTable("Houses");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Land", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<double?>("Area")
+                        .HasColumnType("float");
+
+                    b.Property<int>("PropertyID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("PropertyID");
+
+                    b.ToTable("Lands");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Properties", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Photo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("PropertyType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ThreeDModel")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SellerId");
+
+                    b.ToTable("properties");
+                });
+
             modelBuilder.Entity("Propertease.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -29,9 +206,13 @@ namespace Propertease.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ConfirmPassword")
-                        .IsRequired()
+                    b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ContactNumber")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -48,13 +229,7 @@ namespace Propertease.Migrations
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(15)
-                        .HasColumnType("nvarchar(15)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
@@ -65,6 +240,64 @@ namespace Propertease.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Apartment", b =>
+                {
+                    b.HasOne("Propertease.Models.Properties", "Properties")
+                        .WithMany("Apartments")
+                        .HasForeignKey("PropertyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Propertease.Models.House", b =>
+                {
+                    b.HasOne("Propertease.Models.Properties", "Properties")
+                        .WithMany("Houses")
+                        .HasForeignKey("PropertyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Land", b =>
+                {
+                    b.HasOne("Propertease.Models.Properties", "Properties")
+                        .WithMany("Lands")
+                        .HasForeignKey("PropertyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Properties", b =>
+                {
+                    b.HasOne("Propertease.Models.User", "Seller")
+                        .WithMany("Properties")
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Seller");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Properties", b =>
+                {
+                    b.Navigation("Apartments");
+
+                    b.Navigation("Houses");
+
+                    b.Navigation("Lands");
+                });
+
+            modelBuilder.Entity("Propertease.Models.User", b =>
+                {
+                    b.Navigation("Properties");
                 });
 #pragma warning restore 612, 618
         }

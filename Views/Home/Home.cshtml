@@ -1,42 +1,106 @@
 ﻿@{
     ViewData["Title"] = "Home";
 }
+<body class="bg-gray-100">
+    <!-- Search Section -->
+    <div class="bg-gray-800 py-10">
+        <div class="w-full">
+            <div class="flex justify-center">
+                <div class="flex space-x-2 bg-white shadow rounded-lg p-2 w-3/4">
+                    <input type="text" placeholder="Location" class="w-full px-4 py-2 text-sm border rounded-md focus:outline-none">
+                    <input type="text" placeholder="Property Type" class="w-full px-4 py-2 text-sm border rounded-md focus:outline-none">
+                    <input type="text" placeholder="Price Range" class="w-full px-4 py-2 text-sm border rounded-md focus:outline-none">
+                    <button class="px-4 py-2 text-white bg-black rounded-md">Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome to PROPERTEASE</h1>
-    <p class="lead">Your one-stop solution for buying, selling, and renting properties.</p>
-    <a href="@Url.Action("Properties", "Home")" class="btn btn-primary btn-lg">Explore Properties</a>
-</div>
+    <!-- Browse by Category -->
+    <div class="container mx-auto text-center py-10">
+        <h2 class="text-xl font-bold mb-4">Browse by Category</h2>
+        <div class="grid grid-cols-3 gap-4">
+            <!-- Homes -->
+            <button onclick="window.location.href='/homes'" class="bg-white p-4 shadow rounded-lg text-center w-full focus:outline-none">
+                <div class="text-3xl mb-2">🏠</div>
+                <h3 class="font-bold">Homes</h3>
+                <p class="text-sm text-gray-500">Find your perfect home from our extensive collection</p>
+            </button>
 
-<div class="row mt-5">
-    <div class="col-md-4">
-        <div class="card">
-            <img class="card-img-top" src="~/images/home-buy.jpg" alt="Buy Property">
-            <div class="card-body">
-                <h5 class="card-title">Buy Properties</h5>
-                <p class="card-text">Browse through a wide range of properties to find your dream home.</p>
-                <a href="@Url.Action("Buy", "Properties")" class="btn btn-outline-primary">Browse</a>
+            <!-- Land -->
+            <button onclick="window.location.href='/land'" class="bg-white p-4 shadow rounded-lg text-center w-full focus:outline-none">
+                <div class="text-3xl mb-2">🌲</div>
+                <h3 class="font-bold">Land</h3>
+                <p class="text-sm text-gray-500">Explore available plots and land opportunities</p>
+            </button>
+
+            <!-- Apartments -->
+            <button onclick="window.location.href='/apartments'" class="bg-white p-4 shadow rounded-lg text-center w-full focus:outline-none">
+                <div class="text-3xl mb-2">🏢</div>
+                <h3 class="font-bold">Apartments</h3>
+                <p class="text-sm text-gray-500">Discover modern apartments in prime locations</p>
+            </button>
+        </div>
+    </div>
+
+    <!-- Featured Properties -->
+    <div class="w-full py-10">
+        <h2 class="text-xl font-bold mb-4 text-center">Featured Properties</h2>
+        <div class="grid grid-cols-3 gap-4 px-10">
+            <div class="bg-white p-4 shadow rounded-lg">
+                <div class="h-32 bg-gray-200 rounded mb-2"></div>
+                <h3 class="font-bold">Modern Villa</h3>
+                <p class="text-sm text-gray-500">Beverly Hills, CA</p>
+                <p class="font-bold">$2,500,000</p>
+                <button class="mt-2 w-full bg-black text-white py-2 rounded">View Details</button>
+            </div>
+            <div class="bg-white p-4 shadow rounded-lg">
+                <div class="h-32 bg-gray-200 rounded mb-2"></div>
+                <h3 class="font-bold">Luxury Apartment</h3>
+                <p class="text-sm text-gray-500">Manhattan, NY</p>
+                <p class="font-bold">$1,800,000</p>
+                <button class="mt-2 w-full bg-black text-white py-2 rounded">View Details</button>
+            </div>
+            <div class="bg-white p-4 shadow rounded-lg">
+                <div class="h-32 bg-gray-200 rounded mb-2"></div>
+                <h3 class="font-bold">Beach House</h3>
+                <p class="text-sm text-gray-500">Malibu, CA</p>
+                <p class="font-bold">$3,200,000</p>
+                <button class="mt-2 w-full bg-black text-white py-2 rounded">View Details</button>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <img class="card-img-top" src="~/images/home-sell.jpg" alt="Sell Property">
-            <div class="card-body">
-                <h5 class="card-title">Sell Properties</h5>
-                <p class="card-text">List your property and connect with potential buyers.</p>
-                <a href="@Url.Action("Sell", "Properties")" class="btn btn-outline-primary">List Your Property</a>
+
+    <!-- Best for You -->
+    <div class="w-full py-10">
+        <h2 class="text-xl font-bold mb-4 text-center">Best for You</h2>
+        <div class="grid grid-cols-4 gap-4 px-10">
+            <div class="bg-white p-4 shadow rounded-lg">
+                <div class="h-24 bg-gray-200 rounded mb-2"></div>
+                <h3 class="font-bold">Cozy Studio</h3>
+                <p class="text-sm text-gray-500">San Francisco, CA</p>
+                <p class="font-bold">$650,000</p>
+            </div>
+            <div class="bg-white p-4 shadow rounded-lg">
+                <div class="h-24 bg-gray-200 rounded mb-2"></div>
+                <h3 class="font-bold">Family Home</h3>
+                <p class="text-sm text-gray-500">Seattle, WA</p>
+                <p class="font-bold">$1,200,000</p>
+            </div>
+            <div class="bg-white p-4 shadow rounded-lg">
+                <div class="h-24 bg-gray-200 rounded mb-2"></div>
+                <h3 class="font-bold">Downtown Loft</h3>
+                <p class="text-sm text-gray-500">Chicago, IL</p>
+                <p class="font-bold">$850,000</p>
+            </div>
+            <div class="bg-white p-4 shadow rounded-lg">
+                <div class="h-24 bg-gray-200 rounded mb-2"></div>
+                <h3 class="font-bold">Mountain View</h3>
+                <p class="text-sm text-gray-500">Denver, CO</p>
+                <p class="font-bold">$780,000</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <img class="card-img-top" src="~/images/home-rent.jpg" alt="Rent Property">
-            <div class="card-body">
-                <h5 class="card-title">Rent Properties</h5>
-                <p class="card-text">Find rental properties that match your requirements.</p>
-                <a href="@Url.Action("Rent", "Properties")" class="btn btn-outline-primary">Find Rentals</a>
-            </div>
-        </div>
-    </div>
-</div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.0/flowbite.min.js"></script>
+</body>

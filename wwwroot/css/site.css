@@ -1,4 +1,4 @@
-html {
+/*html {
   font-size: 14px;
 }
 
@@ -46,3 +46,9 @@ body {
 .animate-heartbeat {
     animation: heartbeat 1.5s infinite;
 }
+*/
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Flowbite overrides or custom styles (if any) can go here */

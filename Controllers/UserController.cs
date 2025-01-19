@@ -59,6 +59,7 @@ namespace Propertease.Controllers
                     Email = user.Email,
                     ContactNumber = user.ContactNumber,
                     Role = user.Role,
+                    Address = user.Address,
                     Password = _dataProtector.Protect(user.Password) // Encrypt the password
                 };
 
@@ -83,35 +84,66 @@ namespace Propertease.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(User uEdit)
         {
+            // Fetch all users from the database
             var users = UserDbContext.Users.ToList();
-            if (users != null)
-            {
 
-                var u = users.Where(x => x.Email.ToUpper().Equals(uEdit.Email.ToUpper()) && _dataProtector.Unprotect(x.Password).Equals(uEdit.Password)).FirstOrDefault();
+            // Check if users exist
+            if (users != null && users.Any())
+            {
+                // Find the user with matching email and password
+                var u = users.FirstOrDefault(x =>
+                    x.Email.ToUpper() == uEdit.Email.ToUpper() &&
+                    _dataProtector.Unprotect(x.Password) == uEdit.Password);
+
                 if (u != null)
                 {
+                    // Create claims for the authenticated user
                     List<Claim> claims = new()
-                        {
-                            new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),  // Using Id instead of FullName
-                            new Claim(ClaimTypes.Role, u.Role ?? "DefaultRole"),  // Use Role from User model
-                            new Claim("FullName", u.FullName),  // Custom claim for FullName
-                            new Claim(ClaimTypes.Email, u.Email)  // Correct ClaimType for email
-                        };
+            {
+                new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),  // Using Id instead of FullName
+                new Claim(ClaimTypes.Role, u.Role ?? "DefaultRole"),    // Use Role from User model
+                new Claim("FullName", u.FullName),                     // Custom claim for FullName
+                new Claim(ClaimTypes.Email, u.Email)                   // Correct ClaimType for email
+            };
 
+                    // Create a ClaimsIdentity and sign in the user
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(identity));
 
-                    return RedirectToAction("Home", "Home");
-
+                    // Role-based redirection
+                    if (u.Role != null && u.Role.Equals("Seller", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Redirect to Seller Dashboard after login
+                        return RedirectToAction("Dashboard", "Seller");
+                    }
+                    else if (u.Role != null && u.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Redirect to Admin Dashboard after login
+                        return RedirectToAction("Dashboard", "Admin");
+                    }
+                    else
+                    {
+                        // Redirect other roles (including DefaultRole) to the Home page
+                        return RedirectToAction("Home", "Home");
+                    }
+                }
+                else
+                {
+                    // Incorrect email or password
+                    ModelState.AddModelError("", "Invalid email or password.");
                 }
             }
             else
             {
-                ModelState.AddModelError("", "Incorrect password");
+                // No users exist in the database
+                ModelState.AddModelError("", "No registered users found.");
             }
+
+            // Return to the login view with error
             return View();
         }
+
 
         public async Task<IActionResult> Logout()
         {
@@ -153,7 +185,6 @@ namespace Propertease.Controllers
             return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
         }
 
-        [HttpGet]
 
         [HttpPost]
         public async Task<IActionResult> SaveImage(IFormFile photo)
@@ -163,81 +194,45 @@ namespace Propertease.Controllers
                 return BadRequest("No file selected.");
             }
 
-            try
-            {
-                // Get the logged-in user ID as a string
-                string loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(loggedInUserId))
-                {
-                    return Unauthorized("User is not logged in.");
-                }
-
-                // Convert loggedInUserId to an integer
-                if (!int.TryParse(loggedInUserId, out int userId))
-                {
-                    return BadRequest("Invalid user ID.");
-                }
-
-                // Generate a unique file name
-                string fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName);
-
-                // Define the path to save the image
-                string uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
-                if (!Directory.Exists(uploadFolder))
-                {
-                    Directory.CreateDirectory(uploadFolder);
-                }
-
-                string filePath = Path.Combine(uploadFolder, fileName);
-
-                // Save the file
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await photo.CopyToAsync(fileStream);
-                }
-
-                // Update the user image in the database
-                var user = await UserDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-                if (user == null)
-                {
-                    return NotFound("User not found.");
-                }
-
-                user.Image = fileName;
-                UserDbContext.Users.Update(user);
-                await UserDbContext.SaveChangesAsync();
-
-                // Redirect to the Profile action
-                return RedirectToAction("Profile", "User");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> EditProfile()
-        {
-            // Get the logged-in user ID
             string loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(loggedInUserId) || !int.TryParse(loggedInUserId, out int userId))
             {
                 return Unauthorized("User is not logged in.");
             }
 
-            // Fetch user details from the database
             var user = await UserDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
                 return NotFound("User not found.");
             }
 
-            return View(user);
+            // Save the new image file.
+            string fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName);
+            string uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
+            if (!Directory.Exists(uploadFolder))
+            {
+                Directory.CreateDirectory(uploadFolder);
+            }
+            string filePath = Path.Combine(uploadFolder, fileName);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await photo.CopyToAsync(fileStream);
+            }
+
+            // Update the image field only.
+            user.Image = fileName;
+
+            // Save changes without affecting other fields.
+            UserDbContext.Users.Update(user);
+            await UserDbContext.SaveChangesAsync();
+
+            return RedirectToAction("Profile", "User");
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditProfile(User user)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(User user, IFormFile Photo)
         {
             if (!ModelState.IsValid)
             {
@@ -258,21 +253,41 @@ namespace Propertease.Controllers
                 return NotFound("User not found.");
             }
 
-            // Update fields
+            // Update user details
             existingUser.FullName = user.FullName;
             existingUser.Email = user.Email;
             existingUser.ContactNumber = user.ContactNumber;
             existingUser.Address = user.Address;
 
+            // Handle profile picture upload
+            if (Photo != null && Photo.Length > 0)
+            {
+                string fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(Photo.FileName);
+                string uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
+
+                if (!Directory.Exists(uploadFolder))
+                {
+                    Directory.CreateDirectory(uploadFolder);
+                }
+
+                string filePath = Path.Combine(uploadFolder, fileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await Photo.CopyToAsync(fileStream);
+                }
+
+                // Update the user's profile picture
+                existingUser.Image = fileName;
+            }
+
             // Save changes
             UserDbContext.Users.Update(existingUser);
             await UserDbContext.SaveChangesAsync();
 
-            // Redirect to profile page after successful update
+            // Redirect to Profile page
             return RedirectToAction("Profile", "User");
         }
-
-
 
 
 

@@ -1,47 +1,65 @@
-﻿@* @model IEnumerable<PropertyViewModel> <!-- Assuming you pass a list of properties --> *@
-
-@{
+﻿@{
     ViewData["Title"] = "Properties";
 }
+@model IEnumerable<Propertease.Models.Properties>
 
-<h1 class="text-2xl font-semibold mb-4">Available Properties</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Properties</title>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-6">
+        <h1 class="text-3xl font-bold mb-6">Available Properties</h1>
 
-<table class="table-auto w-full border-collapse border border-gray-200">
-    <thead>
-        <tr class="bg-gray-100">
-            <th class="border border-gray-300 px-4 py-2">#</th>
-            <th class="border border-gray-300 px-4 py-2">Name</th>
-            <th class="border border-gray-300 px-4 py-2">Type</th>
-            <th class="border border-gray-300 px-4 py-2">Location</th>
-            <th class="border border-gray-300 px-4 py-2">Price</th>
-            <th class="border border-gray-300 px-4 py-2">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @* @if (Model != null && Model.Any()) *@
-        @* { *@
-        @*     int index = 1; *@
-        @*     foreach (var property in Model) *@
-        @*     { *@
-        @*         <tr> *@
-        @*             <td class="border border-gray-300 px-4 py-2">@index</td> *@
-        @*             <td class="border border-gray-300 px-4 py-2">@property.Name</td> *@
-        @*             <td class="border border-gray-300 px-4 py-2">@property.Type</td> *@
-        @*             <td class="border border-gray-300 px-4 py-2">@property.Location</td> *@
-        @*             <td class="border border-gray-300 px-4 py-2">Rs. @property.Price.ToString("N0")</td> *@
-        @*             <td class="border border-gray-300 px-4 py-2"> *@
-        @*                 <a asp-controller="Properties" asp-action="Details" asp-route-id="@property.Id" class="text-blue-500 hover:underline">View</a> *@
-        @*                 <a asp-controller="Properties" asp-action="Edit" asp-route-id="@property.Id" class="text-green-500 hover:underline ml-2">Edit</a> *@
-        @*             </td> *@
-        @*         </tr> *@
-        @*         index++; *@
-        @*     } *@
-        @* } *@
-        else
-        {
-            <tr>
-                <td colspan="6" class="text-center border border-gray-300 px-4 py-2">No properties available.</td>
-            </tr>
-        }
-    </tbody>
-</table>
+        <!-- Sidebar for Filters -->
+        <div class="flex">
+            <aside class="w-1/4 bg-white shadow p-4">
+                <h2 class="text-xl font-semibold mb-4">Filters</h2>
+                <form method="get" action="/Home/Properties">
+                    <label for="propertyType" class="block text-sm font-medium text-gray-700">Property Type</label>
+                    <select id="propertyType" name="propertyType" class="mt-1 block w-full border-gray-300 rounded-md">
+                        <option value="">All</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="House">House</option>
+                        <option value="Land">Land</option>
+                    </select>
+
+                    <label for="district" class="block text-sm font-medium text-gray-700 mt-4">District</label>
+                    <input type="text" id="district" name="district" class="mt-1 block w-full border-gray-300 rounded-md" placeholder="Enter district">
+
+                    <button type="submit" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Apply Filters
+                    </button>
+                </form>
+            </aside>
+
+            <!-- Properties List -->
+            <main class="w-3/4 ml-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @if (Model.Any())
+                {
+                    @foreach (var property in Model)
+                    {
+                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                            <img src="~/Images/@property.Photo" alt="Property Image" class="h-48 w-full object-cover">
+                            <div class="p-4">
+                                <h3 class="text-lg font-bold text-gray-800">@property.Title</h3>
+                                <p class="text-gray-600 mt-2">@property.Description</p>
+                                <p class="text-gray-800 mt-4 font-semibold">Price: @property.Price.ToString("C")</p>
+                                <p class="text-sm text-gray-500 mt-1">Location: @property.City, @property.District</p>
+                                <a href="/Property/Details/@property.Id" class="block mt-4 bg-blue-500 text-white text-center py-2 rounded hover:bg-blue-600">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-gray-600 text-center col-span-full">No approved properties available at the moment.</p>
+                }
+            </main>
+        </div>
+    </div>
+</body>
+</html>

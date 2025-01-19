@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Add Property";
+}
+
+<div class="flex justify-center">
+    <form action="@Url.Action("AddProperty", "Seller")" method="post" enctype="multipart/form-data" class="space-y-6 p-8 bg-gray-50 rounded-lg shadow-md max-w-lg w-full">
+        <!-- Property Type -->
+        <div>
+            <label for="PropertyType" class="block text-sm font-medium text-gray-700">Property Type</label>
+            <select id="PropertyType" name="PropertyType" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <option value="House">House</option>
+                <option value="Apartment">Apartment</option>
+                <option value="Land">Land</option>
+            </select>
+        </div>
+
+        <!-- Property Title -->
+        <div>
+            <label for="Title" class="block text-sm font-medium text-gray-700">Property Title</label>
+            <input id="Title" name="Title" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter property title">
+        </div>
+
+        <!-- Price -->
+        <div>
+            <label for="Price" class="block text-sm font-medium text-gray-700">Price</label>
+            <input id="Price" name="Price" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="$0.00">
+        </div>
+
+        <!-- Description -->
+        <div>
+            <label for="Description" class="block text-sm font-medium text-gray-700">Description</label>
+            <textarea id="Description" name="Description" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Describe your property"></textarea>
+        </div>
+
+        <!-- Location Details -->
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label for="District" class="block text-sm font-medium text-gray-700">District</label>
+                <input id="District" name="District" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="District">
+            </div>
+            <div>
+                <label for="City" class="block text-sm font-medium text-gray-700">City</label>
+                <input id="City" name="City" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="City">
+            </div>
+            <div>
+                <label for="Province" class="block text-sm font-medium text-gray-700">State</label>
+                <input id="Province" name="Province" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="State">
+            </div>
+        </div>
+
+        <!-- Property Specific Fields -->
+        <div id="property-specific-fields"></div>
+
+        <!-- Photo Upload -->
+        <div>
+            <label for="photo" class="block text-sm font-medium text-gray-700 ">Upload Photos</label>
+            <input id="photo" name="photo" type="file" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+
+        <!-- Submit Button -->
+        <div class="flex justify-between">
+            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600">Submit Listing</button>
+        </div>
+    </form>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const propertyTypeSelect = document.getElementById('PropertyType');
+        const propertyFields = document.getElementById('property-specific-fields');
+
+        propertyTypeSelect.addEventListener('change', function () {
+            const propertyType = this.value;
+            propertyFields.innerHTML = ''; // Clear any previous fields
+
+            if (propertyType === 'House') {
+                propertyFields.innerHTML = `
+                    <div>
+                        <label for="Bedrooms" class="block text-sm font-medium text-gray-700">Number of Bedrooms</label>
+                        <input id="Bedrooms" name="Bedrooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of bedrooms">
+                    </div>
+                    <div>
+                        <label for="Kitchens" class="block text-sm font-medium text-gray-700">Number of Kitchens</label>
+                        <input id="Kitchens" name="Kitchens" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of Kitchens">
+                    </div>
+                    <div>
+                        <label for="SittingRooms" class="block text-sm font-medium text-gray-700">Number of SittingRooms</label>
+                        <input id="SittingRooms" name="SittingRooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of SittingRooms">
+                    </div>
+                    <div>
+                        <label for="Bathrooms" class="block text-sm font-medium text-gray-700">Number of Bathrooms</label>
+                        <input id="Bathrooms" name="Bathrooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of bathrooms">
+                    </div> 
+                    <div>
+                        <label for="Floors" class="block text-sm font-medium text-gray-700">Number of Floors</label>
+                        <input id="Floors" name="Floors" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of Floors">
+                    </div>
+                    <div>
+                        <label for="Area" class="block text-sm font-medium text-gray-700">Area</label>
+                        <input id="Area" name="Area" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter House Area">
+                    </div>
+                    <div>
+                        <label for="FacingDirection" class="block text-sm font-medium text-gray-700">FacingDirection</label>
+                        <input id="FacingDirection" name="FacingDirection" type="String" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter House FacingDirection">
+                    </div>
+                `;
+            } else if (propertyType === 'Apartment') {
+                propertyFields.innerHTML = `
+                    <div>
+                        <label for="Rooms" class="block text-sm font-medium text-gray-700">Number of Rooms</label>
+                        <input id="Rooms" name="Rooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of rooms">
+                    </div>
+                    <div>
+                        <label for="Kitchens" class="block text-sm font-medium text-gray-700">Number of Kitchens</label>
+                        <input id="Kitchens" name="Kitchens" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of Kitchens">
+                    </div>
+                    <div>
+                        <label for="SittingRooms" class="block text-sm font-medium text-gray-700">Number of SittingRooms</label>
+                        <input id="SittingRooms" name="SittingRooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of SittingRooms">
+                    </div>
+                    <div>
+                        <label for="Bathrooms" class="block text-sm font-medium text-gray-700">Number of Bathrooms</label>
+                        <input id="Bathrooms" name="Bathrooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of bathrooms">
+                    </div>
+                    <div>
+                        <label for="RoomSize" class="block text-sm font-medium text-gray-700">Room Size</label>
+                        <input id="RoomSize" name="RoomSize" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter room size">
+                    </div>
+                `;
+            } else if (propertyType === 'Land') {
+                propertyFields.innerHTML = `
+                    <div>
+                        <label for="Area" class="block text-sm font-medium text-gray-700">Land Area</label>
+                        <input id="Area" name="Area" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter land area">
+                    </div>
+                `;
+            }
+        });
+    });
+</script>
+

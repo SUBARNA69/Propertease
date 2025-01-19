@@ -9,16 +9,23 @@ namespace Propertease.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ProperteaseDbContext _context;
+        public HomeController(ILogger<HomeController> logger, ProperteaseDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Properties()
         {
-            return View();
+            // Retrieve only approved properties from the database
+            var approvedProperties = _context.properties
+                                              .Where(p => p.Status == "Approved")
+                                              .ToList();
+            return View(approvedProperties);
         }
+
+
 
         [AllowAnonymous]
         public IActionResult Home()
