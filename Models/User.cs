@@ -31,6 +31,10 @@ namespace Propertease.Models
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
         public ICollection<Properties>? Properties { get; set; } // Properties owned by the seller
-
+        public ICollection<ForumPost>? ForumPosts { get; set; }
+        public ICollection<ForumComment>? ForumComments { get; set; }
+        public ICollection<UserRating> RatingsReceived { get; set; }
+        public ICollection<PropertyComment> PropertyComments { get; set; }
+        public ICollection<UserRating> RatingsGiven { get; set; }
     }
 }

@@ -6,14 +6,23 @@
 
 <div class="max-w-6xl mx-auto py-8 px-4">
     <!-- Property Image Section -->
-    <div class="bg-gray-200 h-64 flex items-center justify-center mb-6 rounded-lg overflow-hidden">
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    <div class="relative bg-gray-200 h-64 flex items-center justify-center mb-6 rounded-lg overflow-hidden">
+        <!-- Main Image -->
+        @if (Model.ImageUrl != null && Model.ImageUrl.Any())
         {
-            <img src="~/Images/@Model.ImageUrl" alt="Property Image" class="h-full w-auto object-cover" />
+            <img id="mainImage" src="~/Images/@Model.ImageUrl.First()" alt="Property Image" class="h-full w-full object-cover" />
         }
         else
         {
             <span class="text-gray-500">No Image Available</span>
+        }
+
+        <!-- Plus Button for Gallery -->
+        @if (Model.ImageUrl != null && Model.ImageUrl.Count > 1)
+        {
+            <button id="openGallery" class="absolute bottom-4 right-4 bg-white p-2 rounded-full shadow-lg hover:bg-gray-100">
+                <span class="text-gray-700">+@(Model.ImageUrl.Count - 1)</span>
+            </button>
         }
     </div>
 
@@ -65,3 +74,73 @@
         <a href="@Url.Action("AdminRequests", "Admin")" class="text-blue-500 hover:underline">&larr; Back to Properties</a>
     </div>
 </div>
+
+<!-- Image Gallery Modal -->
+<div id="galleryModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-lg p-6 max-w-4xl w-full relative">
+        <!-- Close Button -->
+        <button id="closeGallery" class="absolute top-4 right-4 text-gray-700 hover:text-gray-900">
+            &times;
+        </button>
+
+        <!-- Gallery Content -->
+        <div class="flex items-center justify-between">
+            <!-- Previous Button -->
+            <button id="prevImage" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300">
+                &larr;
+            </button>
+
+            <!-- Current Image -->
+            <img id="modalImage" src="" alt="Gallery Image" class="max-h-[70vh] w-auto object-cover" />
+
+            <!-- Next Button -->
+            <button id="nextImage" class="bg-gray-200 p-2 rounded-full hover:bg-gray-300">
+                &rarr;
+            </button>
+        </div>
+
+        <!-- Thumbnails -->
+        <div class="flex overflow-x-auto mt-4 space-x-2">
+            @if (Model.ImageUrl != null)
+            {
+                foreach (var imageUrl in Model.ImageUrl)
+                {
+                    <img src="~/Images/@imageUrl" alt="Thumbnail" class="w-16 h-16 object-cover cursor-pointer hover:opacity-75" onclick="changeModalImage('@imageUrl')" />
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Gallery Functionality -->
+<script>
+    // Open Gallery Modal
+    document.getElementById('openGallery').addEventListener('click', () => {
+        document.getElementById('galleryModal').classList.remove('hidden');
+        changeModalImage('@Model.ImageUrl.First()'); // Set the first image as default
+    });
+
+    // Close Gallery Modal
+    document.getElementById('closeGallery').addEventListener('click', () => {
+        document.getElementById('galleryModal').classList.add('hidden');
+    });
+
+    // Change Modal Image
+    function changeModalImage(imageUrl) {
+        document.getElementById('modalImage').src = `/Images/${imageUrl}`;
+    }
+
+    // Next and Previous Buttons
+    let currentIndex = 0;
+    const images = @Html.Raw(Json.Serialize(Model.ImageUrl));
+
+    document.getElementById('nextImage').addEventListener('click', () => {
+        currentIndex = (currentIndex + 1) % images.length;
+        changeModalImage(images[currentIndex]);
+    });
+
+    document.getElementById('prevImage').addEventListener('click', () => {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        changeModalImage(images[currentIndex]);
+    });
+</script>

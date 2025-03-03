@@ -73,8 +73,13 @@ namespace Propertease.Controllers
             // If ModelState is invalid, return the same form with validation errors
             return View(user);
         }
+        [AllowAnonymous]
+ 
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
 
-      
         [HttpGet]
         public IActionResult Login()
         {

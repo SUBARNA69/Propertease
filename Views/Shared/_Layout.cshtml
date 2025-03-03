@@ -32,6 +32,7 @@
                             <a asp-controller="Home" asp-action="Home" class="text-gray-900 hover:text-blue-500">Home</a>
                             <a asp-controller="Home" asp-action="Properties" class="text-gray-900 hover:text-blue-500">Properties</a>
                             <a asp-controller="Home" asp-action="About" class="text-gray-900 hover:text-blue-500">About</a>
+                            <a asp-controller="Home" asp-action="Forum" class="text-gray-900 hover:text-blue-500">Forum</a>
                         }
                         @* Role-based navigation links *@
                         else if (User.IsInRole("Seller"))
@@ -53,14 +54,43 @@
                         }
                     </div>
 
-                    <!-- Profile button for logged-in users -->
-                    <button id="profile-button" class="bg-gray-800 text-white rounded-full p-2">
-                        <span class="sr-only">Open user menu</span>
-                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                        </svg>
-                    </button>
+                    <div class="flex space-x-4 items-center">
+                        <!-- Notification Button -->
+                        <button id="notification-button" class="relative bg-gray-800 text-white rounded-full p-2">
+                            <span class="sr-only">Open notifications</span>
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405C19.281 14.234 19 13.62 19 13V9c0-3.866-3.134-7-7-7S5 5.134 5 9v4c0 .62-.281 1.234-.595 1.595L3 17h5m4 0v2a2 2 0 104 0v-2m-6 0h6"></path>
+                            </svg>
+                            <span id="notification-badge" class="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
+                        </button>
+                        <!-- Notification Panel HTML -->
+                        <div id="notification-panel" class="hidden absolute right-0 top-[72px] bg-white rounded-lg shadow-lg w-72 max-h-96 overflow-y-auto">
+                            <div class="p-4">
+                                <h3 class="text-lg font-semibold text-gray-800">Notifications</h3>
+                                <ul id="notification-list" class="mt-2">
+                                    <!-- Notifications will be dynamically added here -->
+                                    @if (TempData["Notification"] != null)
+                                    {
+                                        <li class="text-sm text-gray-700 py-2 border-b">
+                                            @TempData["Notification"]
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li class="text-sm text-gray-700 py-2 border-b">No new notifications</li>
+                                    }
+                                </ul>
+                            </div>
+                        </div>
 
+                        <!-- Profile Button -->
+                        <button id="profile-button" class="bg-gray-800 text-white rounded-full p-2">
+                            <span class="sr-only">Open user menu</span>
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                            </svg>
+                        </button>
+                    </div>
                     <!-- Profile Dropdown -->
                     <div id="profile-dropdown" class="hidden absolute right-0 top-[72px] bg-white rounded-lg shadow-lg w-48">
                         <ul>
@@ -94,11 +124,31 @@
     </footer>
 
     <!-- Toggle profile dropdown with jQuery -->
-    <script>
+    <script>             
         $(document).ready(function () {
+            // Toggle profile dropdown
             $('#profile-button').click(function () {
                 $('#profile-dropdown').toggleClass('hidden');
             });
+
+          $('#notification-button').click(function () {
+            $('#notification-panel').toggleClass('hidden');
+        });
+
+        // Example: Update notification count dynamically
+        function updateNotificationCount(count) {
+            const badge = $('#notification-badge');
+            if (count > 0) {
+                badge.text(count);
+                badge.removeClass('hidden');
+            } else {
+                badge.addClass('hidden');
+            }
+        }
+
+        // Initialize notification count based on TempData
+        const notificationCount = $('#notification-list li').length;
+        updateNotificationCount(notificationCount);
         });
         @RenderSection("Scripts", required: false)
     </script>

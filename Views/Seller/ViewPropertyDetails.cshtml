@@ -4,9 +4,9 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-            @if (!string.IsNullOrEmpty(Model.Photo))
+            @if (!string.IsNullOrEmpty(Model.PropertyImages.First().Photo))
             {
-                <img src="~/Images/@Model.Photo" alt="@Model.Title" class="w-full h-auto rounded-lg" />
+                <img src="~/Images/@Model.PropertyImages.First().Photo" alt="@Model.Title" class="w-full h-auto rounded-lg" />
             }
             else
             {

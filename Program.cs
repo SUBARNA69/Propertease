@@ -1,8 +1,10 @@
-using Propertease.Models;
+﻿using Propertease.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Propertease.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.Extensions.Options;
+using Propertease.Repos;
 namespace Propertease
 {
     public class Program
@@ -16,13 +18,17 @@ namespace Propertease
             builder.Services.AddDbContext<ProperteaseDbContext>(options =>
               options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
                      .EnableSensitiveDataLogging());
-
+            builder.Services.AddTransient<EmailService>();
+            builder.Services.AddSingleton<SmsService>(); // Register the SMS service
             builder.Services.AddSingleton<ProperteaseSecurityProvider>();
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(o =>
                 {
                     o.LoginPath = "/Users/Login";
                     o.LogoutPath = "/User/Logout";
+                    o.AccessDeniedPath = "/User/AccessDenied";
+                    o.ExpireTimeSpan = TimeSpan.FromMinutes(15); // ⏳ 30 minutes expiry
+                    o.SlidingExpiration = true; // Reset expiry time if active
                 });
 
             builder.Services.AddSession(o =>

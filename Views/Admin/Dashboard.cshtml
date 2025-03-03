@@ -1,109 +1,164 @@
-﻿@page
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.7.0/flowbite.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100">
-
-    <div class="flex">
-        
-
-        <!-- Main Content -->
-        <main class="flex-1 p-6">
-            <h1 class="text-2xl font-bold">Welcome back, John!</h1>
-            <p class="text-gray-600">Here's what's happening with your platform today.</p>
-
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-5 gap-4 mt-6">
-                <div class="p-4 bg-white shadow rounded">
-                    <h2 class="text-lg font-bold">Total Users</h2>
-                    <p class="text-2xl font-bold">2,543</p>
-                    <p class="text-sm text-green-500">+12% this month</p>
-                </div>
-                <div class="p-4 bg-white shadow rounded">
-                    <h2 class="text-lg font-bold">Active Properties</h2>
-                    <p class="text-2xl font-bold">1,234</p>
-                    <p class="text-sm text-green-500">+8% this month</p>
-                </div>
-                <div class="p-4 bg-white shadow rounded">
-                    <h2 class="text-lg font-bold">Pending Approvals</h2>
-                    <p class="text-2xl font-bold">48</p>
-                    <p class="text-sm text-gray-500">23 new today</p>
-                </div>
-                <div class="p-4 bg-white shadow rounded">
-                    <h2 class="text-lg font-bold">Flagged Properties</h2>
-                    <p class="text-2xl font-bold">15</p>
-                    <p class="text-sm text-red-500">5 new flags</p>
-                </div>
-                <div class="p-4 bg-white shadow rounded">
-                    <h2 class="text-lg font-bold">Monthly Revenue</h2>
-                    <p class="text-2xl font-bold">$84,245</p>
-                    <p class="text-sm text-green-500">+15% this month</p>
-                </div>
-            </div>
-
-            <!-- Charts Section -->
-            <div class="grid grid-cols-2 gap-4 mt-6">
-                <div class="p-6 bg-white shadow rounded h-64">
-                    <h2 class="text-lg font-bold">User Growth</h2>
-                    <div class="flex items-center justify-center h-full text-gray-400">
-                        Chart: User Growth Over Time
-                    </div>
-                </div>
-                <div class="p-6 bg-white shadow rounded h-64">
-                    <h2 class="text-lg font-bold">Revenue Trends</h2>
-                    <div class="flex items-center justify-center h-full text-gray-400">
-                        Chart: Revenue Analysis
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="mt-6">
-                <h2 class="text-lg font-bold">Recent Activity</h2>
-                <div class="p-4 mt-2 bg-white shadow rounded">
-                    <ul>
-                        <li class="mb-2">
-                            <p><strong>New Property Listed:</strong> Sarah Johnson listed a new property in San Francisco <span class="text-gray-400">2h ago</span></p>
-                        </li>
-                        <li class="mb-2">
-                            <p><strong>Property Flagged:</strong> Property ID #45678 was flagged for review <span class="text-gray-400">4h ago</span></p>
-                        </li>
-                        <li>
-                            <p><strong>New User Registration:</strong> Mike Peters joined as a new agent <span class="text-gray-400">6h ago</span></p>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="mt-6">
-                <h2 class="text-lg font-bold">Quick Actions</h2>
-                <div class="p-4 bg-white shadow rounded">
-                    <ul>
-                        <li class="mb-2">
-                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">✔ Approve Properties (12)</button>
-                        </li>
-                        <li class="mb-2">
-                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">🚩 Review Flags (5)</button>
-                        </li>
-                        <li class="mb-2">
-                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">✔ Verify Agents (8)</button>
-                        </li>
-                        <li>
-                            <button class="w-full px-4 py-2 text-left bg-gray-200 rounded hover:bg-gray-300">📩 Support Tickets (3)</button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </main>
+<div class="p-6 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-xl font-semibold">Welcome back, Subarna!</h1>
+            <p class="text-gray-500">Here's what's happening with your platform today.</p>
+        </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.7.0/flowbite.min.js"></script>
-</body>
-</html>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <!-- Total Users -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center text-gray-500 mb-2">
+                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                        <span>Total Users</span>
+                    </div>
+                    <div class="text-2xl font-bold">@ViewBag.TotalUsers</div>
+                    <div class="text-green-500 text-sm">+12% this month</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Properties -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center text-gray-500 mb-2">
+                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        <span>Active Properties</span>
+                    </div>
+                    <div class="text-2xl font-bold">@ViewBag.ActiveProperties</div>
+                    <div class="text-green-500 text-sm">+8% this month</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Approvals -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center text-gray-500 mb-2">
+                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                        <span>Pending Approvals</span>
+                    </div>
+                    <div class="text-2xl font-bold">@ViewBag.PendingApprovals</div>
+                    <div class="text-gray-500 text-sm">23 new today</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Revenue -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="flex items-center text-gray-500 mb-2">
+                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18" />
+                        </svg>
+                        <span>Monthly Revenue</span>
+                    </div>
+                    <div class="text-2xl font-bold">$84,245</div>
+                    <div class="text-green-500 text-sm">+55% this month</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">User Growth</h2>
+            <div class="h-48 bg-gray-50 rounded flex items-center justify-center">
+                Chart: User Growth Over Time
+            </div>
+        </div>
+
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Revenue Trends</h2>
+            <div class="h-48 bg-gray-50 rounded flex items-center justify-center">
+                Chart: Revenue Analysis
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Recent Activity -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Recent Activity</h2>
+            <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                    <div>
+                        <div class="font-medium">New Property Listed</div>
+                        <div class="text-sm text-gray-500">Sarah Johnson listed a new property in San Francisco</div>
+                        <div class="text-xs text-gray-400">2h ago</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                    <div>
+                        <div class="font-medium">Property Flagged</div>
+                        <div class="text-sm text-gray-500">Property ID #45678 was flagged for review</div>
+                        <div class="text-xs text-gray-400">4h ago</div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+                    <div>
+                        <div class="font-medium">New User Registration</div>
+                        <div class="text-sm text-gray-500">Mike Peters joined as a new agent</div>
+                        <div class="text-xs text-gray-400">6h ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white p-4 rounded-lg shadow">
+            <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+            <div class="space-y-2">
+                <a href="#" class="w-full bg-black text-white py-2 px-4 rounded flex justify-between items-center">
+                    <span>Approve Properties (@ViewBag.PendingApprovals)</span>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="#" class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded flex justify-between items-center">
+                    <span>Review Flags (5)</span>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="#" class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded flex justify-between items-center">
+                    <span>Verify Agents (8)</span>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a href="#" class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded flex justify-between items-center">
+                    <span>Support Tickets (3)</span>
+                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

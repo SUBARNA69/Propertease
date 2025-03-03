@@ -19,6 +19,11 @@ namespace Propertease.Models
 
         // DbSet for Apartments table
         public DbSet<Apartment> Apartments { get; set; }
+        public DbSet<PropertyImage> PropertyImages { get; set; }
+        public DbSet<ForumPost> ForumPosts { get; set; }
+        public DbSet<ForumComment> ForumComments { get; set; }
+        public DbSet<UserRating> UserRatings { get; set; }
+        public DbSet<PropertyComment> PropertyComments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -26,7 +31,57 @@ namespace Propertease.Models
 
             modelBuilder.Entity<Land>().HasOne(l => l.Properties).WithMany(p => p.Lands).HasForeignKey(l => l.PropertyID).OnDelete(DeleteBehavior.Cascade);
 
+            
             modelBuilder.Entity<Apartment>().HasOne(a => a.Properties).WithMany(p => p.Apartments).HasForeignKey(a => a.PropertyID).OnDelete(DeleteBehavior.Cascade);
+           
+            modelBuilder.Entity<ForumPost>()
+                        .HasOne(fp => fp.User)
+                        .WithMany(u => u.ForumPosts)
+                        .HasForeignKey(fp => fp.UserId)
+                        .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<UserRating>()
+                           .HasOne(ur => ur.RatedUser)
+                           .WithMany(u => u.RatingsReceived)
+                           .HasForeignKey(ur => ur.RatedUserId)
+                           .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PropertyImage>()
+    .HasOne(pi => pi.Property)
+    .WithMany(p => p.PropertyImages)
+    .HasForeignKey(pi => pi.PropertyId)
+    .OnDelete(DeleteBehavior.Cascade);
+            // Configure UserRating -> User (RaterUser) relationship
+            modelBuilder.Entity<UserRating>()
+                        .HasOne(ur => ur.RaterUser)
+                        .WithMany(u => u.RatingsGiven)
+                        .HasForeignKey(ur => ur.RaterUserId)
+                        .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<PropertyComment>()
+                        .HasOne(pc => pc.Property)
+                        .WithMany(p => p.PropertyComments)
+                        .HasForeignKey(pc => pc.PropertyId)
+                        .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<PropertyComment>()
+                        .HasOne(pc => pc.User)
+                        .WithMany(u => u.PropertyComments)
+                        .HasForeignKey(pc => pc.UserId)
+                        .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<ForumComment>()
+                    .HasOne(fc => fc.User)
+                    .WithMany(u => u.ForumComments)
+                    .HasForeignKey(fc => fc.UserId)
+                    .OnDelete(DeleteBehavior.NoAction); // Disable cascade delete for ForumComment -> User
+
+            // Configure ForumComment -> ForumPost relationship
+            modelBuilder.Entity<ForumComment>()
+                .HasOne(fc => fc.ForumPost)
+                .WithMany(fp => fp.Comments)
+                .HasForeignKey(fc => fc.ForumPostId)
+                .OnDelete(DeleteBehavior.Cascade); // Cascade delete for ForumComment -> ForumPost
+           
             modelBuilder.Entity<User>(entity =>
             {
                 // Make sure the Email is unique

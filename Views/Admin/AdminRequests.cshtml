@@ -1,4 +1,6 @@
-﻿<table class="table-auto w-full">
+﻿@model IEnumerable<Properties>
+
+<table class="table-auto w-full">
     <thead>
         <tr>
             <th class="text-left px-4 py-2">Image</th>
@@ -11,7 +13,18 @@
         @foreach (var property in Model)
         {
             <tr>
-                <td class="px-4 py-2"><img src="~/Images/@property.Photo" alt="Alternate Text" style="width: 100px; height: 100px; object-fit: cover;" /></td>
+                <td class="px-4 py-2">
+                    @if (property.PropertyImages != null && property.PropertyImages.Any())
+                    {
+                        <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-full h-48 object-cover rounded-lg">
+                    }
+                    else
+                    {
+                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center rounded-lg">
+                            <span class="text-gray-500">No Image Available</span>
+                        </div>
+                    }
+                </td>
                 <td class="px-4 py-2">@property.Title</td>
                 <td class="px-4 py-2">@property.Price</td>
                 <td class="px-4 py-2">

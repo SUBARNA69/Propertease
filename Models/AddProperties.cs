@@ -30,7 +30,7 @@ namespace Propertease.Models
         [Required]
 
         // Media Upload (Paths or URLs can be stored here, depending on how files are handled)
-        public IFormFile photo { get; set; } // You can modify this to store paths or a collection of file paths if needed
+        public List<IFormFile> photo { get; set; } // You can modify this to store paths or a collection of file paths if needed
 
         public string? ThreeDModel { get; set; } // You can modify this to store path or URL for 3D model if applicable
 

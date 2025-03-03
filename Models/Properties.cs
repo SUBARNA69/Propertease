@@ -24,12 +24,6 @@ namespace Propertease.Models
 
         [Required]
         public string Province { get; set; }
-
-        [Required]
-
-        // Media Upload (Paths or URLs can be stored here, depending on how files are handled)
-        public string? Photo { get; set; } 
-
         public string? ThreeDModel { get; set; } // You can modify this to store path or URL for 3D model if applicable
 
         public int SellerId { get; set; }   // Foreign Key
@@ -39,5 +33,7 @@ namespace Propertease.Models
         public ICollection<Apartment> Apartments { get; set; }
         public ICollection<House> Houses { get; set; }
         public ICollection<Land> Lands { get; set; }
+        public ICollection<PropertyImage> PropertyImages { get; set; }
+        public ICollection<PropertyComment> PropertyComments { get; set; }
     }
 }

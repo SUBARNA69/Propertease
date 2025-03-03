@@ -53,8 +53,21 @@
 
         <!-- Photo Upload -->
         <div>
-            <label for="photo" class="block text-sm font-medium text-gray-700 ">Upload Photos</label>
-            <input id="photo" name="photo" type="file" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <label for="photo" class="block text-sm font-medium text-gray-700">Upload Photos</label>
+            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                <div class="space-y-1 text-center">
+                    <!-- File Input -->
+                    <input id="photo" name="photo" type="file" multiple class="sr-only" accept=".jpg,.jpeg,.png,.gif">
+                    <label for="photo" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                        <span>Upload files</span>
+                    </label>
+                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                </div>
+            </div>
+            <!-- Preview Uploaded Images -->
+            <div id="image-preview" class="mt-4 grid grid-cols-3 gap-2"></div>
+            <!-- Validation Message -->
+            <span class="text-sm text-red-600">@Html.ValidationMessage("photo")</span>
         </div>
 
         <!-- Submit Button -->
@@ -63,11 +76,15 @@
         </div>
     </form>
 </div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const propertyTypeSelect = document.getElementById('PropertyType');
         const propertyFields = document.getElementById('property-specific-fields');
+        const fileInput = document.getElementById('photo');
+        const imagePreview = document.getElementById('image-preview');
 
+        // Handle property type change
         propertyTypeSelect.addEventListener('change', function () {
             const propertyType = this.value;
             propertyFields.innerHTML = ''; // Clear any previous fields
@@ -89,7 +106,7 @@
                     <div>
                         <label for="Bathrooms" class="block text-sm font-medium text-gray-700">Number of Bathrooms</label>
                         <input id="Bathrooms" name="Bathrooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of bathrooms">
-                    </div> 
+                    </div>
                     <div>
                         <label for="Floors" class="block text-sm font-medium text-gray-700">Number of Floors</label>
                         <input id="Floors" name="Floors" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of Floors">
@@ -135,6 +152,23 @@
                 `;
             }
         });
+
+        // Handle file input change
+        fileInput.addEventListener('change', function () {
+            imagePreview.innerHTML = ''; // Clear previous previews
+
+            if (this.files && this.files.length > 0) {
+                for (const file of this.files) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.classList.add('w-full', 'h-24', 'object-cover', 'rounded-lg');
+                        imagePreview.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
     });
 </script>
-

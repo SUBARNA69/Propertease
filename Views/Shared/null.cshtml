@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    @*Flowbite CSS*@
+    <link href="~/lib/flowbite/flowbite.css" rel="stylesheet" />
+    <link href="~/lib/flowbite/flowbite.min.css" rel="stylesheet" />
+
+    @*Flowbite JS*@
+    <script src="~/lib/flowbite/flowbite.js"></script>
+    <script src="~/lib/flowbite/flowbite.min.js"></script>
+    <script src="~/lib/flowbite/flowbite.phoenix.js"></script>
+    <script src="~/lib/flowbite/flowbite.phoenix.min.js"></script>
+    <script src="~/lib/flowbite/flowbite.turbo.js"></script>
+    <script src="~/lib/flowbite/flowbite.turbo.min.js"></script>
+
+    @*Jquery cdn*@
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+
+    @*Jquery validation*@
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.js"></script>
+    <script src="~/lib/jquery-validation/dist/additional-methods.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/additional-methods.js"></script>
+
+    @*Unobtrusive Ajax*@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js" integrity="sha512-DedNBWPF0hLGUPNbCYfj8qjlEnNE92Fqn7xd3Sscfu7ipy7Zu33unHdugqRD3c4Vj7/yLv+slqZhMls/4Oc7Zg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    @*Jquery unobtrusive ajax validation*@
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+
+
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BlogManagementApp.styles.css" asp-append-version="true" />
+
+</head>
+<body>
+    <div>
+        @RenderBody()
+    </div>
+</body>
+</html>

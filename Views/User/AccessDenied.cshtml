@@ -1,0 +1,55 @@
+﻿@{
+    Layout = "null";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Denied</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+    <div class="min-h-screen flex flex-col items-center justify-center px-6 py-8">
+        <div class="text-center">
+            <!-- Error code -->
+            <p class="text-5xl text-gray-500 dark:text-gray-400 mb-4">ERROR 403</p>
+
+            <!-- Lock icon -->
+            <div class="mb-4">
+                <svg class="mx-auto w-12 h-12 text-gray-800 dark:text-gray-200" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                    <path d="M14 7h-1.5V4.5a4.5 4.5 0 1 0-9 0V7H2a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Zm-5 8a1 1 0 1 1-2 0v-3a1 1 0 1 1 2 0v3Zm1.5-8h-5V4.5a2.5 2.5 0 1 1 5 0V7Z" />
+                </svg>
+            </div>
+
+            <!-- Main heading -->
+            <h1 class="mb-4 text-2xl font-bold text-gray-900 dark:text-white">Access Denied</h1>
+
+            <!-- Description -->
+            <p class="mb-8 text-gray-500 dark:text-gray-400">
+                Oops! It looks like you're trying to access a page that's restricted to administrators only. You'll need admin privileges to view this content.
+            </p>
+
+            <!-- Buttons -->
+            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center">
+                <a href="javascript:history.back()" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-gray-800 rounded-lg hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+                    <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4" />
+                    </svg>
+                    Go Back
+                </a>
+                <button type="button" class="py-2.5 px-5 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                    Return Home
+                </button>
+            </div>
+
+
+            <!-- Error reference -->
+            <p class="mt-8 text-xs text-gray-500 dark:text-gray-400">
+                Error Reference: E403-F5B8DD0V-2505
+            </p>
+        </div>
+    </div>
+</body>
+</html>

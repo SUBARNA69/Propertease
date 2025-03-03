@@ -21,9 +21,9 @@
                             <td class="px-6 py-4 border-b">
                                 <div class="flex items-center">
                                     <div class="w-16 h-16 bg-gray-300 rounded-lg mr-3">
-                                        @if (!string.IsNullOrEmpty(property.Photo))
+                                        @if (!string.IsNullOrEmpty(property.PropertyImages.First().Photo))
                                         {
-                                            <img src="~/Images/@property.Photo"
+                                            <img src="~/Images/@property.PropertyImages.First().Photo"
                                                  alt="@property.Title"
                                                  class="w-16 h-16 object-cover rounded-lg" />
                                         }

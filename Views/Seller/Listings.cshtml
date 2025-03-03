@@ -1,56 +1,78 @@
 ﻿@model IEnumerable<Propertease.Models.Properties>
 
+@{
+    ViewData["Title"] = "My Listings";
+}
+
 <div class="container mx-auto p-6">
     <h1 class="text-2xl font-semibold mb-4">My Listings</h1>
 
     @if (Model != null && Model.Any())
     {
-        <div class="overflow-x-auto">
-            <table class="w-full bg-white border border-gray-200 rounded-lg shadow">
-                <thead>
+        <div class="overflow-x-auto rounded-lg shadow">
+            <table class="w-full bg-white border border-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-6 py-3 border-b text-left text-gray-500">Property</th>
-                        <th class="px-6 py-3 border-b text-left text-gray-500">Price</th>
-                        <th class="px-6 py-3 border-b text-left text-gray-500">Description</th>
-                        <th class="px-6 py-3 border-b text-left text-gray-500">Status</th> <!-- Added Status Column -->
-                        <th class="px-6 py-3 border-b text-left text-gray-500">Actions</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-gray-200">
                     @foreach (var property in Model)
                     {
-                        <tr>
-                            <td class="px-6 py-4 border-b">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <!-- Property Image and Title -->
+                            <td class="px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="w-16 h-16 bg-gray-300 rounded-lg mr-3">
-                                        @if (!string.IsNullOrEmpty(property.Photo))
+                                    <div class="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                                        @if (property.PropertyImages != null && property.PropertyImages.Any())
                                         {
-                                            <img src="~/Images/@property.Photo"
+                                            <img src="~/Images/@property.PropertyImages.First().Photo"
                                                  alt="@property.Title"
-                                                 class="w-16 h-16 object-cover rounded-lg" />
+                                                 class="w-full h-full object-cover" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-full h-full flex items-center justify-center text-gray-500">
+                                                No Image
+                                            </div>
                                         }
                                     </div>
-                                    <div>
-                                        <p class="font-semibold">@property.Title</p>
-                                        <p class="text-gray-500 text-sm">@property.City, @property.District</p>
+                                    <div class="ml-4">
+                                        <p class="font-semibold text-gray-900">@property.Title</p>
+                                        <p class="text-sm text-gray-500">@property.City, @property.District</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 border-b">₹@property.Price.ToString("N0")</td>
-                            <td class="px-6 py-4 border-b">@property.Description</td>
-                            <td class="px-6 py-4 border-b">
-                                <span class="px-2 py-1 rounded-lg text-sm font-medium
+                            <!-- Price -->
+                            <td class="px-6 py-4">
+                                <p class="text-gray-900">₹@property.Price.ToString("N0")</p>
+                            </td>
+                            <!-- Description -->
+                            <td class="px-6 py-4">
+                                <p class="text-gray-900">@property.Description</p>
+                            </td>
+                            <!-- Status -->
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 text-sm font-semibold rounded-full
                                     @(property.Status == "Pending" ? "bg-yellow-100 text-yellow-700" :
-                                    property.Status == "Approved" ? "bg-green-100 text-green-700" :
-                                    "bg-red-100 text-red-700")">
+                                      property.Status == "Approved" ? "bg-green-100 text-green-700" :
+                                      "bg-red-100 text-red-700")">
                                     @property.Status
                                 </span>
-                            </td> <!-- Status Cell -->
-                            <td class="px-6 py-4 border-b">
+                            </td>
+                            <!-- Actions -->
+                            <td class="px-6 py-4">
                                 <div class="flex space-x-3">
-                                    <a href="/Seller/ViewPropertyDetails/@property.Id" class="text-blue-500 hover:underline">View</a>
-                                    <a href="#" class="text-yellow-500 hover:underline">Edit</a>
-                                    <a href="#" class="text-red-500 hover:underline">Delete</a>
+                                    <a href="/Seller/ViewPropertyDetails/@property.Id" class="text-blue-500 hover:text-blue-700 hover:underline">View</a>
+                                    <a href="#" class="text-yellow-500 hover:text-yellow-700 hover:underline">Edit</a>
+                                    <form asp-action="Delete" asp-controller="Seller" method="post" class="inline">
+                                        <input type="hidden" name="id" value="@property.Id" />
+                                        <button type="submit" class="text-red-500 hover:text-red-700 hover:underline" onclick="return confirm('Are you sure you want to delete this property?')">Delete</button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
