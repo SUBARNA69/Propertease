@@ -5,6 +5,7 @@ using Propertease.Security;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using Propertease.Repos;
+using Propertease.Repos.Propertease.Services;
 namespace Propertease
 {
     public class Program
@@ -18,6 +19,7 @@ namespace Propertease
             builder.Services.AddDbContext<ProperteaseDbContext>(options =>
               options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
                      .EnableSensitiveDataLogging());
+            builder.Services.AddSingleton<AwsSnsService>(); // Register the AWS SNS service
             builder.Services.AddTransient<EmailService>();
             builder.Services.AddSingleton<SmsService>(); // Register the SMS service
             builder.Services.AddSingleton<ProperteaseSecurityProvider>();

@@ -9,32 +9,34 @@ namespace Propertease.Models
         // Required properties
         public int Id { get; set; }
 
-        public string FullName { get; set; }
+        public string? FullName { get; set; }
 
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Required]
         [Phone]
-        public string ContactNumber { get; set; }
+        public string? ContactNumber { get; set; }
 
         // Optional properties
         public string? Image { get; set; }
         public string? Role { get; set; }
 
         // Password and Confirm Password
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         public string? Address {  get; set; }
         [NotMapped]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
+        public string? ConfirmPassword { get; set; }
+        public string? EmailVerificationToken { get; set; } // Stores the verification code sent via SMS
+        public bool IsEmailVerified { get; set; } = false; // Tracks whether the phone number is verified
         public ICollection<Properties>? Properties { get; set; } // Properties owned by the seller
         public ICollection<ForumPost>? ForumPosts { get; set; }
         public ICollection<ForumComment>? ForumComments { get; set; }
-        public ICollection<UserRating> RatingsReceived { get; set; }
-        public ICollection<PropertyComment> PropertyComments { get; set; }
-        public ICollection<UserRating> RatingsGiven { get; set; }
+        public ICollection<UserRating>? RatingsReceived { get; set; }
+        public ICollection<PropertyComment>? PropertyComments { get; set; }
+        public ICollection<UserRating>? RatingsGiven { get; set; }
     }
 }

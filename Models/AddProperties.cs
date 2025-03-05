@@ -32,12 +32,13 @@ namespace Propertease.Models
         // Media Upload (Paths or URLs can be stored here, depending on how files are handled)
         public List<IFormFile> photo { get; set; } // You can modify this to store paths or a collection of file paths if needed
 
-        public string? ThreeDModel { get; set; } // You can modify this to store path or URL for 3D model if applicable
+        public IFormFile? ThreeDModel { get; set; } // You can modify this to store path or URL for 3D model if applicable
 
         // Contact Information
         [Required]
         [StringLength(100)]
         public string? Status { get; set; }
+       
         public User Seller { get; set; } // Link to the User model
         public int? HouseID { get; set; } // Primary Key
         public int? Bedrooms { get; set; }
@@ -45,11 +46,18 @@ namespace Propertease.Models
         public int SittingRooms { get; set; }
         public int? Bathrooms { get; set; }
         public int? Floors { get; set; }
-        public double? Area { get; set; } // In square meters or feet
+        public double? LandArea { get; set; } // In square meters or feet
+        public string? RoadAccess { get; set; }
+        public string? LandType { get; set; }
+        public string? SoilQuality { get; set; }
+        public double? BuildupArea { get; set; } // In square meters or feet
+        public DateOnly BuiltYear { get; set; } // In square meters or feet
         public string? FacingDirection { get; set; } // e.g., North, South
         public int? ApartmentID { get; set; } // Primary Key
         public int? Rooms { get; set; }
         public double? RoomSize { get; set; } // In square meters or feet
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
         // Foreign Key
     }
 }

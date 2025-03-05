@@ -1,0 +1,94 @@
+﻿@model Propertease.Models.PropertyDetailsViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Model.Title - Property Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 p-6">
+
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="relative">
+            @if (Model.ImageUrl.Any())
+            {
+                <img src="@Model.ImageUrl.First()" alt="@Model.Title" class="w-full h-64 object-cover">
+            }
+            else
+            {
+                <img src="https://via.placeholder.com/800x400" alt="Property Main Image" class="w-full h-64 object-cover">
+            }
+
+            <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-4">
+                <h1 class="text-2xl font-bold">$@Model.Price</h1>
+                <p class="text-sm">@Model.City, @Model.District, @Model.Province</p>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <div class="text-gray-600 space-y-2">
+                <p>📍 Location: @Model.City, @Model.District, @Model.Province</p>
+                <p>📘 Road Access: @Model.RoadAccess</p>
+
+                @if (Model.PropertyType == "House")
+                {
+                    <p>🏠 House - @Model.Bedrooms Bedrooms, @Model.Bathrooms Bathrooms, @Model.Kitchens Kitchens</p>
+                    <p>📎 Area: @Model.LandArea sq ft</p>
+                    <p>📅 Built Year: @Model.BuiltYear</p>
+                }
+                else if (Model.PropertyType == "Apartment")
+                {
+                    <p>🏢 Apartment - @Model.Rooms Rooms, @Model.Bathrooms Bathrooms, @Model.Kitchens Kitchens</p>
+                    <p>📎 Room Size: @Model.RoomSize sq ft</p>
+                }
+                else if (Model.PropertyType == "Land")
+                {
+                    <p>🌍 Land - @Model.LandType, Soil Quality: @Model.SoilQuality</p>
+                    <p>📎 Land Area: @Model.LandArea sq ft</p>
+                }
+            </div>
+
+            <p class="mt-4 text-gray-700">@Model.Description</p>
+
+            <div class="mt-6">
+                <h2 class="text-lg font-semibold">Map View</h2>
+                <div id="map" class="mt-2 h-48 bg-gray-200 rounded-lg"></div>
+            </div>
+
+            <div class="mt-6 flex items-center space-x-4">
+                <div class="flex-shrink-0">
+                    <img src="https://via.placeholder.com/50" alt="@Model.SellerName" class="h-12 w-12 rounded-full">
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold">@Model.SellerName</h3>
+                    <p class="text-gray-600">📘 @Model.SellerContact</p>
+                </div>
+            </div>
+
+            <div class="mt-6 flex space-x-4">
+                <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Contact Agent</button>
+                <button class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Schedule Viewing</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [@Model.Longitude, @Model.Latitude],
+            zoom: 12
+        });
+
+        new mapboxgl.Marker()
+            .setLngLat([@Model.Longitude, @Model.Latitude])
+            .addTo(map);
+    </script>
+</body>
+</html>

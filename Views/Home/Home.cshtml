@@ -89,7 +89,9 @@
                         <h2 class="text-xl font-bold mt-2">@property.Title</h2>
                         <p class="text-gray-600">@property.District, @property.City </p>
                         <p class="text-green-600 font-semibold">Rs. @property.Price</p>
-                        <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">View Details</button>
+                        <a href="@Url.Action("Details", "Property", new { id = property.Id })" class="text-blue-500 hover:underline">
+                            View Details
+                        </a>
                     </div>
                 }
             </div>
@@ -109,7 +111,9 @@
                         <h2 class="text-xl font-bold mt-2">@property.Title</h2>
                         <p class="text-gray-600">@property.District, @property.City </p>
                         <p class="text-green-600 font-semibold">Rs. @property.Price</p>
-                        <button class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">View Details</button>
+                        <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="text-blue-500 hover:underline">
+                            View Details
+                        </a>
                     </div>
                 }
                 

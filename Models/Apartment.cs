@@ -10,6 +10,7 @@ namespace Propertease.Models
         public int? Bathrooms { get; set; }
         public int? SittingRooms { get; set; }
         public double? RoomSize { get; set; } // In square meters or feet
+        public DateOnly BuiltYear { get; set; } // e.g., North, South
 
         // Foreign Key
         public int PropertyID { get; set; }

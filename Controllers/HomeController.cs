@@ -26,8 +26,81 @@ namespace Propertease.Controllers
                                               .ToList();
             return View(approvedProperties);
         }
+        [HttpGet("Details/{id}")]
+        public async Task<IActionResult> Details(int id)
+        {
+            var property = await _context.properties
+                .Include(p => p.Seller)
+                .Include(p => p.PropertyImages)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
+            if (property == null)
+            {
+                return NotFound();
+            }
 
+            var viewModel = new PropertyDetailsViewModel
+            {
+                Id = property.Id,
+                Title = property.Title,
+                Price = property.Price,
+                Description = property.Description,
+                District = property.District,
+                City = property.City,
+                Province = property.Province,
+                ImageUrl = property.PropertyImages.Select(img => "/Images/" + img.Photo).ToList(),
+                SellerName = property.Seller.FullName,
+                SellerContact = property.Seller.ContactNumber,
+                PropertyType = property.PropertyType,
+                Latitude = property.Latitude,
+                Longitude = property.Longitude,
+                RoadAccess = property.RoadAccess,
+                ThreeDModel = property.ThreeDModel != null ? "/3DModels/" + property.ThreeDModel : null // Add 3D Model URL
+
+            };
+
+            if (property.PropertyType == "House")
+            {
+                var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+                if (house != null)
+                {
+                    viewModel.Bedrooms = house.Bedrooms;
+                    viewModel.Kitchens = house.Kitchens;
+                    viewModel.SittingRooms = house.SittingRooms;
+                    viewModel.Bathrooms = house.Bathrooms;
+                    viewModel.Floors = house.Floors;
+                    viewModel.LandArea = house.LandArea;
+                    viewModel.BuildupArea = house.BuildupArea;
+                    viewModel.BuiltYear = house.BuiltYear;
+                    viewModel.FacingDirection = house.FacingDirection;
+                }
+            }
+            else if (property.PropertyType == "Apartment")
+            {
+                var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == property.Id);
+                if (apartment != null)
+                {
+                    viewModel.Rooms = apartment.Rooms;
+                    viewModel.Kitchens = apartment.Kitchens;
+                    viewModel.Bathrooms = apartment.Bathrooms;
+                    viewModel.SittingRooms = apartment.SittingRooms;
+                    viewModel.RoomSize = apartment.RoomSize;
+                    viewModel.BuiltYear = apartment.BuiltYear;
+                }
+            }
+            else if (property.PropertyType == "Land")
+            {
+                var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == property.Id);
+                if (land != null)
+                {
+                    viewModel.LandArea = land.LandArea;
+                    viewModel.LandType = land.LandType;
+                    viewModel.SoilQuality = land.SoilQuality;
+                }
+            }
+
+            return View(viewModel);
+        }
 
         [AllowAnonymous]
         public IActionResult Home()
@@ -41,7 +114,9 @@ namespace Propertease.Controllers
 
             return View(properties);
         }
-         public IActionResult About()
+
+
+        public IActionResult About()
         {
             return View();
         }

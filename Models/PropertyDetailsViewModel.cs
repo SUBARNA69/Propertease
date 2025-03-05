@@ -29,8 +29,16 @@
 
         // Specific to Land
         public double? LandArea { get; set; }
-
+        public string? RoadAccess { get; set; }
+        public string? LandType { get; set; }
+        public string? SoilQuality { get; set; }
+        public double? BuildupArea { get; set; } // In square meters or feet
+        public DateOnly BuiltYear { get; set; } // In square meters or feet
         public string PropertyType { get; set; } // House, Apartment, Land
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public string? ThreeDModel { get; set; }
+
     }
 
 

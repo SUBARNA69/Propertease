@@ -35,14 +35,35 @@
             <p class="text-gray-700 mb-4">@Model.Description</p>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <p><strong>Bedrooms:</strong> @Model.Bedrooms</p>
-                <p><strong>Bathrooms:</strong> @Model.Bathrooms</p>
-                <p><strong>Area:</strong> @Model.Area sq ft</p>
-                <p><strong>Kitchens:</strong> @Model.Kitchens</p>
+                @if (Model.PropertyType == "House")
+                {
+                    <p><strong>Bedrooms:</strong> @Model.Bedrooms</p>
+                    <p><strong>Bathrooms:</strong> @Model.Bathrooms</p>
+                    <p><strong>Land Area:</strong> @Model.LandArea sq ft</p>
+                    <p><strong>Kitchens:</strong> @Model.Kitchens</p>
+                    <p><strong>Buildup Area:</strong> @Model.BuildupArea sq ft</p>
+                    <p><strong>Built Year:</strong> @Model.BuiltYear.ToString("yyyy")</p>
+                    <p><strong>Facing Direction:</strong> @Model.FacingDirection</p>
+                }
+                else if (Model.PropertyType == "Apartment")
+                {
+                    <p><strong>Bedrooms:</strong> @Model.Bedrooms</p>
+                    <p><strong>Bathrooms:</strong> @Model.Bathrooms</p>
+                    <p><strong>Kitchens:</strong> @Model.Kitchens</p>
+                    <p><strong>Room Size:</strong> @Model.RoomSize sq ft</p>
+                    <p><strong>Built Year:</strong> @Model.BuiltYear.ToString("yyyy")</p>
+                }
+                else if (Model.PropertyType == "Land")
+                {
+                    <p><strong>Land Area:</strong> @Model.LandArea sq ft</p>
+                    <p><strong>Land Type:</strong> @Model.LandType</p>
+                    <p><strong>Soil Quality:</strong> @Model.SoilQuality</p>
+                }
             </div>
 
             <div class="border-t pt-4 mt-4">
                 <p><strong>Location:</strong> @Model.City, @Model.District, @Model.Province</p>
+                <p><strong>Road Access:</strong> @Model.RoadAccess</p>
                 <p><strong>Property Type:</strong> @Model.PropertyType</p>
             </div>
         </div>
@@ -57,9 +78,9 @@
 
     <!-- Approve/Reject Buttons -->
     <div class="flex justify-center mt-8 space-x-4">
-        <form style="display:inline;">
+        <form style="display:inline;" asp-action="ApproveProperty" asp-controller="Admin" method="post">
             <input type="hidden" name="id" value="@Model.Id" />
-            <button asp-action="ApproveProperty" asp-controller="Admin" type="submit" class="bg-green-500 text-white px-2 py-1 rounded">Approve</button>
+            <button type="submit" class="bg-green-500 text-white px-2 py-1 rounded">Approve</button>
         </form>
 
         <!-- Reject Button -->

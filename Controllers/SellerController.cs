@@ -28,16 +28,35 @@ namespace Propertease.Controllers
         {
             return View();
         }
+
         [HttpPost]
         public async Task<IActionResult> AddProperty(AddProperties addUserRequest)
         {
-            string filename = "";
             var sellerId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Get User ID from claims
+            string? threeDModelFileName = null; // Define it outside so it's accessible later
 
-            // Handle photo upload
-           
+            // Handle 3D model upload (only for House or Apartment)
+            if (addUserRequest.ThreeDModel != null && (addUserRequest.PropertyType == "House" || addUserRequest.PropertyType == "Apartment"))
+            {
+                try
+                {
+                    string modelUploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "3DModels");
+                    threeDModelFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(addUserRequest.ThreeDModel.FileName);
+                    string modelFilePath = Path.Combine(modelUploadFolder, threeDModelFileName);
 
-            // Save base property details
+                    using (var modelStream = new FileStream(modelFilePath, FileMode.Create))
+                    {
+                        await addUserRequest.ThreeDModel.CopyToAsync(modelStream);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"3D model upload failed: {ex.Message}");
+                    return View(addUserRequest);
+                }
+            }
+
+            // Save base property details including new RoadAccess field
             var propertyModel = new Properties
             {
                 PropertyType = addUserRequest.PropertyType,
@@ -47,7 +66,12 @@ namespace Propertease.Controllers
                 District = addUserRequest.District,
                 City = addUserRequest.City,
                 Province = addUserRequest.Province,
+                RoadAccess = addUserRequest.RoadAccess, // New field
+                Latitude = addUserRequest.Latitude, // Add Latitude
+                Longitude = addUserRequest.Longitude, // Add Longitude
                 Status = "Pending",
+                ThreeDModel = threeDModelFileName, // Store the filename for reference
+
                 SellerId = int.Parse(sellerId), // Automatically assign SellerId
             };
 
@@ -63,9 +87,9 @@ namespace Propertease.Controllers
 
                     foreach (var photo in addUserRequest.photo) // Loop through each IFormFile
                     {
-                        if (photo.Length > 0) // Use .Length on individual IFormFile
+                        if (photo.Length > 0)
                         {
-                            string photoFilename = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName); // Renamed filename to photoFilename
+                            string photoFilename = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName);
                             string filePath = Path.Combine(uploadFolder, photoFilename);
 
                             using (var fileStream = new FileStream(filePath, FileMode.Create))
@@ -76,7 +100,7 @@ namespace Propertease.Controllers
                             propertyImages.Add(new PropertyImage
                             {
                                 PropertyId = propertyModel.Id, // Foreign key
-                                Photo = photoFilename // Use the new photoFilename variable
+                                Photo = photoFilename
                             });
                         }
                     }
@@ -89,13 +113,13 @@ namespace Propertease.Controllers
                     return View(addUserRequest);
                 }
             }
-             else
+            else
             {
                 ModelState.AddModelError("", "Please upload a valid photo.");
                 return View(addUserRequest);
             }
-            
-            // Save specific property type details
+
+            // Save specific property type details with new fields
             if (addUserRequest.PropertyType == "House")
             {
                 var house = new House
@@ -105,8 +129,11 @@ namespace Propertease.Controllers
                     SittingRooms = addUserRequest.SittingRooms,
                     Bathrooms = addUserRequest.Bathrooms,
                     Floors = addUserRequest.Floors,
-                    Area = addUserRequest.Area,
+                    LandArea = addUserRequest.LandArea,      // New: renamed Area to LandArea
+                    BuildupArea = addUserRequest.BuildupArea,  // New field
+                    BuiltYear = addUserRequest.BuiltYear,      // New field (assumed DateOnly or DateTime)
                     FacingDirection = addUserRequest.FacingDirection,
+                   
                     PropertyID = propertyModel.Id // Foreign key
                 };
                 await _context.Houses.AddAsync(house);
@@ -120,6 +147,7 @@ namespace Propertease.Controllers
                     Bathrooms = addUserRequest.Bathrooms,
                     SittingRooms = addUserRequest.SittingRooms,
                     RoomSize = addUserRequest.RoomSize,
+                    BuiltYear = addUserRequest.BuiltYear, // New field
                     PropertyID = propertyModel.Id // Foreign key
                 };
                 await _context.Apartments.AddAsync(apartment);
@@ -128,7 +156,9 @@ namespace Propertease.Controllers
             {
                 var land = new Land
                 {
-                    Area = addUserRequest.Area,
+                    LandArea = addUserRequest.LandArea,     // New: renamed Area to LandArea
+                    LandType = addUserRequest.LandType,       // New field
+                    SoilQuality = addUserRequest.SoilQuality, // New field
                     PropertyID = propertyModel.Id // Foreign key
                 };
                 await _context.Lands.AddAsync(land);
@@ -142,6 +172,7 @@ namespace Propertease.Controllers
             // Redirect to Listings page
             return RedirectToAction("Listings");
         }
+
         public IActionResult ViewPropertyDetails(int id)
         {
             var property = _context.properties.FirstOrDefault(p => p.Id == id);
@@ -152,21 +183,23 @@ namespace Propertease.Controllers
 
             return View(property);
         }
+
         public async Task<IActionResult> Listings()
         {
-            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)); // Convert to int
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var properties = await _context.properties
-                .Where(p => p.SellerId == sellerId) // Filter by logged-in seller
-                .Include(p => p.PropertyImages) // Include related images
+                .Where(p => p.SellerId == sellerId)
+                .Include(p => p.PropertyImages)
                 .ToListAsync();
 
             if (properties == null || !properties.Any())
             {
-                properties = new List<Properties>(); // Avoid null issues
+                properties = new List<Properties>();
             }
 
-            return View(properties); // Pass data to the view
+            return View(properties);
         }
+
         [HttpGet]
         public async Task<IActionResult> EditProperty(int id)
         {
@@ -181,61 +214,13 @@ namespace Propertease.Controllers
                     Price = property.Price,
                     City = property.City,
                     District = property.District,
+                    // You could add additional fields here if needed
                 };
                 return View(editModel);
             }
             return RedirectToAction("Listings");
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> EditProperty(AddProperties model, IFormFile photo)
-        //{
-        //    var property = await _context.properties.FindAsync(model.PropertyId);
-        //    if (property != null)
-        //    {
-        //        property.Title = model.Title;
-        //        property.Description = model.Description;
-        //        property.Price = model.Price;
-        //        property.City = model.City;
-        //        property.District = model.District;
-
-        //        if (photo != null && photo.Length > 0)
-        //        {
-        //            try
-        //            {
-        //                string uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
-        //                string filename = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName);
-        //                string filePath = Path.Combine(uploadFolder, filename);
-                       
-        //                using (var fileStream = new FileStream(filePath, FileMode.Create))
-        //                {
-        //                    await photo.CopyToAsync(fileStream);
-        //                }
-
-        //                // Delete old image if it exists
-        //                if (!string.IsNullOrEmpty(property.Photo))
-        //                {
-        //                    var oldImagePath = Path.Combine(uploadFolder, property.Photo);
-        //                    if (System.IO.File.Exists(oldImagePath))
-        //                    {
-        //                        System.IO.File.Delete(oldImagePath);
-        //                    }
-        //                }
-
-        //                property.Photo = filename;
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                ModelState.AddModelError("", $"File upload failed: {ex.Message}");
-        //                return View(model);
-        //            }
-        //        }
-
-        //        await _context.SaveChangesAsync();
-        //        return RedirectToAction("Listings");
-        //    }
-        //    return RedirectToAction("Listings");
-        //}
         public async Task<IActionResult> Delete(int id)
         {
             var property = await _context.properties.FindAsync(id);
@@ -246,30 +231,24 @@ namespace Propertease.Controllers
             }
             return RedirectToAction("Listings");
         }
-        // Dashboard page
+
         public async Task<IActionResult> Dashboard()
         {
             try
             {
-                var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)); // Get current seller's ID
-                var fullName = User.FindFirstValue("FullName"); // Retrieve the full name
-                var firstName = fullName.Split(' ').FirstOrDefault(); // Get the first part of the name (the first name)
-                                                                          // Now you can use 'firstName' as the username or display name
-                
+                var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var fullName = User.FindFirstValue("FullName");
+                var firstName = fullName.Split(' ').FirstOrDefault();
 
-
-                // Fetch seller's properties
                 var properties = await _context.properties
                     .Where(p => p.SellerId == sellerId)
                     .ToListAsync();
 
-                // Calculate statistics
                 var totalListings = properties.Count;
                 var pendingApprovals = properties.Count(p => p.Status == "Pending");
                 var activeProperties = properties.Count(p => p.Status == "Approved");
-                var newInquiries = properties.Count(p => p.Status == "Rejected"); // Placeholder, replace with actual logic
+                var newInquiries = properties.Count(p => p.Status == "Rejected");
 
-                // Pass data to the view
                 ViewBag.TotalListings = totalListings;
                 ViewBag.PendingApprovals = pendingApprovals;
                 ViewBag.ActiveProperties = activeProperties;
@@ -280,8 +259,8 @@ namespace Propertease.Controllers
             }
             catch (Exception ex)
             {
-                return Content($"Error: {ex.Message}"); // Temporary error display
+                return Content($"Error: {ex.Message}");
             }
         }
-}
+    }
 }

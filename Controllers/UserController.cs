@@ -13,6 +13,9 @@ using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using Microsoft.AspNetCore.Hosting;
+using Propertease.Repos;
+using Propertease.Repos.Propertease.Services;
+using Esri.ArcGISRuntime.Ogc;
 
 namespace Propertease.Controllers
 {
@@ -20,14 +23,17 @@ namespace Propertease.Controllers
     public class UserController : Controller
     {
         private readonly ProperteaseDbContext UserDbContext;
+        private readonly EmailService emailService;
         private readonly IDataProtector _dataProtector;
         IWebHostEnvironment webHostEnvironment;
 
-        public UserController(ProperteaseDbContext userDbContext,ProperteaseSecurityProvider p, IDataProtectionProvider provider, IWebHostEnvironment webHostEnvironment)
+
+        public UserController(ProperteaseDbContext userDbContext,EmailService emailService, ProperteaseSecurityProvider p, IDataProtectionProvider provider, IWebHostEnvironment webHostEnvironment)
         {
             this.UserDbContext = userDbContext;
             this._dataProtector = provider.CreateProtector(p.Key);
             this.webHostEnvironment = webHostEnvironment;
+            this.emailService = emailService;
         }
         public IActionResult Index()
         {
@@ -39,9 +45,9 @@ namespace Propertease.Controllers
         {
             // Return an empty AddUser model for the form
             return View(new AddUser());
-        }   
+        }
         [HttpPost]
-        public IActionResult Register(AddUser user)
+        public async Task<IActionResult> Register(AddUser user)
         {
             if (ModelState.IsValid)
             {
@@ -52,6 +58,9 @@ namespace Propertease.Controllers
                     return View(user);
                 }
 
+                // Generate a unique verification token
+                var verificationToken = Guid.NewGuid().ToString();
+
                 // Create and save a new user
                 var newUser = new User
                 {
@@ -60,21 +69,59 @@ namespace Propertease.Controllers
                     ContactNumber = user.ContactNumber,
                     Role = user.Role,
                     Address = user.Address,
-                    Password = _dataProtector.Protect(user.Password) // Encrypt the password
+                    Password = _dataProtector.Protect(user.Password), // Encrypt the password
+                    EmailVerificationToken = verificationToken, // Store the verification token
+                    IsEmailVerified = false // Set email as unverified initially
                 };
 
                 UserDbContext.Users.Add(newUser);
                 UserDbContext.SaveChanges();
 
-                // Redirect to a success page or login page
-                return RedirectToAction("Login");
+                // Generate the verification link
+                var verificationLink = Url.Action("VerifyEmail", "User", new { token = verificationToken }, Request.Scheme);
+
+                // Send the email with the verification link
+                var emailBody = $"Please click the following link to verify your email: <a href='{verificationLink}'>Verify Email</a>";
+                await emailService.SendEmailAsync(user.Email, "Email Verification", emailBody);
+
+                // Redirect to a confirmation page (you can create a new view for this)
+                return RedirectToAction("VerificationSent");
             }
 
             // If ModelState is invalid, return the same form with validation errors
             return View(user);
         }
+        [HttpGet]
+        public IActionResult VerificationSent()
+        {
+            return View();
+        }
+        [HttpGet]
+        public IActionResult VerifyEmail(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return BadRequest("Invalid verification link.");
+            }
+
+            var user = UserDbContext.Users.FirstOrDefault(u => u.EmailVerificationToken == token);
+            if (user == null)
+            {
+                return BadRequest("Invalid verification link.");
+            }
+
+            user.IsEmailVerified = true;
+            user.EmailVerificationToken = null; // Clear the token after successful verification
+
+            UserDbContext.Users.Update(user);
+            UserDbContext.SaveChanges();
+
+            // Redirect to login page or show a success message
+            return RedirectToAction("Login");
+        }
+
+
         [AllowAnonymous]
- 
         public IActionResult AccessDenied()
         {
             return View();
@@ -102,14 +149,19 @@ namespace Propertease.Controllers
 
                 if (u != null)
                 {
+                    if (!u.IsEmailVerified)
+                    {
+                        ModelState.AddModelError("", "Please verify your phone number before logging in.");
+                        return View();
+                    }
                     // Create claims for the authenticated user
                     List<Claim> claims = new()
-            {
-                new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),  // Using Id instead of FullName
-                new Claim(ClaimTypes.Role, u.Role ?? "DefaultRole"),    // Use Role from User model
-                new Claim("FullName", u.FullName),                     // Custom claim for FullName
-                new Claim(ClaimTypes.Email, u.Email)                   // Correct ClaimType for email
-            };
+                    {
+                        new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),  // Using Id instead of FullName
+                        new Claim(ClaimTypes.Role, u.Role ?? "DefaultRole"),    // Use Role from User model
+                        new Claim("FullName", u.FullName),                     // Custom claim for FullName
+                        new Claim(ClaimTypes.Email, u.Email)                   // Correct ClaimType for email
+                    };
 
                     // Create a ClaimsIdentity and sign in the user
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -149,7 +201,7 @@ namespace Propertease.Controllers
             return View();
         }
 
-
+       
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

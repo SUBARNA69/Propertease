@@ -24,12 +24,9 @@ namespace Propertease.Repos
 
                 TwilioClient.Init(accountSid, authToken);
 
-                var to = new PhoneNumber(toPhoneNumber);
-                var from = new PhoneNumber(fromPhoneNumber);
-
                 var smsMessage = MessageResource.Create(
-                    to: to,
-                    from: from,
+                    to: new PhoneNumber(toPhoneNumber),
+                    from: new PhoneNumber(fromPhoneNumber),
                     body: message
                 );
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Propertease.Models;
 
@@ -11,9 +12,11 @@ using Propertease.Models;
 namespace Propertease.Migrations
 {
     [DbContext(typeof(ProperteaseDbContext))]
-    partial class ProperteaseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250303025209_phoneverify")]
+    partial class phoneverify
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,9 +35,6 @@ namespace Propertease.Migrations
 
                     b.Property<int?>("Bathrooms")
                         .HasColumnType("int");
-
-                    b.Property<DateOnly?>("BuiltYear")
-                        .HasColumnType("date");
 
                     b.Property<int?>("Kitchens")
                         .HasColumnType("int");
@@ -153,17 +153,14 @@ namespace Propertease.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
+                    b.Property<double?>("Area")
+                        .HasColumnType("float");
+
                     b.Property<int?>("Bathrooms")
                         .HasColumnType("int");
 
                     b.Property<int?>("Bedrooms")
                         .HasColumnType("int");
-
-                    b.Property<double?>("BuildupArea")
-                        .HasColumnType("float");
-
-                    b.Property<DateOnly?>("BuiltYear")
-                        .HasColumnType("date");
 
                     b.Property<string>("FacingDirection")
                         .HasColumnType("nvarchar(max)");
@@ -173,9 +170,6 @@ namespace Propertease.Migrations
 
                     b.Property<int?>("Kitchens")
                         .HasColumnType("int");
-
-                    b.Property<double?>("LandArea")
-                        .HasColumnType("float");
 
                     b.Property<int>("PropertyID")
                         .HasColumnType("int");
@@ -198,19 +192,11 @@ namespace Propertease.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<double?>("LandArea")
+                    b.Property<double?>("Area")
                         .HasColumnType("float");
-
-                    b.Property<string>("LandType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PropertyID")
                         .HasColumnType("int");
-
-                    b.Property<string>("SoilQuality")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
@@ -239,12 +225,6 @@ namespace Propertease.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("float");
-
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
@@ -253,10 +233,6 @@ namespace Propertease.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Province")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RoadAccess")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -353,20 +329,22 @@ namespace Propertease.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("EmailVerificationToken")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("FullName")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsEmailVerified")
+                    b.Property<bool>("IsPhoneVerified")
                         .HasColumnType("bit");
 
                     b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneVerificationCode")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")

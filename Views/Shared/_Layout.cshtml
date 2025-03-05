@@ -48,9 +48,9 @@
                             <a asp-controller="Admin" asp-action="Dashboard" class="text-gray-900 hover:text-blue-500">Dashboard</a>
                             <a asp-controller="Admin" asp-action="AdminRequests" class="text-gray-900 hover:text-blue-500">Property Request</a>
                             <a asp-controller="Admin" asp-action="AllProperties" class="text-gray-900 hover:text-blue-500">Property Management</a>
-                            <a asp-controller="Admin" asp-action="ViewSellerApprovalStatus" class="text-gray-900 hover:text-blue-500">Settings</a>
-                            <a asp-controller="Feedback" asp-action="Index" class="text-gray-900 hover:text-blue-500">Feedback</a>
-                            <a asp-controller="Support" asp-action="Index" class="text-gray-900 hover:text-blue-500">Support</a>
+                            <a asp-controller="Admin" asp-action="UsersManagement" class="text-gray-900 hover:text-blue-500">User Management</a>
+                            <a asp-controller="Admin" asp-action="Index" class="text-gray-900 hover:text-blue-500">Feedback</a>
+                            <a asp-controller="Admin" asp-action="Index" class="text-gray-900 hover:text-blue-500">Support</a>
                         }
                     </div>
 
@@ -95,7 +95,7 @@
                     <div id="profile-dropdown" class="hidden absolute right-0 top-[72px] bg-white rounded-lg shadow-lg w-48">
                         <ul>
                             <li><a asp-action="Profile" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a></li>
-                            <li><a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a></li>
+                            <li><a asp-action="ChangePassword" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a></li>
                             <li>
                                 <a asp-controller="User" asp-action="Logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
                             </li>

@@ -9,21 +9,19 @@ using System.Threading.Tasks;
 namespace Propertease.Controllers
 {
     [Authorize(Roles = "Admin")]
-
     public class AdminController : Controller
     {
         private readonly ProperteaseDbContext _context;
         private readonly PropertyRepository _propertyService;
         private readonly EmailService _emailService;
 
-
         public AdminController(ProperteaseDbContext context, PropertyRepository propertyService, EmailService emailService)
         {
             _context = context;
             _propertyService = propertyService;
             _emailService = emailService;
-
         }
+
         [Authorize]
         public IActionResult Dashboard()
         {
@@ -72,7 +70,6 @@ namespace Propertease.Controllers
         }
 
         // Action to approve a property
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> ApproveProperty(int id)
         {
@@ -123,12 +120,13 @@ namespace Propertease.Controllers
                                              .Where(p => p.Status == "Approved")
                                              .ToList();
 
-            return View(approvedProperties);  // Pass approved properties to the view
+            return View(approvedProperties);
         }
+
         public IActionResult AllProperties()
         {
             var properties = _context.properties
-                .Include(p => p.PropertyImages) // Include the related images
+                .Include(p => p.PropertyImages)
                 .ToList();
 
             return View(properties);
@@ -145,6 +143,37 @@ namespace Propertease.Controllers
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("AllProperties");
+        }
+
+        // Action to display the user list in the UsersManagement view
+        public IActionResult UsersManagement()
+        {
+            var users = _context.Users.ToList();
+            return View(users);
+        }
+
+        // Action to view user details
+        public async Task<IActionResult> ViewUserDetails(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return View(user);
+        }
+
+        // Action to delete a user
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user = await _context.Users.FindAsync(id);
+            if (user != null)
+            {
+                _context.Users.Remove(user);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("UsersManagement");
         }
     }
 }
