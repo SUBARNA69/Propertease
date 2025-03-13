@@ -9,16 +9,22 @@
 
     <!-- Profile Image Display -->
     <div class="flex justify-center mb-6">
-        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300">
+        <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-300 cursor-pointer" id="profileImageContainer">
             @if (!string.IsNullOrEmpty(Model.Image))
             {
-                <img src="~/Images/@Model.Image" alt="Profile Image" class="w-full h-full object-cover" />
+                <img src="~/Images/@Model.Image" alt="Profile Image" class="w-full h-full object-cover" id="profileImage" />
             }
             else
             {
-                <img src="https://via.placeholder.com/150" alt="Default Profile Image" class="w-full h-full object-cover" />
+                <img src="https://via.placeholder.com/150" alt="Default Profile Image" class="w-full h-full object-cover" id="profileImage" />
             }
         </div>
+    </div>
+
+    <!-- Full Screen Image Overlay -->
+    <div id="imageOverlay" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+        <img id="fullScreenImage" src="" alt="Full Screen Image" class="max-w-full max-h-full" />
+        <button id="closeOverlayButton" class="absolute top-4 right-4 text-white text-2xl bg-red-500 rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-600">&times;</button>
     </div>
 
     <!-- User Information -->
@@ -29,35 +35,33 @@
         <div class="text-lg font-medium">Address: @Model.Address</div>
     </div>
 
-    <!-- Image Upload Form -->
-    <form asp-action="SaveImage" asp-controller="User" method="post" enctype="multipart/form-data" class="mt-6">
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Upload Image</label>
-            <input type="file" name="photo" class="block w-full text-sm text-gray-900 border rounded-lg cursor-pointer focus:outline-none" />
-        </div>
-
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Image</button>
-        <button type="button" id="editProfileButton" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Edit Profile</button>
-    </form>
+    <!-- Edit Profile Button -->
+    <div class="mt-6">
+        <button id="editProfileButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Edit Profile</button>
+    </div>
 
     <!-- Edit Profile Form -->
-    <div id="editProfileForm" class="hidden mt-6 bg-gray-100 p-4 rounded-lg">
-        <form asp-action="Profile" asp-controller="User" method="post">
+    <div id="editProfileForm" class="mt-6 bg-gray-100 p-4 rounded-lg hidden">
+        <form asp-action="Profile" asp-controller="User" method="post" enctype="multipart/form-data">
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Name</label>
-                <input type="text" name="FullName" value="@Model.FullName" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
+                <input type="text" asp-for="FullName" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Email</label>
-                <input type="email" name="Email" value="@Model.Email" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
+                <input type="email" asp-for="Email" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Contact Number</label>
-                <input type="text" name="ContactNumber" value="@Model.ContactNumber" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
+                <input type="text" asp-for="ContactNumber" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700">Address</label>
-                <input type="text" name="Address" value="@Model.Address" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
+                <input type="text" asp-for="Address" class="block w-full text-sm text-gray-900 border rounded-lg focus:outline-none p-2" />
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700">Upload Image</label>
+                <input type="file" name="Photo" class="block w-full text-sm text-gray-900 border rounded-lg cursor-pointer focus:outline-none" />
             </div>
             <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Save Changes</button>
             <button type="button" id="cancelEditButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Cancel</button>
@@ -65,12 +69,35 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('editProfileButton').addEventListener('click', function () {
-        document.getElementById('editProfileForm').classList.remove('hidden');
-    });
 
-    document.getElementById('cancelEditButton').addEventListener('click', function () {
-        document.getElementById('editProfileForm').classList.add('hidden');
-    });
-</script>
+    <script>
+        // Toggle Edit Profile Form
+        document.getElementById('editProfileButton').addEventListener('click', function() {
+            document.getElementById('editProfileForm').classList.toggle('hidden');
+        });
+
+        document.getElementById('cancelEditButton').addEventListener('click', function() {
+            document.getElementById('editProfileForm').classList.add('hidden');
+        });
+
+        // Full Screen Image Overlay
+        const profileImage = document.getElementById('profileImage');
+        const imageOverlay = document.getElementById('imageOverlay');
+        const fullScreenImage = document.getElementById('fullScreenImage');
+        const closeOverlayButton = document.getElementById('closeOverlayButton');
+
+        profileImage.addEventListener('click', function() {
+            fullScreenImage.src = profileImage.src; // Set the full-screen image source
+            imageOverlay.classList.remove('hidden'); // Show the overlay
+        });
+
+        closeOverlayButton.addEventListener('click', function() {
+            imageOverlay.classList.add('hidden'); // Hide the overlay
+        });
+
+        imageOverlay.addEventListener('click', function(event) {
+            if (event.target === imageOverlay) {
+                imageOverlay.classList.add('hidden'); // Hide the overlay if clicked outside the image
+            }
+        });
+    </script>

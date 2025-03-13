@@ -50,5 +50,21 @@ body {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Add this to your site.css file */
+.notification-item.unread {
+    background-color: rgba(59, 130, 246, 0.05);
+    border-left: 3px solid #3b82f6;
+}
 
+.notification-item .delete-notification {
+    visibility: hidden;
+}
+
+.notification-item:hover .delete-notification {
+    visibility: visible;
+}
+
+#notification-badge {
+    font-size: 0.65rem;
+}
 /* Flowbite overrides or custom styles (if any) can go here */

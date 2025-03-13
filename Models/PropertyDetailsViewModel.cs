@@ -9,6 +9,7 @@
         public string District { get; set; }
         public string City { get; set; }
         public string Province { get; set; }
+        public string SellerImage { get; set; }
         public List<string> ImageUrl { get; set; } // This should be a property
         
         public string SellerName { get; set; }

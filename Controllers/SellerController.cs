@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Propertease.Hubs;
 using Propertease.Models;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
+using Propertease.Repos;
 
 namespace Propertease.Controllers
 {
@@ -14,12 +17,18 @@ namespace Propertease.Controllers
     {
         IWebHostEnvironment webHostEnvironment;
         private readonly ProperteaseDbContext _context;
+        private readonly INotificationService _notificationService;
+        private readonly IHubContext<NotificationHub> _hubContext; // Inject SignalR Hub Context
+
+
 
         // Inject the ApplicationDbContext into the controller
-        public SellerController(ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment)
+        public SellerController(ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment, IHubContext<NotificationHub> hubContext, INotificationService _notificationService)
         {
             _context = context;
             this.webHostEnvironment = webHostEnvironment;
+            _hubContext = hubContext;
+            this._notificationService = _notificationService;
         }
 
         // GET: Seller/AddProperty
@@ -166,10 +175,19 @@ namespace Propertease.Controllers
 
             // Save specific property type details to the database
             await _context.SaveChangesAsync();
+            string adminNotification = $"New Property Added: {propertyModel.Title} is awaiting approval.";
 
-            TempData["Notification"] = $"Your property '{propertyModel.Title}' has been added and is awaiting approval by an admin.";
+            try
+            {
+                // Store and send notification
+                await _notificationService.CreateNotificationAsync(adminNotification, propertyId: propertyModel.Id);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine("Error sending notification: " + ex.Message);
+            }
 
-            // Redirect to Listings page
             return RedirectToAction("Listings");
         }
 

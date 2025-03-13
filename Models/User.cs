@@ -32,6 +32,9 @@ namespace Propertease.Models
         public string? ConfirmPassword { get; set; }
         public string? EmailVerificationToken { get; set; } // Stores the verification code sent via SMS
         public bool IsEmailVerified { get; set; } = false; // Tracks whether the phone number is verified
+                                                           // Add these properties to your User model
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
         public ICollection<Properties>? Properties { get; set; } // Properties owned by the seller
         public ICollection<ForumPost>? ForumPosts { get; set; }
         public ICollection<ForumComment>? ForumComments { get; set; }

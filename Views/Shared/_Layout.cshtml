@@ -63,22 +63,16 @@
                             </svg>
                             <span id="notification-badge" class="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center hidden">0</span>
                         </button>
-                        <!-- Notification Panel HTML -->
-                        <div id="notification-panel" class="hidden absolute right-0 top-[72px] bg-white rounded-lg shadow-lg w-72 max-h-96 overflow-y-auto">
+                        <!-- Update your notification-panel div with this enhanced version -->
+                        <div id="notification-panel" class="hidden absolute right-0 top-[72px] bg-white rounded-lg shadow-lg w-72 max-h-96 overflow-y-auto z-50">
                             <div class="p-4">
-                                <h3 class="text-lg font-semibold text-gray-800">Notifications</h3>
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="text-lg font-semibold text-gray-800">Notifications</h3>
+                                    <button id="clear-notifications" class="text-xs text-blue-600 hover:text-blue-800">Clear All</button>
+                                </div>
                                 <ul id="notification-list" class="mt-2">
                                     <!-- Notifications will be dynamically added here -->
-                                    @if (TempData["Notification"] != null)
-                                    {
-                                        <li class="text-sm text-gray-700 py-2 border-b">
-                                            @TempData["Notification"]
-                                        </li>
-                                    }
-                                    else
-                                    {
-                                        <li class="text-sm text-gray-700 py-2 border-b">No new notifications</li>
-                                    }
+                                    <li class="text-sm text-gray-700 py-2 border-b empty-notification">No new notifications</li>
                                 </ul>
                             </div>
                         </div>
@@ -95,7 +89,7 @@
                     <div id="profile-dropdown" class="hidden absolute right-0 top-[72px] bg-white rounded-lg shadow-lg w-48">
                         <ul>
                             <li><a asp-action="Profile" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a></li>
-                            <li><a asp-action="ChangePassword" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a></li>
+                            <li><a asp-action="UpdatePassword" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a></li>
                             <li>
                                 <a asp-controller="User" asp-action="Logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
                             </li>
@@ -123,34 +117,260 @@
         </div>
     </footer>
 
-    <!-- Toggle profile dropdown with jQuery -->
-    <script>             
-        $(document).ready(function () {
-            // Toggle profile dropdown
-            $('#profile-button').click(function () {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js" integrity="sha512-7SRCYIJtR6F8ocwW7UxW6wGKqbSyqREDbfCORCbGLatU0iugBLwyOXpzhkPyHIFdBO0K2VCu57fvP2Twgx1o2A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+                $(document).ready(function () {
+            // Toggle UI elements (keep existing code)
+            $('#profile-button').click(function (e) {
+                e.stopPropagation();
                 $('#profile-dropdown').toggleClass('hidden');
+                $('#notification-panel').addClass('hidden'); // Close notifications when opening profile
             });
 
-          $('#notification-button').click(function () {
-            $('#notification-panel').toggleClass('hidden');
-        });
+            $('#notification-button').click(function (e) {
+                e.stopPropagation();
+                $('#notification-panel').toggleClass('hidden');
+                $('#profile-dropdown').addClass('hidden'); // Close profile when opening notifications
 
-        // Example: Update notification count dynamically
-        function updateNotificationCount(count) {
-            const badge = $('#notification-badge');
-            if (count > 0) {
-                badge.text(count);
-                badge.removeClass('hidden');
-            } else {
-                badge.addClass('hidden');
-            }
+                // Mark as read when opening
+                if (!$('#notification-panel').hasClass('hidden')) {
+                    markNotificationsAsRead();
+                }
+            });
+
+            // Close dropdowns when clicking elsewhere
+            $(document).click(function() {
+                $('#profile-dropdown').addClass('hidden');
+                $('#notification-panel').addClass('hidden');
+            });
+
+            // Prevent clicks inside the dropdown from closing it
+            $('#profile-dropdown, #notification-panel').click(function(e) {
+                e.stopPropagation();
+            });
+
+            // Clear all notifications
+            $('#clear-notifications').click(function() {
+                clearNotifications();
+            });
+
+                  // Build the connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // Better reconnection strategy
+            .build();
+
+        // Start the connection with logging
+        function startConnection() {
+            connection.start()
+                .then(() => {
+                    console.log("Connected to NotificationHub.");
+                    // This will automatically get unread notifications from database
+                    // We don't need to invoke it explicitly since we've added it to OnConnectedAsync
+                })
+                .catch(err => {
+                    console.error("Error connecting to NotificationHub:", err.toString());
+                    // Try to reconnect after 5 seconds
+                    setTimeout(startConnection, 5000);
+                });
         }
 
-        // Initialize notification count based on TempData
-        const notificationCount = $('#notification-list li').length;
-        updateNotificationCount(notificationCount);
+        startConnection();
+
+            // Handle reconnection events
+            connection.onreconnecting(error => {
+                console.log("Connection lost. Attempting to reconnect...");
+            });
+
+            connection.onreconnected(connectionId => {
+                console.log("Connection reestablished. ConnectionId:", connectionId);
+                // Re-fetch notifications after reconnection
+                connection.invoke("GetUnreadNotifications").catch(err => {
+                    console.error("Error getting unread notifications after reconnect:", err.toString());
+                });
+            });
+
+            connection.onclose(error => {
+                console.log("Connection closed. Attempting to restart...");
+                startConnection();
+            });
+
+            // Listen for real-time notifications
+            connection.on("ReceiveNotification", function (message) {
+                console.log("Notification received:", message);
+                addNotification({
+                    id: null, // No database ID yet for real-time notifications
+                    message: message,
+                    timestamp: new Date().toLocaleTimeString() + ' ' + new Date().toLocaleDateString(),
+                    isUnread: true
+                });
+            });
+
+            // Listen for loading unread notifications from database
+            connection.on("LoadUnreadNotifications", function (notifications) {
+                console.log("Loaded unread notifications:", notifications);
+                // Clear existing notifications before loading from database
+                $('#notification-list').empty();
+
+                if (notifications.length === 0) {
+                    $('#notification-list').html('<li class="text-sm text-gray-700 py-2 border-b empty-notification">No new notifications</li>');
+                } else {
+                    // Add database notifications
+                    notifications.forEach(notification => {
+                        addNotification({
+                            id: notification.id,
+                            message: notification.message,
+                            timestamp: new Date(notification.createdAt).toLocaleTimeString() + ' ' + new Date(notification.createdAt).toLocaleDateString(),
+                            isUnread: !notification.isRead
+                        });
+                    });
+                }
+            });
+
+            // Add a notification with timestamp
+            function addNotification(notification) {
+                const notificationList = $('#notification-list');
+
+                // Remove the empty notification message if present
+                $('.empty-notification').remove();
+
+                // Create notification with timestamp and unique ID
+                const notificationId = notification.id ? `db-notification-${notification.id}` : 'notification-' + Date.now();
+                const notificationHtml = `
+                    <li id="${notificationId}" class="notification-item text-sm text-gray-700 py-2 px-2 border-b hover:bg-gray-100 ${notification.isUnread ? 'unread' : ''}">
+                        <div class="flex justify-between">
+                            <span class="notification-text">${notification.message}</span>
+                            <button class="delete-notification text-gray-400 hover:text-red-500" data-id="${notification.id || ''}">×</button>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">${notification.timestamp}</div>
+                    </li>
+                `;
+
+                notificationList.prepend(notificationHtml);
+
+                // Save notifications to localStorage (for fallback)
+                saveNotifications();
+
+                // Update notification count
+                updateNotificationCount();
+            }
+
+            // Update notification count
+            function updateNotificationCount() {
+                const unreadCount = $('.notification-item.unread').length;
+                updateNotificationBadge(unreadCount);
+            }
+
+            // Update notification badge
+            function updateNotificationBadge(count) {
+                const badge = $('#notification-badge');
+                const unreadCount = count || $('.notification-item.unread').length;
+
+                if (unreadCount > 0) {
+                    badge.text(unreadCount);
+                    badge.removeClass('hidden');
+                } else {
+                    badge.addClass('hidden');
+                }
+            }
+
+            // Mark notifications as read
+            function markNotificationsAsRead() {
+                // Track which database notifications need to be marked as read
+                $('.notification-item.unread').each(function() {
+                    const $item = $(this);
+                    const id = $item.attr('id');
+
+                    // If it's a database notification
+                    if (id && id.startsWith('db-notification-')) {
+                        const dbId = parseInt(id.replace('db-notification-', ''));
+                        if (dbId) {
+                            // Call hub method to mark as read in database
+                            connection.invoke("MarkAsRead", dbId).catch(err => {
+                                console.error("Error marking notification as read:", err.toString());
+                            });
+                        }
+                    }
+
+                    // Remove unread class
+                    $item.removeClass('unread');
+                });
+
+                updateNotificationBadge(0);
+                saveNotifications();
+            }
+
+            // Save notifications to localStorage (as fallback)
+            function saveNotifications() {
+                const notifications = [];
+                $('#notification-list .notification-item').each(function() {
+                    const id = $(this).attr('id');
+                    // Only save non-database notifications to localStorage
+                    if (!id.startsWith('db-notification-')) {
+                        notifications.push({
+                            id: id,
+                            message: $(this).find('.notification-text').text(),
+                            timestamp: $(this).find('.text-xs').text(),
+                            isUnread: $(this).hasClass('unread')
+                        });
+                    }
+                });
+
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+            }
+
+            // Clear all notifications
+            function clearNotifications() {
+                // Clear database notifications first
+                $('#notification-list .notification-item').each(function() {
+                    const id = $(this).attr('id');
+                    if (id && id.startsWith('db-notification-')) {
+                        const dbId = parseInt(id.replace('db-notification-', ''));
+                        if (dbId) {
+                            // Call hub method to mark as read
+                            connection.invoke("MarkAsRead", dbId).catch(err => {
+                                console.error("Error marking notification as read:", err.toString());
+                            });
+                        }
+                    }
+                });
+
+                // Clear UI
+                $('#notification-list').html('<li class="text-sm text-gray-700 py-2 border-b empty-notification">No new notifications</li>');
+                updateNotificationBadge(0);
+                localStorage.removeItem('notifications');
+            }
+
+            // Delete individual notification
+            $(document).on('click', '.delete-notification', function(e) {
+                e.stopPropagation();
+                const $item = $(this).closest('.notification-item');
+                const id = $item.attr('id');
+                const dbId = $(this).data('id');
+
+                // If it's a database notification
+                if (dbId && id.startsWith('db-notification-')) {
+                    // Call hub method to mark as read
+                    connection.invoke("MarkAsRead", dbId).catch(err => {
+                        console.error("Error marking notification as read:", err.toString());
+                    });
+                }
+
+                // Remove from UI
+                $item.remove();
+
+                // If no notifications left, show empty state
+                if ($('.notification-item').length === 0) {
+                    $('#notification-list').html('<li class="text-sm text-gray-700 py-2 border-b empty-notification">No new notifications</li>');
+                }
+
+                saveNotifications();
+                updateNotificationCount();
+            });
         });
+
         @RenderSection("Scripts", required: false)
     </script>
+
 </body>
 </html>

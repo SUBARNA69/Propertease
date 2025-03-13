@@ -18,6 +18,8 @@ namespace Propertease.Models
         public DbSet<Land> Lands { get; set; }
 
         // DbSet for Apartments table
+        // In your ApplicationDbContext class
+        public DbSet<Notification> Notifications { get; set; }
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<PropertyImage> PropertyImages { get; set; }
         public DbSet<ForumPost> ForumPosts { get; set; }

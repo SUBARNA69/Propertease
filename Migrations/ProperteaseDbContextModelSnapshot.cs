@@ -33,7 +33,7 @@ namespace Propertease.Migrations
                     b.Property<int?>("Bathrooms")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly?>("BuiltYear")
+                    b.Property<DateOnly>("BuiltYear")
                         .HasColumnType("date");
 
                     b.Property<int?>("Kitchens")
@@ -162,7 +162,7 @@ namespace Propertease.Migrations
                     b.Property<double?>("BuildupArea")
                         .HasColumnType("float");
 
-                    b.Property<DateOnly?>("BuiltYear")
+                    b.Property<DateOnly>("BuiltYear")
                         .HasColumnType("date");
 
                     b.Property<string>("FacingDirection")
@@ -217,6 +217,36 @@ namespace Propertease.Migrations
                     b.HasIndex("PropertyID");
 
                     b.ToTable("Lands");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Propertease.Models.Properties", b =>
@@ -369,6 +399,12 @@ namespace Propertease.Migrations
                     b.Property<string>("Password")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
 
@@ -470,6 +506,15 @@ namespace Propertease.Migrations
                         .IsRequired();
 
                     b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Notification", b =>
+                {
+                    b.HasOne("Propertease.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Propertease.Models.Properties", b =>

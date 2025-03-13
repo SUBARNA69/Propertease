@@ -1,66 +1,85 @@
-﻿using Propertease.Models;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Propertease.Security;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.Extensions.Options;
+using Propertease.Hubs;
 using Propertease.Repos;
 using Propertease.Repos.Propertease.Services;
-namespace Propertease
+using Propertease.Security;
+using Propertease.Models;
+using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.SignalR;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Register CORS policy (allowing all origins for testing purposes)
+builder.Services.AddCors(options =>
 {
-    public class Program
+    options.AddPolicy("AllowAllOrigins", policy =>
     {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .WithExposedHeaders("Content-Disposition"); // Useful for file downloads
+    });
+});
 
-            // Add services to the container.
-            builder.Services.AddScoped<PropertyRepository>();
-            builder.Services.AddDbContext<ProperteaseDbContext>(options =>
-              options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
-                     .EnableSensitiveDataLogging());
-            builder.Services.AddSingleton<AwsSnsService>(); // Register the AWS SNS service
-            builder.Services.AddTransient<EmailService>();
-            builder.Services.AddSingleton<SmsService>(); // Register the SMS service
-            builder.Services.AddSingleton<ProperteaseSecurityProvider>();
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(o =>
-                {
-                    o.LoginPath = "/Users/Login";
-                    o.LogoutPath = "/User/Logout";
-                    o.AccessDeniedPath = "/User/AccessDenied";
-                    o.ExpireTimeSpan = TimeSpan.FromMinutes(15); // ⏳ 30 minutes expiry
-                    o.SlidingExpiration = true; // Reset expiry time if active
-                });
+// Register other services
+builder.Services.AddScoped<PropertyRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddDbContext<ProperteaseDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
+           .EnableSensitiveDataLogging());
+builder.Services.AddSingleton<AwsSnsService>();
+builder.Services.AddTransient<EmailService>();
+// Add this line with your other SignalR configuration
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddSingleton<SmsService>();
+builder.Services.AddSingleton<ProperteaseSecurityProvider>();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true; // Helpful during development
+    options.MaximumReceiveMessageSize = 102400; // 100 KB
+});
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(o =>
+    {
+        o.LoginPath = "/User/Login";
+        o.LogoutPath = "/User/Logout";
+        o.AccessDeniedPath = "/User/AccessDenied";
+        o.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+        o.SlidingExpiration = true;
+    });
+builder.Services.AddSession(o =>
+{
+    o.IdleTimeout = TimeSpan.FromMinutes(1);
+    o.Cookie.HttpOnly = true;
+});
+builder.Services.AddControllersWithViews();
 
-            builder.Services.AddSession(o =>
-            {
-                o.IdleTimeout = TimeSpan.FromMinutes(1);
-                o.Cookie.HttpOnly = true;
-            });
-            builder.Services.AddControllersWithViews();
-            var app = builder.Build();
-            // Configure the HTTP request pipeline.
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
-            }
+var app = builder.Build();
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-            app.UseSession();
-            app.UseAuthentication();
-            app.UseRouting();
-            app.UseAuthorization();
-            app.UseStaticFiles();
-
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Home}/{action=Home}/{id?}");
-
-            app.Run();
-        }
-    }
+// Configure the HTTP request pipeline
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseSession();
+app.UseRouting();
+
+// Use the CORS policy
+app.UseCors("AllowAllOrigins");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map SignalR hubs after authentication
+app.MapHub<NotificationHub>("notificationHub");
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Home}/{id?}");
+
+app.Run();

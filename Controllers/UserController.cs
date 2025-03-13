@@ -124,8 +124,10 @@ namespace Propertease.Controllers
         [AllowAnonymous]
         public IActionResult AccessDenied()
         {
-            return View();
+            // You can add a message here or just redirect to login directly
+            return RedirectToAction("Login", "User");
         }
+
 
         [HttpGet]
         public IActionResult Login()
@@ -151,7 +153,7 @@ namespace Propertease.Controllers
                 {
                     if (!u.IsEmailVerified)
                     {
-                        ModelState.AddModelError("", "Please verify your phone number before logging in.");
+                        ModelState.AddModelError("", "Please verify your Email before logging in.");
                         return View();
                     }
                     // Create claims for the authenticated user
@@ -201,7 +203,140 @@ namespace Propertease.Controllers
             return View();
         }
 
-       
+        // GET: /User/ForgotPassword
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // POST: /User/ForgotPassword
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Find the user by email
+            var user = await UserDbContext.Users.FirstOrDefaultAsync(u => u.Email.ToUpper() == model.Email.ToUpper());
+
+            // If user not found, still show success to prevent email enumeration attacks
+            if (user == null)
+            {
+                return RedirectToAction("ForgotPasswordConfirmation");
+            }
+
+            // Generate password reset token
+            var resetToken = Guid.NewGuid().ToString();
+
+            // Store the token and its expiration time (24 hours from now)
+            user.PasswordResetToken = resetToken;
+            user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(24);
+
+            UserDbContext.Users.Update(user);
+            await UserDbContext.SaveChangesAsync();
+
+            // Generate the reset link
+            var resetLink = Url.Action("ResetPassword", "User",
+                new { token = resetToken, email = user.Email }, Request.Scheme);
+
+            // Send the email with the reset link
+            var emailBody = $@"
+        <h2>Reset Your Password</h2>
+        <p>Please click the link below to reset your password:</p>
+        <p><a href='{resetLink}'>Reset Password</a></p>
+        <p>If you didn't request a password reset, please ignore this email.</p>
+        <p>This link will expire in 24 hours.</p>
+    ";
+
+            await emailService.SendEmailAsync(user.Email, "Password Reset Request", emailBody);
+
+            return RedirectToAction("ForgotPasswordConfirmation");
+        }
+
+        // GET: /User/ForgotPasswordConfirmation
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPasswordConfirmation()
+        {
+            return View();
+        }
+
+        // GET: /User/ResetPassword
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email))
+            {
+                ModelState.AddModelError("", "Invalid password reset token");
+                return View("Error");
+            }
+
+            var model = new ResetPasswordViewModel
+            {
+                Token = token,
+                Email = email
+            };
+
+            return View(model);
+        }
+
+        // POST: /User/ResetPassword
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Find the user by email
+            var user = await UserDbContext.Users.FirstOrDefaultAsync(u =>
+                u.Email.ToUpper() == model.Email.ToUpper() &&
+                u.PasswordResetToken == model.Token);
+
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                return RedirectToAction("ResetPasswordConfirmation");
+            }
+
+            // Check if token is expired
+            if (user.PasswordResetTokenExpiry < DateTime.UtcNow)
+            {
+                ModelState.AddModelError("", "Password reset token has expired");
+                return View(model);
+            }
+
+            // Update the user's password
+            user.Password = _dataProtector.Protect(model.Password);
+
+            // Clear the reset token
+            user.PasswordResetToken = null;
+            user.PasswordResetTokenExpiry = null;
+
+            UserDbContext.Users.Update(user);
+            await UserDbContext.SaveChangesAsync();
+
+            return RedirectToAction("ResetPasswordConfirmation");
+        }
+
+        // GET: /User/ResetPasswordConfirmation
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPasswordConfirmation()
+        {
+            return View();
+        }
+
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -316,9 +451,17 @@ namespace Propertease.Controllers
             existingUser.ContactNumber = user.ContactNumber;
             existingUser.Address = user.Address;
 
-            // Handle profile picture upload
+            // Handle profile picture upload (only if a new file is uploaded)
             if (Photo != null && Photo.Length > 0)
             {
+                // Validate the uploaded file (e.g., file type, size)
+                if (!Photo.ContentType.StartsWith("image/"))
+                {
+                    ModelState.AddModelError("Photo", "Only image files are allowed.");
+                    return View(user);
+                }
+
+                // Save the new image file
                 string fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(Photo.FileName);
                 string uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
 
@@ -332,6 +475,16 @@ namespace Propertease.Controllers
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await Photo.CopyToAsync(fileStream);
+                }
+
+                // Delete the old image file if it exists
+                if (!string.IsNullOrEmpty(existingUser.Image))
+                {
+                    string oldFilePath = Path.Combine(uploadFolder, existingUser.Image);
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        System.IO.File.Delete(oldFilePath);
+                    }
                 }
 
                 // Update the user's profile picture
@@ -348,37 +501,66 @@ namespace Propertease.Controllers
 
 
 
+        // In UserController.cs
+        [Authorize]
+        [HttpGet]
+        public IActionResult UpdatePassword()
+        {
+            return View(new PasswordChangeModel());
+        }
+
         [Authorize]
         [HttpPost]
-        public IActionResult ChangePassword(Models.ChangePassword c)
+        [ValidateAntiForgeryToken]
+        [Route("User/UpdatePassword")] // Add explicit route
+        public async Task<IActionResult> UpdatePassword(PasswordChangeModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                var u = UserDbContext.Users.Where(e => e.Id == Convert.ToInt16(User.Identity!.Name)).First();
-                if (_dataProtector.Unprotect(u.Password) != c.CurrentPassword)
-                {
-                    ModelState.AddModelError("", "Check your current password");
-                }
-                else
-                {
-                    if (c.NewPassword == c.ConfirmPassword)
-                    {
-                        u.Password = _dataProtector.Protect(c.NewPassword);
-                        UserDbContext.Update(u);
-                        UserDbContext.SaveChanges();
-                        return Content("Success");
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("", "Confirm Password doesnot match");
-                        return View(c);
-                    }
-
-                }
-
+                return View(model);
             }
-            return Json("Fail");
-            
+
+            try
+            {
+                // Get the current user ID from claims
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int id))
+                {
+                    ModelState.AddModelError("", "User authentication error. Please try logging in again.");
+                    return View(model);
+                }
+
+                // Find the user in the database
+                var user = await UserDbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+                if (user == null)
+                {
+                    ModelState.AddModelError("", "User not found. Please try logging in again.");
+                    return View(model);
+                }
+
+                // Verify current password
+                if (_dataProtector.Unprotect(user.Password) != model.CurrentPassword)
+                {
+                    ModelState.AddModelError("CurrentPassword", "Current password is incorrect.");
+                    return View(model);
+                }
+
+                // Update the password
+                user.Password = _dataProtector.Protect(model.NewPassword);
+                UserDbContext.Users.Update(user);
+                await UserDbContext.SaveChangesAsync();
+
+                // Add success message
+                TempData["SuccessMessage"] = "Your password has been changed successfully.";
+
+                return RedirectToAction("Profile", "User");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                ModelState.AddModelError("", "An error occurred while changing your password. Please try again.");
+                return View(model);
+            }
         }
-    }
+    }  
 }
