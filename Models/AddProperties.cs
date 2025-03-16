@@ -43,7 +43,7 @@ namespace Propertease.Models
         public int? HouseID { get; set; } // Primary Key
         public int? Bedrooms { get; set; }
         public int? Kitchens { get; set; }
-        public int SittingRooms { get; set; }
+        public int? SittingRooms { get; set; }
         public int? Bathrooms { get; set; }
         public int? Floors { get; set; }
         public double? LandArea { get; set; } // In square meters or feet
@@ -56,8 +56,9 @@ namespace Propertease.Models
         public int? ApartmentID { get; set; } // Primary Key
         public int? Rooms { get; set; }
         public double? RoomSize { get; set; } // In square meters or feet
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the property was first listed
         // Foreign Key
     }
 }

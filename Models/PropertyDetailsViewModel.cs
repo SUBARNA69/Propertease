@@ -13,6 +13,7 @@
         public List<string> ImageUrl { get; set; } // This should be a property
         
         public string SellerName { get; set; }
+        public string Status { get; set; }
         public string SellerContact { get; set; }
 
         // Specific to House
@@ -28,7 +29,7 @@
         public int? Rooms { get; set; }
         public double? RoomSize { get; set; }
 
-        // Specific to Land
+        // Specific to Land 
         public double? LandArea { get; set; }
         public string? RoadAccess { get; set; }
         public string? LandType { get; set; }

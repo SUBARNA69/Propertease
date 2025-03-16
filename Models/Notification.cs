@@ -4,19 +4,14 @@
     {
         public int Id { get; set; }
 
-        // Can be null if notification is for all users (like admins)
+        // User who should receive the notification (can be null for global notifications)
         public int? UserId { get; set; }
+        public virtual User User { get; set; }
 
         public string? Message { get; set; }
-
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-
         public bool IsRead { get; set; } = false;
-
-        // Optional: Reference to related entity
         public int? PropertyId { get; set; }
-
-        // Navigation property (if needed)
-        public virtual User User { get; set; }
+        public string NotificationType { get; set; } // e.g., "PropertyApproval", "PropertyRejection"
     }
 }

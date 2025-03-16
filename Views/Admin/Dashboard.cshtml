@@ -2,163 +2,411 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="p-6 max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-xl font-semibold">Welcome back, Subarna!</h1>
-            <p class="text-gray-500">Here's what's happening with your platform today.</p>
-        </div>
-    </div>
+<!-- Include Flowbite CSS and JS in your _Layout.cshtml or add here -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
 
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <!-- Total Users -->
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex items-center text-gray-500 mb-2">
-                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                        <span>Total Users</span>
+
+<div class="p-4 sm:ml-64">
+    <div class="p-4 border-gray-200 rounded-lg">
+        <!-- Header -->
+        <div class="mb-6">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Welcome back, Admin!</h1>
+            <p class="text-gray-500 dark:text-gray-400">Here's what's happening with your platform today.</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+            <!-- Total Users -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">@ViewBag.TotalUsers</span>
+                        <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Total Users</h3>
                     </div>
-                    <div class="text-2xl font-bold">@ViewBag.TotalUsers</div>
-                    <div class="text-green-500 text-sm">+12% this month</div>
+                    <div class="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+                        +12%
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Properties -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">@ViewBag.ActiveProperties</span>
+                        <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Active Properties</h3>
+                    </div>
+                    <div class="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+                        +8%
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Approvals -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">@ViewBag.PendingApprovals</span>
+                        <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Pending Approvals</h3>
+                    </div>
+                    <div class="ml-5 w-0 flex items-center justify-end flex-1 text-gray-500 text-base font-bold">
+                        23 new today
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Active Properties -->
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex items-center text-gray-500 mb-2">
-                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                        </svg>
-                        <span>Active Properties</span>
-                    </div>
-                    <div class="text-2xl font-bold">@ViewBag.ActiveProperties</div>
-                    <div class="text-green-500 text-sm">+8% this month</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Approvals -->
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex items-center text-gray-500 mb-2">
-                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                        <span>Pending Approvals</span>
-                    </div>
-                    <div class="text-2xl font-bold">@ViewBag.PendingApprovals</div>
-                    <div class="text-gray-500 text-sm">23 new today</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Monthly Revenue -->
-        <div class="bg-white p-4 rounded-lg shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex items-center text-gray-500 mb-2">
-                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18" />
-                        </svg>
-                        <span>Monthly Revenue</span>
-                    </div>
-                    <div class="text-2xl font-bold">$84,245</div>
-                    <div class="text-green-500 text-sm">+55% this month</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div class="bg-white p-4 rounded-lg shadow">
-            <h2 class="text-lg font-semibold mb-4">User Growth</h2>
-            <div class="h-48 bg-gray-50 rounded flex items-center justify-center">
-                Chart: User Growth Over Time
-            </div>
-        </div>
-
-        <div class="bg-white p-4 rounded-lg shadow">
-            <h2 class="text-lg font-semibold mb-4">Revenue Trends</h2>
-            <div class="h-48 bg-gray-50 rounded flex items-center justify-center">
-                Chart: Revenue Analysis
-            </div>
-        </div>
-    </div>
-
-    <!-- Bottom Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Recent Activity -->
-        <div class="bg-white p-4 rounded-lg shadow">
-            <h2 class="text-lg font-semibold mb-4">Recent Activity</h2>
-            <div class="space-y-4">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+        <!-- Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Monthly User Registrations (Bar Chart) -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+                <div class="mb-4 flex items-center justify-between">
                     <div>
-                        <div class="font-medium">New Property Listed</div>
-                        <div class="text-sm text-gray-500">Sarah Johnson listed a new property in San Francisco</div>
-                        <div class="text-xs text-gray-400">2h ago</div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Monthly User Registrations</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Buyers vs Sellers</p>
                     </div>
                 </div>
+                <div class="h-72">
+                    <canvas id="userRegistrationsChart"></canvas>
+                </div>
+            </div>
 
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
+            <!-- Monthly Property Listings (Bar Chart) -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+                <div class="mb-4 flex items-center justify-between">
                     <div>
-                        <div class="font-medium">Property Flagged</div>
-                        <div class="text-sm text-gray-500">Property ID #45678 was flagged for review</div>
-                        <div class="text-xs text-gray-400">4h ago</div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Monthly Property Listings</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Approved vs Pending</p>
                     </div>
                 </div>
-
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-gray-200 rounded-full"></div>
-                    <div>
-                        <div class="font-medium">New User Registration</div>
-                        <div class="text-sm text-gray-500">Mike Peters joined as a new agent</div>
-                        <div class="text-xs text-gray-400">6h ago</div>
-                    </div>
+                <div class="h-72">
+                    <canvas id="propertyListingsChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="bg-white p-4 rounded-lg shadow">
-            <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
-            <div class="space-y-2">
-                <a href="#" class="w-full bg-black text-white py-2 px-4 rounded flex justify-between items-center">
-                    <span>Approve Properties (@ViewBag.PendingApprovals)</span>
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <a href="#" class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded flex justify-between items-center">
-                    <span>Review Flags (5)</span>
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <a href="#" class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded flex justify-between items-center">
-                    <span>Verify Agents (8)</span>
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
-                <a href="#" class="w-full bg-gray-100 text-gray-800 py-2 px-4 rounded flex justify-between items-center">
-                    <span>Support Tickets (3)</span>
-                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
+        <!-- Additional Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Property Growth Line Chart (NEW) -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Property Growth</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Total properties over time</p>
+                    </div>
+                </div>
+                <div class="h-72">
+                    <canvas id="propertyGrowthChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Property Types Distribution (Bar Chart) -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Property Types</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Distribution by type</p>
+                    </div>
+                </div>
+                <div class="h-72">
+                    <canvas id="propertyTypesChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Recent Activity</h3>
+            </div>
+            <div>
+                <div class="flow-root">
+                    <ul role="list" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @if (ViewBag.RecentApprovedProperties != null && ViewBag.RecentApprovedProperties.Count > 0)
+                        {
+                            @foreach (var property in ViewBag.RecentApprovedProperties)
+                            {
+                                <li class="py-3 sm:py-4">
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate dark:text-white">
+                                                New Property Listed
+                                            </p>
+                                            <p class="text-sm text-gray-500 truncate dark:text-gray-400">
+                                                @property.Title in @property.Location - $@property.Price.ToString("N0")
+                                            </p>
+                                        </div>
+                                        <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+                                            @{
+                                                var timeAgo = DateTime.Now - property.ApprovedDate;
+                                                string timeDisplay;
+
+                                                if (timeAgo.TotalMinutes < 60)
+                                                    timeDisplay = $"{Math.Floor(timeAgo.TotalMinutes)} minutes ago";
+                                                else if (timeAgo.TotalHours < 24)
+                                                    timeDisplay = $"{Math.Floor(timeAgo.TotalHours)} hours ago";
+                                                else
+                                                    timeDisplay = $"{Math.Floor(timeAgo.TotalDays)} days ago";
+                                            }
+                                            @timeDisplay
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="py-3 sm:py-4">
+                                <div class="flex items-center">
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">No recent activity</p>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Include Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+
+    <script>
+        // Parse the JSON data from ViewBag
+        const monthlyUserRegistrations = @Html.Raw(ViewBag.MonthlyUserRegistrations);
+        const monthlyPropertyListings = @Html.Raw(ViewBag.MonthlyPropertyListings);
+        const propertyTypesData = @Html.Raw(ViewBag.PropertyTypesData);
+        const propertyGrowthData = @Html.Raw(ViewBag.PropertyGrowthData);
+
+        // Extract data for charts
+        const months = monthlyUserRegistrations.map(item => item.month);
+        const buyerCounts = monthlyUserRegistrations.map(item => item.buyers);
+        const sellerCounts = monthlyUserRegistrations.map(item => item.sellers);
+
+        const approvedCounts = monthlyPropertyListings.map(item => item.approved);
+        const pendingCounts = monthlyPropertyListings.map(item => item.pending);
+
+        const propertyTypes = propertyTypesData.map(item => item.type);
+        const propertyCounts = propertyTypesData.map(item => item.count);
+
+        // Extract data for the line chart
+        const growthMonths = propertyGrowthData.map(item => item.month);
+        const propertyTotals = propertyGrowthData.map(item => item.total);
+
+        // Set up color scheme
+        const colors = {
+            blue: {
+                primary: '#1A56DB',
+                light: 'rgba(26, 86, 219, 0.1)'
+            },
+            green: {
+                primary: '#16BDCA',
+                light: 'rgba(22, 189, 202, 0.1)'
+            },
+            orange: {
+                primary: '#F59E0B',
+                light: 'rgba(245, 158, 11, 0.1)'
+            },
+            red: {
+                primary: '#EF4444',
+                light: 'rgba(239, 68, 68, 0.1)'
+            },
+            purple: {
+                primary: '#8B5CF6',
+                light: 'rgba(139, 92, 246, 0.1)'
+            }
+        };
+
+        // Monthly User Registrations Chart
+        const userRegistrationsCtx = document.getElementById('userRegistrationsChart').getContext('2d');
+        new Chart(userRegistrationsCtx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Buyers',
+                        data: buyerCounts,
+                        backgroundColor: colors.blue.primary,
+                        borderColor: colors.blue.primary,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Sellers',
+                        data: sellerCounts,
+                        backgroundColor: colors.green.primary,
+                        borderColor: colors.green.primary,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // Monthly Property Listings Chart
+        const propertyListingsCtx = document.getElementById('propertyListingsChart').getContext('2d');
+        new Chart(propertyListingsCtx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [
+                    {
+                        label: 'Approved',
+                        data: approvedCounts,
+                        backgroundColor: colors.green.primary,
+                        borderColor: colors.green.primary,
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Pending',
+                        data: pendingCounts,
+                        backgroundColor: colors.orange.primary,
+                        borderColor: colors.orange.primary,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // Property Types Chart
+        const propertyTypesCtx = document.getElementById('propertyTypesChart').getContext('2d');
+        new Chart(propertyTypesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: propertyTypes,
+                datasets: [
+                    {
+                        data: propertyCounts,
+                        backgroundColor: [
+                            colors.blue.primary,
+                            colors.green.primary,
+                            colors.orange.primary,
+                            colors.red.primary,
+                            colors.purple.primary
+                        ],
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    }
+                }
+            }
+        });
+
+        // Property Growth Line Chart
+        const propertyGrowthCtx = document.getElementById('propertyGrowthChart').getContext('2d');
+        new Chart(propertyGrowthCtx, {
+            type: 'line',
+            data: {
+                labels: growthMonths,
+                datasets: [
+                    {
+                        label: 'Total Properties',
+                        data: propertyTotals,
+                        backgroundColor: colors.purple.light,
+                        borderColor: colors.purple.primary,
+                        borderWidth: 2,
+                        pointBackgroundColor: colors.purple.primary,
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: colors.purple.primary,
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    </script>

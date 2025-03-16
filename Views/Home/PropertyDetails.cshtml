@@ -28,7 +28,15 @@
                 <p class="text-sm">@Model.City, @Model.District, @Model.Province</p>
             </div>
         </div>
-
+        @if (!string.IsNullOrEmpty(Model.ThreeDModel))
+        {
+            <a href="@Url.Action("ModelViewer", "Property", new { id = Model.Id })" class="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-purple-600 dark:hover:bg-purple-700 focus:outline-none dark:focus:ring-purple-800">
+                <svg class="w-4 h-4 inline-block mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                    <path d="M8 0a8 8 0 0 0-8 8 8.034 8.034 0 0 0 1.014 3.9.5.5 0 0 0 .131.172l.414.42 7.067 7.069a.5.5 0 0 0 .707 0l7.067-7.069.414-.42a.5.5 0 0 0 .131-.172A8.034 8.034 0 0 0 16 8a8 8 0 0 0-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
+                </svg>
+                View 3D Virtual Tour
+            </a>
+        }
         <div class="p-6">
             <div class="text-gray-600 space-y-2">
                 <p>📍 Location: @Model.City, @Model.District, @Model.Province</p>

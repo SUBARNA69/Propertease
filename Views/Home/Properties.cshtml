@@ -3,72 +3,161 @@
 }
 @model IEnumerable<Properties>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Properties</title>
-</head>
-<body class="bg-gray-100">
-    <div class="container mx-auto px-4 py-6">
-        <h1 class="text-3xl font-bold mb-6">Available Properties</h1>
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="mb-6 text-center">
+        <h1 class="text-3xl font-extrabold text-gray-900 md:text-4xl lg:text-5xl">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Available Properties</span>
+        </h1>
+        <p class="mt-3 text-gray-500 text-lg">Find your dream property from our exclusive listings</p>
+    </div>
 
-        <!-- Sidebar for Filters -->
-        <div class="flex">
-            <aside class="w-1/4 bg-white shadow p-4">
-                <h2 class="text-xl font-semibold mb-4">Filters</h2>
-                <form method="get" action="/Home/Properties">
-                    <label for="propertyType" class="block text-sm font-medium text-gray-700">Property Type</label>
-                    <select id="propertyType" name="propertyType" class="mt-1 block w-full border-gray-300 rounded-md">
-                        <option value="">All</option>
+    <!-- Filter Button and Controls -->
+    <div class="mb-6">
+        <button id="filterButton" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 flex items-center">
+            <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.75 4H19M7.75 4a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 4h2.25m13.5 6H19m-2.25 0a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 10h11.25m-4.5 6H19M7.75 16a2.25 2.25 0 0 1-4.5 0m4.5 0a2.25 2.25 0 0 0-4.5 0M1 16h2.25" />
+            </svg>
+            Filter Properties
+        </button>
+
+        <!-- Collapsible Filter Section -->
+        <div id="filterSection" class="hidden mt-4 p-6 bg-white border border-gray-200 rounded-lg shadow-md">
+            <form method="get" action="/Home/Properties" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="propertyType" class="block mb-2 text-sm font-medium text-gray-900">Property Type</label>
+                    <select id="propertyType" name="propertyType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="">All Types</option>
                         <option value="Apartment">Apartment</option>
                         <option value="House">House</option>
                         <option value="Land">Land</option>
                     </select>
+                </div>
 
-                    <label for="district" class="block text-sm font-medium text-gray-700 mt-4">District</label>
-                    <input type="text" id="district" name="district" class="mt-1 block w-full border-gray-300 rounded-md" placeholder="Enter district">
+                <div>
+                    <label for="district" class="block mb-2 text-sm font-medium text-gray-900">District</label>
+                    <input type="text" id="district" name="district" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter district">
+                </div>
 
-                    <button type="submit" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                <div>
+                    <label for="priceRange" class="block mb-2 text-sm font-medium text-gray-900">Price Range</label>
+                    <select id="priceRange" name="priceRange" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="">Any Price</option>
+                        <option value="0-100000">$0 - $100,000</option>
+                        <option value="100000-300000">$100,000 - $300,000</option>
+                        <option value="300000-500000">$300,000 - $500,000</option>
+                        <option value="500000-1000000">$500,000 - $1,000,000</option>
+                        <option value="1000000+">$1,000,000+</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-3 flex flex-wrap gap-2 items-center">
+                    <span class="text-sm font-medium text-gray-900">Popular Locations:</span>
+                    <a href="/Home/Properties?district=Downtown" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors">Downtown</a>
+                    <a href="/Home/Properties?district=Westside" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors">Westside</a>
+                    <a href="/Home/Properties?district=Eastside" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors">Eastside</a>
+                    <a href="/Home/Properties?district=Northside" class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors">Northside</a>
+                </div>
+
+                <div class="md:col-span-3 flex gap-3">
+                    <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 flex items-center">
+                        <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                        </svg>
                         Apply Filters
                     </button>
-                </form>
-            </aside>
+                    <a href="/Home/Properties" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5">
+                        Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
-            <!-- Properties List -->
-            <main class="w-3/4 ml-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @if (Model.Any())
+    <!-- Properties Grid -->
+    <main>
+        @if (Model.Any())
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                @foreach (var property in Model)
                 {
-                    @foreach (var property in Model)
-                    {
-                        <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                        <div class="relative overflow-hidden">
                             @if (property.PropertyImages != null && property.PropertyImages.Any())
                             {
-                                <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-full h-48 object-cover rounded-lg">
+                                <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500">
                             }
                             else
                             {
-                                <div class="w-full h-48 bg-gray-200 flex items-center justify-center rounded-lg">
+                                <div class="w-full h-64 bg-gray-200 flex items-center justify-center">
                                     <span class="text-gray-500">No Image Available</span>
                                 </div>
-                            }                         
-                            <div class="p-4">
-                                <h3 class="text-lg font-bold text-gray-800">@property.Title</h3>
-                                <p class="text-gray-600 mt-2">@property.Description</p>
-                                <p class="text-gray-800 mt-4 font-semibold">Price: @property.Price.ToString("C")</p>
-                                <p class="text-sm text-gray-500 mt-1">Location: @property.City, @property.District</p>
-                                <a href="/Home/Details/@property.Id" class="block mt-4 bg-blue-500 text-white text-center py-2 rounded hover:bg-blue-600">
-                                    View Details
-                                </a>
+                            }
+                            <div class="absolute top-2 right-2 bg-blue-600 text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                                @property.PropertyType
                             </div>
                         </div>
-                    }
+
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold tracking-tight text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">@property.Title</h3>
+
+                            <div class="flex items-center text-gray-500 text-sm mb-3">
+                                <svg class="w-4 h-4 mr-1 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 21">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.8 12.938h-.01a7 7 0 1 0-11.465.144h-.016l.141.17c.1.128.2.252.3.372L8 20l5.13-6.248c.193-.209.373-.429.54-.66l.13-.154Z" />
+                                </svg>
+                                @property.City, @property.District
+                            </div>
+
+                            <p class="mb-3 font-normal text-gray-700 line-clamp-2">@property.Description</p>
+
+                            <div class="flex items-center justify-between mt-4 mb-3">
+                                <span class="text-2xl font-bold text-gray-900">@property.Price.ToString("C0")</span>
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <svg class="w-4 h-4 mr-1 text-yellow-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                                    </svg>
+                                    <span>4.8</span>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">3 Beds</span>
+                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">2 Baths</span>
+                                <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">1,500 sqft</span>
+                            </div>
+
+                            <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="inline-flex items-center w-full justify-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 transition-colors">
+                                View Details
+                                <svg class="w-3.5 h-3.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9" />
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
                 }
-                else
-                {
-                    <p class="text-gray-600 text-center col-span-full">No approved properties available at the moment.</p>
-                }
-            </main>
-        </div>
-    </div>
-</body>
-</html>
+            </div>
+        }
+        else
+        {
+            <div class="p-12 text-center bg-white border border-gray-200 rounded-lg shadow-md">
+                <svg class="w-12 h-12 mx-auto mb-4 text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                </svg>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">No Properties Found</h3>
+                <p class="text-gray-500 mb-6">No approved properties available at the moment.</p>
+                <a href="/Home/Properties" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none">
+                    Clear Filters
+                </a>
+            </div>
+        }
+    </main>
+</div>
+
+<script>
+    // Toggle Filter Section
+    document.getElementById('filterButton').addEventListener('click', function() {
+        const filterSection = document.getElementById('filterSection');
+        filterSection.classList.toggle('hidden');
+    });
+</script>

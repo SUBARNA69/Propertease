@@ -9,6 +9,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Linq;
 using Propertease.Repos;
+using PROPERTEASE.Models;
 
 namespace Propertease.Controllers
 {
@@ -79,6 +80,7 @@ namespace Propertease.Controllers
                 Latitude = addUserRequest.Latitude, // Add Latitude
                 Longitude = addUserRequest.Longitude, // Add Longitude
                 Status = "Pending",
+                CreatedAt = DateTime.Now,
                 ThreeDModel = threeDModelFileName, // Store the filename for reference
 
                 SellerId = int.Parse(sellerId), // Automatically assign SellerId
@@ -191,16 +193,93 @@ namespace Propertease.Controllers
             return RedirectToAction("Listings");
         }
 
-        public IActionResult ViewPropertyDetails(int id)
+        public async Task<IActionResult> ViewPropertyDetails(int id)
         {
-            var property = _context.properties.FirstOrDefault(p => p.Id == id);
+            // Get the base property with images
+            var property = await _context.properties
+                .Include(p => p.PropertyImages)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (property == null)
             {
                 return NotFound();
             }
 
-            return View(property);
+            // Get seller information
+            var seller = await _context.Users.FindAsync(property.SellerId);
+
+            // Create the view model
+            var viewModel = new PropertyDetailsViewModel
+            {
+                Id = property.Id,
+                Title = property.Title,
+                Price = property.Price,
+                Description = property.Description,
+                District = property.District,
+                City = property.City,
+                Province = property.Province,
+                PropertyType = property.PropertyType,
+                Status = property.Status,
+                RoadAccess = property.RoadAccess,
+                Latitude = property.Latitude,
+                Longitude = property.Longitude,
+                ThreeDModel = property.ThreeDModel,
+
+                // Seller information
+                SellerName = seller?.FullName,
+                SellerContact = seller?.ContactNumber,
+                SellerImage = seller?.Image,
+
+                // Images
+                ImageUrl = property.PropertyImages?.Select(pi => pi.Photo).ToList() ?? new List<string>()
+            };
+
+            // Get property-specific details based on type
+            if (property.PropertyType == "House")
+            {
+                var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == id);
+                if (house != null)
+                {
+                    viewModel.Bedrooms = house.Bedrooms;
+                    viewModel.Kitchens = house.Kitchens;
+                    viewModel.SittingRooms = house.SittingRooms;
+                    viewModel.Bathrooms = house.Bathrooms;
+                    viewModel.Floors = house.Floors;
+                    viewModel.LandArea = house.LandArea;
+                    viewModel.BuildupArea = house.BuildupArea;
+                    viewModel.BuiltYear = house.BuiltYear;
+                    viewModel.FacingDirection = house.FacingDirection;
+                    viewModel.Area = house.BuildupArea; // For compatibility
+                }
+            }
+            else if (property.PropertyType == "Apartment")
+            {
+                var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == id);
+                if (apartment != null)
+                {
+                    viewModel.Rooms = apartment.Rooms;
+                    viewModel.Kitchens = apartment.Kitchens;
+                    viewModel.Bathrooms = apartment.Bathrooms;
+                    viewModel.SittingRooms = apartment.SittingRooms;
+                    viewModel.RoomSize = apartment.RoomSize;
+                    viewModel.BuiltYear = apartment.BuiltYear;
+                }
+            }
+            else if (property.PropertyType == "Land")
+            {
+                var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == id);
+                if (land != null)
+                {
+                    viewModel.LandArea = land.LandArea;
+                    viewModel.LandType = land.LandType;
+                    viewModel.SoilQuality = land.SoilQuality;
+                }
+            }
+
+            return View(viewModel);
         }
+
+
 
         public async Task<IActionResult> Listings()
         {
@@ -221,23 +300,251 @@ namespace Propertease.Controllers
         [HttpGet]
         public async Task<IActionResult> EditProperty(int id)
         {
-            var property = await _context.properties.FirstOrDefaultAsync(x => x.Id == id);
-            if (property != null)
+            var property = await _context.properties
+                .Include(p => p.PropertyImages)
+                .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (property == null)
             {
-                var editModel = new AddProperties
-                {
-                    PropertyId = property.Id,
-                    Title = property.Title,
-                    Description = property.Description,
-                    Price = property.Price,
-                    City = property.City,
-                    District = property.District,
-                    // You could add additional fields here if needed
-                };
-                return View(editModel);
+                return NotFound();
             }
-            return RedirectToAction("Listings");
+
+            // Check if the current user is the owner of this property
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (property.SellerId != sellerId)
+            {
+                return Forbid();
+            }
+
+            // Create the edit model with base property details
+            var editModel = new AddProperties
+            {
+                PropertyId = property.Id,
+                PropertyType = property.PropertyType,
+                Title = property.Title,
+                Description = property.Description,
+                Price = property.Price,
+                City = property.City,
+                District = property.District,
+                Province = property.Province,
+                RoadAccess = property.RoadAccess,
+                Latitude = property.Latitude,
+                Longitude = property.Longitude
+            };
+
+            // Load property-specific details based on type
+            if (property.PropertyType == "House")
+            {
+                var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == id);
+                if (house != null)
+                {
+                    editModel.Bedrooms = house.Bedrooms;
+                    editModel.Kitchens = house.Kitchens;
+                    editModel.SittingRooms = house.SittingRooms;
+                    editModel.Bathrooms = house.Bathrooms;
+                    editModel.Floors = house.Floors;
+                    editModel.LandArea = house.LandArea;
+                    editModel.BuildupArea = house.BuildupArea;
+                    editModel.BuiltYear = house.BuiltYear;
+                    editModel.FacingDirection = house.FacingDirection;
+                }
+            }
+            else if (property.PropertyType == "Apartment")
+            {
+                var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == id);
+                if (apartment != null)
+                {
+                    editModel.Rooms = apartment.Rooms;
+                    editModel.Kitchens = apartment.Kitchens;
+                    editModel.Bathrooms = apartment.Bathrooms;
+                    editModel.SittingRooms = apartment.SittingRooms;
+                    editModel.RoomSize = apartment.RoomSize;
+                    editModel.BuiltYear = apartment.BuiltYear;
+                }
+            }
+            else if (property.PropertyType == "Land")
+            {
+                var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == id);
+                if (land != null)
+                {
+                    editModel.LandArea = land.LandArea;
+                    editModel.LandType = land.LandType;
+                    editModel.SoilQuality = land.SoilQuality;
+                }
+            }
+
+            // Pass existing images to the view
+            ViewBag.ExistingImages = property.PropertyImages?.Select(pi => pi.Photo).ToList() ?? new List<string>();
+            ViewBag.ExistingThreeDModel = property.ThreeDModel;
+
+            return View(editModel);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> EditProperty(AddProperties model, List<string> ImagesToDelete)
+        {
+            if (model.PropertyId <= 0)
+            {
+                return BadRequest();
+            }
+
+            // Get the existing property
+            var property = await _context.properties
+                .Include(p => p.PropertyImages)
+                .FirstOrDefaultAsync(p => p.Id == model.PropertyId);
+
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the current user is the owner of this property
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (property.SellerId != sellerId)
+            {
+                return Forbid();
+            }
+
+            // Update basic property details
+            property.Title = model.Title;
+            property.Description = model.Description;
+            property.Price = model.Price;
+            property.City = model.City;
+            property.District = model.District;
+            property.Province = model.Province;
+            property.RoadAccess = model.RoadAccess;
+            property.Latitude = model.Latitude;
+            property.Longitude = model.Longitude;
+
+            // Handle 3D model upload if provided
+            if (model.ThreeDModel != null && model.ThreeDModel.Length > 0 &&
+                 (property.PropertyType == "House" || property.PropertyType == "Apartment"))
+            { 
+                // Delete old 3D model if exists
+                if (!string.IsNullOrEmpty(property.ThreeDModel))
+                {
+                    string oldModelPath = Path.Combine(webHostEnvironment.WebRootPath, "3DModels", property.ThreeDModel);
+                    if (System.IO.File.Exists(oldModelPath))
+                    {
+                        System.IO.File.Delete(oldModelPath);
+                    }
+                }
+
+                // Save new 3D model
+                string modelUploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "3DModels");
+                string threeDModelFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ThreeDModel.FileName);
+                string modelFilePath = Path.Combine(modelUploadFolder, threeDModelFileName);
+
+                using (var modelStream = new FileStream(modelFilePath, FileMode.Create))
+                {
+                    await model.ThreeDModel.CopyToAsync(modelStream);
+                }
+
+                property.ThreeDModel = threeDModelFileName;
+            }
+
+            // Handle image deletions if any
+            if (ImagesToDelete != null && ImagesToDelete.Any())
+            {
+                foreach (var imageToDelete in ImagesToDelete)
+                {
+                    // Remove from database
+                    var imageEntity = property.PropertyImages.FirstOrDefault(pi => pi.Photo == imageToDelete);
+                    if (imageEntity != null)
+                    {
+                        _context.PropertyImages.Remove(imageEntity);
+
+                        // Delete physical file
+                        string imagePath = Path.Combine(webHostEnvironment.WebRootPath, "Images", imageToDelete);
+                        if (System.IO.File.Exists(imagePath))
+                        {
+                            System.IO.File.Delete(imagePath);
+                        }
+                    }
+                }
+            }
+
+            // Handle new image uploads if any
+            if (model.photo != null && model.photo.Count > 0)
+            {
+                List<PropertyImage> newImages = new List<PropertyImage>();
+                string uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
+
+                foreach (var photo in model.photo)
+                {
+                    if (photo.Length > 0)
+                    {
+                        string photoFilename = Guid.NewGuid().ToString() + "_" + Path.GetFileName(photo.FileName);
+                        string filePath = Path.Combine(uploadFolder, photoFilename);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await photo.CopyToAsync(fileStream);
+                        }
+
+                        newImages.Add(new PropertyImage
+                        {
+                            PropertyId = property.Id,
+                            Photo = photoFilename
+                        });
+                    }
+                }
+
+                if (newImages.Any())
+                {
+                    await _context.PropertyImages.AddRangeAsync(newImages);
+                }
+            }
+
+            // Update property-specific details
+            if (property.PropertyType == "House")
+            {
+                var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+                if (house != null)
+                {
+                    house.Bedrooms = model.Bedrooms;
+                    house.Kitchens = model.Kitchens;
+                    house.SittingRooms = model.SittingRooms;
+                    house.Bathrooms = model.Bathrooms;
+                    house.Floors = model.Floors;
+                    house.LandArea = model.LandArea;
+                    house.BuildupArea = model.BuildupArea;
+                    house.BuiltYear = model.BuiltYear;
+                    house.FacingDirection = model.FacingDirection;
+                }
+            }
+            else if (property.PropertyType == "Apartment")
+            {
+                var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == property.Id);
+                if (apartment != null)
+                {
+                    apartment.Rooms = model.Rooms;
+                    apartment.Kitchens = model.Kitchens;
+                    apartment.Bathrooms = model.Bathrooms;
+                    apartment.SittingRooms = model.SittingRooms;
+                    apartment.RoomSize = model.RoomSize;
+                    apartment.BuiltYear = model.BuiltYear;
+                }
+            }
+            else if (property.PropertyType == "Land")
+            {
+                var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == property.Id);
+                if (land != null)
+                {
+                    land.LandArea = model.LandArea;
+                    land.LandType = model.LandType;
+                    land.SoilQuality = model.SoilQuality;
+                }
+            }
+
+            // Save all changes to the database
+            await _context.SaveChangesAsync();
+
+            // Redirect to the property details page
+            return RedirectToAction("ViewPropertyDetails", new { id = property.Id });
+        }
+
+
 
         public async Task<IActionResult> Delete(int id)
         {
@@ -280,5 +587,137 @@ namespace Propertease.Controllers
                 return Content($"Error: {ex.Message}");
             }
         }
+        [HttpGet]
+        // Modify the Boost action to accept a propertyId parameter
+        public IActionResult Boost(int? propertyId = null)
+        {
+            var model = new BoostViewModel();
+
+            // If propertyId is provided, pre-fill the property link
+            if (propertyId.HasValue)
+            {
+                // Get the property to verify it exists and belongs to this seller
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var property = _context.properties
+                    .FirstOrDefault(p => p.Id == propertyId && p.SellerId == userId);
+
+                if (property != null)
+                {
+                    // Pre-fill the property link
+                    model.PropertyLink = Url.Action("ViewPropertyDetails", "Seller", new { id = propertyId }, Request.Scheme);
+                }
+            }
+
+            return View(model);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Boost(BoostViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Extract property ID from the URL
+            int propertyId = 0;
+            if (!string.IsNullOrEmpty(model.PropertyLink))
+            {
+                // Parse the property ID from the URL
+                // Example URL: https://localhost:7152/Seller/ViewPropertyDetails/23
+                var segments = model.PropertyLink.Split('/');
+                var idSegment = segments.LastOrDefault();
+                if (int.TryParse(idSegment, out int id))
+                {
+                    propertyId = id;
+                }
+            }
+
+            // Verify the property exists and belongs to the current seller
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var property = await _context.properties
+                .FirstOrDefaultAsync(p => p.Id == propertyId && p.SellerId == userId);
+
+            if (property == null)
+            {
+                ModelState.AddModelError("PropertyLink", "Invalid property link or you don't own this property.");
+                return View(model);
+            }
+
+            // Calculate the price
+            model.CalculateTotalPrice();
+
+            // Create a new boosted property entry
+            var boostedProperty = new BoostedProperty
+            {
+                PropertyId = propertyId,
+                FullName = model.FullName,
+                PhoneNumber = model.PhoneNumber,
+                Hours = model.SelectedHours,
+                PeopleToReach = model.SelectedPeople,
+                Price = model.TotalPrice,
+                StartTime = DateTime.UtcNow,
+                EndTime = DateTime.UtcNow.AddHours(model.SelectedHours),
+                IsActive = true
+            };
+
+            _context.BoostedProperties.Add(boostedProperty);
+            await _context.SaveChangesAsync();
+
+            // Redirect to a payment page or confirmation page
+            return RedirectToAction("BoostConfirmation", new { id = boostedProperty.Id });
+        }
+
+        public IActionResult BoostConfirmation(int id)
+        {
+            var boostedProperty = _context.BoostedProperties
+                .Include(bp => bp.Property)
+                .FirstOrDefault(bp => bp.Id == id);
+
+            if (boostedProperty == null)
+            {
+                return NotFound();
+            }
+
+            return View(boostedProperty);
+        }
+        [HttpGet]
+        public IActionResult CalculatePrice(int hours, int people)
+        {
+            int basePrice = 100;
+            int peopleCost = people * 10; // Changed from 2 to 10 Rs per person
+            int additionalHours = (hours - 12) / 12 * 50; // Additional cost for every 12 hours
+            int totalPrice = basePrice + peopleCost + additionalHours;
+
+            return Json(totalPrice);
+        }
+        // Add this action to your SellerController
+        // Modify the MyProperties action method in SellerController.cs
+        public async Task<IActionResult> MyProperties()
+        {
+            // Get the current user's ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Get all properties belonging to this seller
+            var properties = await _context.properties
+                .Include(p => p.PropertyImages)
+                .Where(p => p.SellerId == userId)
+                .OrderByDescending(p => p.Id)
+                .ToListAsync();
+
+            // Get active boosted properties for this seller's properties
+            var currentTime = DateTime.UtcNow;
+            var propertyIds = properties.Select(p => p.Id).ToList();
+
+            var boostedProperties = await _context.BoostedProperties
+    .Include(bp => bp.Property)
+    .Where(bp => bp.Property.SellerId == userId && bp.IsActive && bp.EndTime > currentTime)
+    .ToListAsync();
+
+            ViewBag.BoostedProperties = boostedProperties;
+
+            return View(properties);
+        }
+
     }
 }

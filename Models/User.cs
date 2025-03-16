@@ -35,6 +35,7 @@ namespace Propertease.Models
                                                            // Add these properties to your User model
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
+        public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the user registered
         public ICollection<Properties>? Properties { get; set; } // Properties owned by the seller
         public ICollection<ForumPost>? ForumPosts { get; set; }
         public ICollection<ForumComment>? ForumComments { get; set; }

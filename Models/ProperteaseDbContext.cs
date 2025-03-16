@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PROPERTEASE.Models;
 
 namespace Propertease.Models
 
@@ -16,7 +17,7 @@ namespace Propertease.Models
 
         // DbSet for Lands table
         public DbSet<Land> Lands { get; set; }
-
+        public DbSet<BoostedProperty> BoostedProperties { get; set; }
         // DbSet for Apartments table
         // In your ApplicationDbContext class
         public DbSet<Notification> Notifications { get; set; }

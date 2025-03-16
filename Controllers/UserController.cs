@@ -71,6 +71,7 @@ namespace Propertease.Controllers
                     Address = user.Address,
                     Password = _dataProtector.Protect(user.Password), // Encrypt the password
                     EmailVerificationToken = verificationToken, // Store the verification token
+                    CreatedAt = DateTime.Now,
                     IsEmailVerified = false // Set email as unverified initially
                 };
 

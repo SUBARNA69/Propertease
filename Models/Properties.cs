@@ -34,6 +34,7 @@ namespace Propertease.Models
         public User Seller { get; set; } // Link to the User model
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the property was first listed
         public ICollection<Apartment> Apartments { get; set; }
         public ICollection<House> Houses { get; set; }
         public ICollection<Land> Lands { get; set; }

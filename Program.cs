@@ -7,6 +7,7 @@ using Propertease.Security;
 using Propertease.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
+using Propertease.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +31,8 @@ builder.Services.AddDbContext<ProperteaseDbContext>(options =>
            .EnableSensitiveDataLogging());
 builder.Services.AddSingleton<AwsSnsService>();
 builder.Services.AddTransient<EmailService>();
+// Add this to your ConfigureServices method
+builder.Services.AddHostedService<BoostedPropertyCleanupService>();
 // Add this line with your other SignalR configuration
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 builder.Services.AddSingleton<SmsService>();

@@ -1,0 +1,149 @@
+﻿@model PROPERTEASE.Models.BoostViewModel
+
+@{
+    ViewData["Title"] = "Boost Your Property";
+}
+
+<!-- jQuery for AJAX -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Main Container -->
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">🚀 Boost Your Property</h2>
+
+    <!-- Pricing Information Banner -->
+    <div class="bg-blue-50 p-4 rounded-lg mb-6 shadow-sm">
+        <h3 class="text-lg font-semibold text-blue-700 mb-2">Pricing Information</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-3 rounded shadow-sm">
+                <p class="text-gray-700">Base Price (12 Hours): <strong>Rs.100</strong></p>
+            </div>
+            <div class="bg-white p-3 rounded shadow-sm">
+                <p class="text-gray-700">Cost per Person: <strong>Rs.10</strong></p>
+            </div>
+            <div class="bg-white p-3 rounded shadow-sm">
+                <p class="text-gray-700">Additional 12 Hours: <strong>Rs.50</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6">
+        <!-- Left Section - Input Fields -->
+        <div class="col-span-2 bg-gray-50 p-6 rounded-lg shadow-md">
+            <form method="post" asp-action="Boost" class="space-y-4">
+                <!-- Number of Hours -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">⏳ Number of Hours:</label>
+                    <select id="hoursDropdown" asp-for="SelectedHours" class="w-full px-4 py-2 border rounded-lg shadow-sm">
+                        @foreach (var hour in Model.AvailableHours)
+                        {
+                            <option value="@hour">@hour</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Number of People -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">👥 Number of People to Reach:</label>
+                    <select id="peopleDropdown" asp-for="SelectedPeople" class="w-full px-4 py-2 border rounded-lg shadow-sm">
+                        @for (int i = 1; i <= 1000; i++)
+                        {
+                            <option value="@i">@i</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">👤 Full Name:</label>
+                    <input type="text" asp-for="FullName" class="w-full px-4 py-2 border rounded-lg shadow-sm" required />
+                </div>
+
+                <!-- Phone Number -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">📞 Phone Number:</label>
+                    <input type="text" asp-for="PhoneNumber" class="w-full px-4 py-2 border rounded-lg shadow-sm" required />
+                </div>
+
+                <!-- Property Link -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">🔗 Link to Your Property:</label>
+                    <input type="text" asp-for="PropertyLink" class="w-full px-4 py-2 border rounded-lg shadow-sm" required />
+                    @if (!string.IsNullOrEmpty(Model.PropertyLink))
+                    {
+                        <p class="text-sm text-green-600 mt-1">Property link pre-filled from your selection.</p>
+                    }
+                </div>
+
+                <!-- Proceed Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 shadow-lg">
+                        🚀 Proceed
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Section - Price Breakdown -->
+        <div class="bg-gray-100 p-6 rounded-lg shadow-md flex flex-col justify-center">
+            <h4 class="text-lg font-semibold text-gray-700 mb-4">💰 Your Boost Summary:</h4>
+
+            <div class="bg-white rounded-lg p-4 shadow-sm mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600">Selected Hours:</span>
+                    <span class="font-semibold" id="displayHours">12</span>
+                </div>
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-600">Target Audience:</span>
+                    <span class="font-semibold" id="displayPeople">1</span>
+                </div>
+                <div class="h-px bg-gray-200 my-3"></div>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-700 font-medium">Total Price:</span>
+                    <span class="text-xl font-bold text-blue-600">Rs.<span id="totalPrice">100</span></span>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                <p class="text-sm text-yellow-700">
+                    <span class="font-semibold">Note:</span> Boosting your property increases its visibility to potential buyers for the selected duration.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AJAX Script -->
+<script>
+    $(document).ready(function () {
+        // Initial price calculation when page loads
+        updatePrice();
+
+        function updatePrice() {
+            var hours = $("#hoursDropdown").val();
+            var people = $("#peopleDropdown").val();
+
+            // Update display values
+            $("#displayHours").text(hours);
+            $("#displayPeople").text(people);
+
+            $.ajax({
+                url: "@Url.Action("CalculatePrice", "Seller")",
+                type: "GET",
+                data: { hours: hours, people: people },
+                success: function (response) {
+                    $("#totalPrice").text(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                    console.log("Response:", xhr.responseText);
+                }
+            });
+        }
+
+        // Trigger AJAX when selection changes
+        $("#hoursDropdown, #peopleDropdown").change(function() {
+            updatePrice();
+        });
+    });
+</script>

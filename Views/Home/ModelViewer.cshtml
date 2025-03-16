@@ -1,0 +1,351 @@
+﻿@model Propertease.Models.PropertyDetailsViewModel
+@{
+    ViewData["Title"] = "3D Property Tour";
+    Layout = "_Layout";
+
+    // Debug information
+    var modelPath = Model.ThreeDModel;
+    var fullModelPath = Url.Content("~/3DModels/" + modelPath);
+}
+
+<!-- Add this debug section during development -->
+<div class="p-4 mb-4 text-sm text-blue-800 bg-blue-50 dark:bg-gray-800 dark:text-blue-400" role="alert">
+    <span class="font-medium">Debug Info:</span>
+    <ul class="mt-1.5 ml-4 list-disc list-inside">
+        <li>Model Path: @modelPath</li>
+        <li>Full URL: @fullModelPath</li>
+    </ul>
+</div>
+
+<!-- Flowbite CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet">
+
+<style>
+    #model-container {
+        width: 100%;
+        height: 80vh;
+        position: relative;
+        overflow: hidden;
+        background: #f8f9fa;
+        border-radius: 0.5rem;
+    }
+
+    .controls {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10;
+        display: flex;
+        gap: 10px;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 20;
+    }
+
+    .fullscreen-button {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        z-index: 10;
+    }
+</style>
+
+<div class="p-4 sm:ml-64">
+    <div class="mb-4">
+        <a href="@Url.Action("Details", "Home", new { id = Model.Id })" class="inline-flex items-center text-blue-600 hover:underline">
+            <svg class="w-3 h-3 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5H1m0 0 4 4M1 5l4-4" />
+            </svg>
+            Back to Property Details
+        </a>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+        <h1 class="text-2xl font-semibold mb-4">3D Virtual Tour: @Model.Title</h1>
+
+        <div id="model-container">
+            <!-- Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay">
+                <div role="status" class="mb-4">
+                    <svg aria-hidden="true" class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                        <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                    </svg>
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="text-lg text-gray-700">Loading 3D Model...</p>
+            </div>
+
+            <!-- Fullscreen Button -->
+            <button id="fullscreen-button" type="button" class="fullscreen-button text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h4v4M1 1v4M13 1h-4v4m4-4v4M1 13h4V9M1 13v-4m12 4h-4V9m4 4v-4" />
+                </svg>
+                <span class="sr-only">Fullscreen</span>
+            </button>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button id="reset-camera" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Reset View
+                </button>
+                <button id="auto-rotate" type="button" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+                    Auto-Rotate
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <h2 class="text-lg font-medium mb-2">Navigation Controls:</h2>
+            <ul class="list-disc pl-5 text-gray-700 dark:text-gray-300">
+                <li>Left-click + drag: Rotate the model</li>
+                <li>Right-click + drag: Pan the camera</li>
+                <li>Scroll wheel: Zoom in/out</li>
+                <li>Double-click: Focus on a specific part of the model</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Three.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/DRACOLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the model path and debug it
+        const modelUrl = '@Html.Raw(fullModelPath)';
+        console.log('Loading model from:', modelUrl);
+
+        // Initialize Three.js scene
+        const container = document.getElementById('model-container');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const resetCameraButton = document.getElementById('reset-camera');
+        const autoRotateButton = document.getElementById('auto-rotate');
+        const fullscreenButton = document.getElementById('fullscreen-button');
+
+        let scene, camera, renderer, controls, model;
+        let autoRotate = false;
+
+        function showError(message, error) {
+            console.error('Error:', message, error);
+            loadingOverlay.innerHTML = `
+                <div class="text-red-600 text-xl mb-2">Error Loading 3D Model</div>
+                <p class="text-gray-700">${message}</p>
+                <p class="text-gray-500 mt-2 text-sm">Technical details: ${error?.message || 'Unknown error'}</p>
+                <div class="mt-4 text-left text-sm text-gray-600">
+                    <p>Troubleshooting:</p>
+                    <ul class="list-disc pl-5 mt-2">
+                        <li>Check if the file exists at: ${modelUrl}</li>
+                        <li>Verify file permissions</li>
+                        <li>Ensure the model is a valid GLB file</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Initialize the scene
+        function init() {
+            try {
+                // Create scene
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0xf8f9fa);
+
+                // Create camera
+                camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+                camera.position.set(5, 2, 5);
+
+                // Create renderer
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.outputEncoding = THREE.sRGBEncoding;
+                renderer.shadowMap.enabled = true;
+                container.appendChild(renderer.domElement);
+
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                scene.add(ambientLight);
+
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(5, 10, 7.5);
+                directionalLight.castShadow = true;
+                scene.add(directionalLight);
+
+                // Add orbit controls - FIX: Make sure OrbitControls is properly linked to THREE
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                controls.screenSpacePanning = false;
+                controls.minDistance = 1;
+                controls.maxDistance = 50;
+                controls.maxPolarAngle = Math.PI / 2;
+
+                // Load the 3D model
+                loadModel();
+
+                // Handle window resize
+                window.addEventListener('resize', onWindowResize);
+            } catch (error) {
+                showError('Failed to initialize 3D viewer', error);
+            }
+        }
+
+        // Load the 3D model
+        function loadModel() {
+            try {
+                // Create a GLTF loader
+                const loader = new THREE.GLTFLoader();
+
+                // Optional: Use Draco compression if your models are compressed
+                const dracoLoader = new THREE.DRACOLoader();
+                dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+                loader.setDRACOLoader(dracoLoader);
+
+                // Add error handler for the fetch request
+                fetch(modelUrl)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        console.log('Model file accessible, proceeding with load');
+                    })
+                    .catch(error => {
+                        showError('Failed to access model file', error);
+                        return;
+                    });
+
+                // Load the model
+                loader.load(
+                    modelUrl,
+                    function(gltf) {
+                        console.log('Model loaded successfully:', gltf);
+                        model = gltf.scene;
+
+                        // Center the model
+                        const box = new THREE.Box3().setFromObject(model);
+                        const center = box.getCenter(new THREE.Vector3());
+                        model.position.x = -center.x;
+                        model.position.y = -center.y;
+                        model.position.z = -center.z;
+
+                        // Scale the model to fit the view
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxDim = Math.max(size.x, size.y, size.z);
+                        const scale = 5 / maxDim;
+                        model.scale.set(scale, scale, scale);
+
+                        // Add the model to the scene
+                        scene.add(model);
+
+                      // Hide loading overlay
+                        loadingOverlay.style.display = 'none';
+
+                        // Set initial camera position based on model
+                        resetCamera();
+                    },
+                    function(xhr) {
+                        // Loading progress
+                        const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+                        console.log(`Loading model: ${percent}%`);
+                    },
+                    function(error) {
+                        showError('Failed to load 3D model', error);
+                    }
+                );
+            } catch (error) {
+                showError('Failed to initialize model loader', error);
+            }
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Update controls
+            controls.update();
+
+            // Auto-rotate if enabled
+            if (autoRotate && model) {
+                model.rotation.y += 0.005;
+            }
+
+            // Render scene
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        // Reset camera to default position
+        function resetCamera() {
+            if (model) {
+                // Get the bounding box of the model
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                const size = box.getSize(new THREE.Vector3());
+
+                // Set camera position
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const fov = camera.fov * (Math.PI / 180);
+                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
+                cameraZ *= 1.5; // Zoom out a bit
+
+                camera.position.set(center.x + cameraZ, center.y + cameraZ / 2, center.z + cameraZ);
+                camera.lookAt(center);
+                camera.updateProjectionMatrix();
+
+                // Update controls target
+                controls.target.set(center.x, center.y, center.z);
+                controls.update();
+            }
+        }
+
+        // Toggle fullscreen
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => {
+                    console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Initialize the scene
+        init();
+        animate();
+
+        // Event listeners for buttons
+        resetCameraButton.addEventListener('click', resetCamera);
+
+        autoRotateButton.addEventListener('click', function() {
+            autoRotate = !autoRotate;
+            this.classList.toggle('bg-blue-700');
+            this.classList.toggle('text-white');
+            this.classList.toggle('bg-white');
+            this.classList.toggle('text-gray-900');
+        });
+
+        fullscreenButton.addEventListener('click', toggleFullscreen);
+    });
+</script>

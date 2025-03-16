@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Propertease.Models;
@@ -12,16 +13,22 @@ namespace Propertease.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ProperteaseDbContext _context;
-        public HomeController(ILogger<HomeController> logger, ProperteaseDbContext context)
+        IWebHostEnvironment webHostEnvironment;
+
+        public HomeController(ILogger<HomeController> logger, ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment)
         {
             _logger = logger;
             _context = context;
+            this.webHostEnvironment = webHostEnvironment;
+
+
         }
 
         public IActionResult Properties()
         {
             // Retrieve only approved properties from the database
             var approvedProperties = _context.properties
+                                              .Include(p => p.PropertyImages)
                                               .Where(p => p.Status == "Approved")
                                               .ToList();
             return View(approvedProperties);
@@ -104,18 +111,89 @@ namespace Propertease.Controllers
 
 
         [AllowAnonymous]
-        public IActionResult Home()
+        public async Task<IActionResult> Home()
         {
-            var properties = _context.properties
-                .Include(p => p.PropertyImages) // Ensure PropertyImages are loaded
-                .Where(p => p.Status == "Approved") // Filter only approved properties
-                .OrderByDescending(p => p.Id) // Order by latest
-                .Take(3) // Get only 3 properties
-                .ToList();
+            // Get active boosted properties
+            var currentTime = DateTime.UtcNow;
+            var boostedPropertyIds = await _context.BoostedProperties
+                .Where(bp => bp.IsActive && bp.StartTime <= currentTime && bp.EndTime >= currentTime)
+                .OrderByDescending(bp => bp.PeopleToReach) // Order by reach (importance)
+                .Select(bp => bp.PropertyId)
+                .ToListAsync();
 
-            return View(properties);
+            // Get all approved properties
+            var allProperties = await _context.properties
+                .Include(p => p.PropertyImages)
+                .Where(p => p.Status == "Approved")
+                .ToListAsync();
+
+            // Reorder properties to show boosted ones first
+            var orderedProperties = allProperties
+                .OrderByDescending(p => boostedPropertyIds.Contains(p.Id)) // Boosted properties first
+                .ThenByDescending(p => p.Id) // Then by newest
+                .ToList();
+            // Pass the boosted property IDs to the view
+
+            ViewBag.BoostedPropertyIds = boostedPropertyIds;
+
+            return View(orderedProperties);
+        }
+        // GET: Property/ModelViewer/5
+        [HttpGet]
+        // GET: Property/ModelViewer/5
+        public IActionResult ModelViewer(int id)
+        {
+            // Get the property details
+            var property = _context.properties
+                .Include(p => p.Seller)
+                .FirstOrDefault(p => p.Id == id);
+
+            if (property == null || string.IsNullOrEmpty(property.ThreeDModel))
+            {
+                return NotFound();
+            }
+
+            // Verify the file exists
+            var modelPath = Path.Combine(webHostEnvironment.WebRootPath, "3DModels", property.ThreeDModel);
+            if (!System.IO.File.Exists(modelPath))
+            {
+                // Log the error and return a meaningful message
+                _logger.LogError($"3D model file not found at: {modelPath}");
+                return View("Error", new ErrorViewModel
+                {
+                    Message = "The 3D model file for this property is currently unavailable."
+                });
+            }
+
+            // Map to view model
+            var viewModel = new PropertyDetailsViewModel
+            {
+                Id = property.Id,
+                Title = property.Title,
+                ThreeDModel = property.ThreeDModel, // This should be just the filename, not the full path
+                                                    // Map other properties as needed
+            };
+
+            return View(viewModel);
         }
 
+        // Add an endpoint to serve the 3D model file
+        [HttpGet]
+        [Route("3DModels/{filename}")]
+        public IActionResult GetModelFile(string filename)
+        {
+            // Sanitize the filename to prevent directory traversal
+            filename = Path.GetFileName(filename);
+
+            var modelPath = Path.Combine(webHostEnvironment.WebRootPath, "3DModels", filename);
+            if (!System.IO.File.Exists(modelPath))
+            {
+                return NotFound();
+            }
+
+            // Serve the file with the correct MIME type
+            return PhysicalFile(modelPath, "model/gltf-binary");
+        }
 
         public IActionResult About()
         {
@@ -185,7 +263,39 @@ namespace Propertease.Controllers
 
             return View(viewModel);
         }
+        // ... existing code ...
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddForumComment(int postId, string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return BadRequest("Comment content cannot be empty.");
+            }
+
+            // Get the current user's ID
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return NotFound("User ID not found in claims.");
+            }
+
+            var comment = new ForumComment
+            {
+                Content = content,
+                ForumPostId = postId,
+                UserId = int.Parse(userId),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.ForumComments.Add(comment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Forum));
+        }
+
+        // ... existing code ...
         // POST: /Forum
         [HttpPost]
         [ValidateAntiForgeryToken]

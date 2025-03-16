@@ -16,6 +16,7 @@ namespace Propertease.Models
         public IFormFile? photo { get; set; }
         public string? Password { get; set; } = null!;
         public string? Address { get; set; } = null!;
+        public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the user registered
 
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "Passwords do not match.")]

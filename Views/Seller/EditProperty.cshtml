@@ -1,49 +1,426 @@
 ﻿@model Propertease.Models.AddProperties
 
-<div class="container mx-auto p-6">
-    <h1 class="text-2xl font-semibold mb-4">Edit Property</h1>
+    <!-- Add Mapbox GL JS CSS and JavaScript in the head section -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.0/mapbox-gl.js"></script>
+    <style>
+        /* Ensure the map container has a defined height */
+        #map {
+            width: 100%;
+            height: 300px;
+            border-radius: 0.5rem;
+        }
+    </style>
 
-    <form asp-action="EditProperty" asp-controller="Seller" method="post" enctype="multipart/form-data">
-        <input type="hidden" asp-for="PropertyId" />
 
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium" for="Title">Title</label>
-            <input asp-for="Title" class="w-full px-4 py-2 border rounded-lg" />
-            <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
-        </div>
+<div class="container mx-auto p-6 max-w-6xl">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-semibold mb-6 pb-2 border-b">Edit Property</h1>
 
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium" for="Description">Description</label>
-            <textarea asp-for="Description" class="w-full px-4 py-2 border rounded-lg"></textarea>
-            <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
-        </div>
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div asp-validation-summary="All" class="text-sm"></div>
+            </div>
+        }
 
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium" for="Price">Price</label>
-            <input asp-for="Price" type="number" class="w-full px-4 py-2 border rounded-lg" />
-            <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
-        </div>
+        <form asp-action="EditProperty" asp-controller="Seller" method="post" enctype="multipart/form-data">
+            <input type="hidden" asp-for="PropertyId" />
+            <input type="hidden" asp-for="PropertyType" />
 
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium" for="City">City</label>
-            <input asp-for="City" class="w-full px-4 py-2 border rounded-lg" />
-            <span asp-validation-for="City" class="text-red-500 text-sm"></span>
-        </div>
+            <!-- Basic Property Information -->
+            <div class="mb-6">
+                <h2 class="text-xl font-medium mb-4">Basic Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2" for="Title">Title</label>
+                        <input asp-for="Title" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
+                    </div>
 
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium" for="District">District</label>
-            <input asp-for="District" class="w-full px-4 py-2 border rounded-lg" />
-            <span asp-validation-for="District" class="text-red-500 text-sm"></span>
-        </div>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2" for="Price">Price (₹)</label>
+                        <input asp-for="Price" type="number" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+            </div>
 
-        <div class="mb-4">
-            <label class="block text-gray-700 font-medium" for="Photo">Photo</label>
-            <input type="file" name="photo" class="w-full px-4 py-2 border rounded-lg" />
-        </div>
+            <!-- Location Information -->
+            <div class="mb-6">
+                <h2 class="text-xl font-medium mb-4">Location</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2" for="City">City</label>
+                        <input asp-for="City" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <span asp-validation-for="City" class="text-red-500 text-sm"></span>
+                    </div>
 
-        <div class="flex space-x-4">
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">Save Changes</button>
-            <a href="/Seller/Listings" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600">Cancel</a>
-        </div>
-    </form>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2" for="District">District</label>
+                        <input asp-for="District" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <span asp-validation-for="District" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2" for="Province">Province</label>
+                        <input asp-for="Province" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        <span asp-validation-for="Province" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2" for="RoadAccess">Road Access</label>
+                        <select asp-for="RoadAccess" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                        <span asp-validation-for="RoadAccess" class="text-red-500 text-sm"></span>
+                    </div>
+                </div>
+
+                <!-- Map for Location Selection -->
+                <div class="mt-4">
+                    <label class="block text-gray-700 font-medium mb-2">Select Location on Map</label>
+                    <div id="map"></div>
+                    <input type="hidden" asp-for="Latitude" id="Latitude" />
+                    <input type="hidden" asp-for="Longitude" id="Longitude" />
+                    <p class="text-sm text-gray-500 mt-2">Click on the map or drag the marker to set the property location.</p>
+                </div>
+            </div>
+
+            <!-- Property Description -->
+            <div class="mb-6">
+                <h2 class="text-xl font-medium mb-4">Description</h2>
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2" for="Description">Detailed Description</label>
+                    <textarea asp-for="Description" rows="5" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
+                </div>
+            </div>
+
+            <!-- Property Type Specific Fields -->
+            @if (Model.PropertyType == "House")
+            {
+                <div class="mb-6">
+                    <h2 class="text-xl font-medium mb-4">House Details</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="Bedrooms">Bedrooms</label>
+                            <input asp-for="Bedrooms" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="Bathrooms">Bathrooms</label>
+                            <input asp-for="Bathrooms" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="Kitchens">Kitchens</label>
+                            <input asp-for="Kitchens" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="SittingRooms">Sitting Rooms</label>
+                            <input asp-for="SittingRooms" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="Floors">Floors</label>
+                            <input asp-for="Floors" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="LandArea">Land Area (sq.m)</label>
+                            <input asp-for="LandArea" type="number" step="0.01" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="BuildupArea">Buildup Area (sq.m)</label>
+                            <input asp-for="BuildupArea" type="number" step="0.01" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="FacingDirection">Facing Direction</label>
+                            <select asp-for="FacingDirection" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Direction</option>
+                                <option value="North">North</option>
+                                <option value="South">South</option>
+                                <option value="East">East</option>
+                                <option value="West">West</option>
+                                <option value="North-East">North-East</option>
+                                <option value="North-West">North-West</option>
+                                <option value="South-East">South-East</option>
+                                <option value="South-West">South-West</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="BuiltYear">Built Year</label>
+                            <input asp-for="BuiltYear" type="date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.PropertyType == "Apartment")
+            {
+                <div class="mb-6">
+                    <h2 class="text-xl font-medium mb-4">Apartment Details</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="Rooms">Rooms</label>
+                            <input asp-for="Rooms" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="Bathrooms">Bathrooms</label>
+                            <input asp-for="Bathrooms" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="Kitchens">Kitchens</label>
+                            <input asp-for="Kitchens" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="SittingRooms">Sitting Rooms</label>
+                            <input asp-for="SittingRooms" type="number" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="RoomSize">Room Size (sq.m)</label>
+                            <input asp-for="RoomSize" type="number" step="0.01" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="BuiltYear">Built Year</label>
+                            <input asp-for="BuiltYear" type="date" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.PropertyType == "Land")
+            {
+                <div class="mb-6">
+                    <h2 class="text-xl font-medium mb-4">Land Details</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="LandArea">Land Area (sq.m)</label>
+                            <input asp-for="LandArea" type="number" step="0.01" min="0" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="LandType">Land Type</label>
+                            <select asp-for="LandType" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Land Type</option>
+                                <option value="Residential">Residential</option>
+                                <option value="Commercial">Commercial</option>
+                                <option value="Agricultural">Agricultural</option>
+                                <option value="Industrial">Industrial</option>
+                                <option value="Mixed Use">Mixed Use</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="SoilQuality">Soil Quality</label>
+                            <select asp-for="SoilQuality" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">Select Soil Quality</option>
+                                <option value="Excellent">Excellent</option>
+                                <option value="Good">Good</option>
+                                <option value="Average">Average</option>
+                                <option value="Poor">Poor</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- 3D Model Upload (Only for House and Apartment) -->
+            @if (Model.PropertyType == "House" || Model.PropertyType == "Apartment")
+            {
+                <div class="mb-6" id="3D-model-upload">
+                    <h2 class="text-xl font-medium mb-4">3D Model (Optional)</h2>
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2" for="ThreeDModel">3D Model File</label>
+                        <input type="file" name="ThreeDModel" class="w-full px-4 py-2 border rounded-lg" accept=".glb,.gltf" />
+                        <p class="text-sm text-gray-500 mt-1">Upload a new 3D model or leave empty to keep the existing one.</p>
+                    </div>
+                    @if (!string.IsNullOrEmpty(ViewBag.ExistingThreeDModel))
+                    {
+                        <div class="mt-2 flex items-center text-sm text-gray-600">
+                            <svg class="w-5 h-5 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Current 3D model: @ViewBag.ExistingThreeDModel
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Property Images -->
+            <div class="mb-6">
+                <h2 class="text-xl font-medium mb-4">Property Images</h2>
+
+                <!-- Existing Images -->
+                @if (ViewBag.ExistingImages != null && ViewBag.ExistingImages.Count > 0)
+                {
+                    <div class="mb-4">
+                        <label class="block text-gray-700 font-medium mb-2">Current Images</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            @foreach (var image in ViewBag.ExistingImages)
+                            {
+                                <div class="relative group">
+                                    <img src="~/Images/@image" alt="Property image" class="w-full h-32 object-cover rounded-lg">
+                                    <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+                                        <div class="flex space-x-2">
+                                            <input type="checkbox" name="ImagesToDelete" value="@image" id="delete-@image" class="hidden">
+                                            <label for="delete-@image" class="cursor-pointer bg-red-500 text-white p-1 rounded-full hover:bg-red-600">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">Hover over an image and click the trash icon to mark it for deletion.</p>
+                    </div>
+                }
+
+                <!-- Upload New Images -->
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2" for="photo">Upload New Images</label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="photo" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                                    <span>Upload files</span>
+                                    <input id="photo" name="photo" type="file" multiple class="sr-only" accept="image/*">
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                        </div>
+                    </div>
+                    <!-- Preview for new images -->
+                    <div id="new-image-preview" class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- Form Buttons -->
+            <div class="flex flex-wrap gap-4 mt-8">
+                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 inline-flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Save Changes
+                </button>
+                <a href="/Seller/ViewPropertyDetails/@Model.PropertyId" class="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 inline-flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
 </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Mapbox
+            mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
+
+            // Get initial coordinates from form inputs or default to Kathmandu
+            const initialLat = parseFloat(document.getElementById('Latitude').value) || 27.7172;
+            const initialLng = parseFloat(document.getElementById('Longitude').value) || 85.3240;
+
+            const map = new mapboxgl.Map({
+                container: 'map',
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [initialLng, initialLat],
+                zoom: 12
+            });
+
+            // Add navigation controls
+            map.addControl(new mapboxgl.NavigationControl());
+
+            // Add marker at initial position
+            let marker = new mapboxgl.Marker({ draggable: true })
+                .setLngLat([initialLng, initialLat])
+                .addTo(map);
+
+            // Update coordinates when marker is dragged
+            marker.on('dragend', function() {
+                const lngLat = marker.getLngLat();
+                document.getElementById('Latitude').value = lngLat.lat.toFixed(6);
+                document.getElementById('Longitude').value = lngLat.lng.toFixed(6);
+            });
+
+            // Allow clicking on map to set marker position
+            map.on('click', function(e) {
+                const lngLat = e.lngLat;
+                marker.setLngLat(lngLat);
+                document.getElementById('Latitude').value = lngLat.lat.toFixed(6);
+                document.getElementById('Longitude').value = lngLat.lng.toFixed(6);
+            });
+
+            // Ensure map is properly sized after load
+            map.on('load', function() {
+                map.resize();
+            });
+
+            // Toggle 3D model upload section based on property type
+            const propertyType = '@Model.PropertyType';
+            if (propertyType === 'Land') {
+                const threeDModelSection = document.querySelector('[id$="3D-model-upload"]');
+                if (threeDModelSection) {
+                    threeDModelSection.style.display = 'none';
+                }
+            }
+
+            // Image preview functionality for new uploads
+            const photoInput = document.querySelector('input[name="photo"]');
+            if (photoInput) {
+                photoInput.addEventListener('change', function() {
+                    const previewContainer = document.getElementById('new-image-preview');
+                    if (!previewContainer) return;
+
+                    previewContainer.innerHTML = '';
+
+                    if (this.files && this.files.length > 0) {
+                        for (const file of this.files) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const imgContainer = document.createElement('div');
+                                imgContainer.className = 'relative';
+
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'w-full h-32 object-cover rounded-lg';
+                                img.alt = 'Property image preview';
+
+                                imgContainer.appendChild(img);
+                                previewContainer.appendChild(imgContainer);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+

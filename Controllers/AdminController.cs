@@ -37,10 +37,113 @@ namespace Propertease.Controllers
             var pendingApprovals = _context.properties
                 .Count(p => p.Status == "Pending");
 
+            // Get the last 6 months
+            var today = DateTime.Today;
+            var lastSixMonths = Enumerable.Range(0, 6)
+                .Select(i => today.AddMonths(-i))
+                .Select(date => new {
+                    Month = date.ToString("MMM"),
+                    Year = date.Year,
+                    MonthNumber = date.Month
+                })
+                .OrderBy(d => d.Year)
+                .ThenBy(d => d.MonthNumber)
+                .ToList();
+
+            // Monthly User Registrations (Bar Chart 1)
+            var monthlyUserRegistrations = new List<object>();
+            foreach (var month in lastSixMonths)
+            {
+                var startDate = new DateTime(month.Year, month.MonthNumber, 1);
+                var endDate = startDate.AddMonths(1);
+
+                var buyerCount = _context.Users
+                    .Count(u => u.Role == "Buyer" &&
+                           u.CreatedAt >= startDate &&
+                           u.CreatedAt < endDate);
+
+                var sellerCount = _context.Users
+                    .Count(u => u.Role == "Seller" &&
+                           u.CreatedAt >= startDate &&
+                           u.CreatedAt < endDate);
+
+                monthlyUserRegistrations.Add(new
+                {
+                    month = month.Month,
+                    buyers = buyerCount,
+                    sellers = sellerCount
+                });
+            }
+
+            // Monthly Property Listings (Bar Chart 2)
+            var monthlyPropertyListings = new List<object>();
+            foreach (var month in lastSixMonths)
+            {
+                var startDate = new DateTime(month.Year, month.MonthNumber, 1);
+                var endDate = startDate.AddMonths(1);
+
+                var approvedCount = _context.properties
+                    .Count(p => p.Status == "Approved" &&
+                           p.CreatedAt >= startDate &&
+                           p.CreatedAt < endDate);
+
+                var pendingCount = _context.properties
+                    .Count(p => p.Status == "Pending" &&
+                           p.CreatedAt >= startDate &&
+                           p.CreatedAt < endDate);
+
+                monthlyPropertyListings.Add(new
+                {
+                    month = month.Month,
+                    approved = approvedCount,
+                    pending = pendingCount
+                });
+            }
+
+            // Property Types Distribution (Bar Chart 3)
+            var propertyTypesData = _context.properties
+                .Where(p => p.Status == "Approved")
+                .GroupBy(p => p.PropertyType)
+                .Select(g => new { type = g.Key, count = g.Count() })
+                .ToList();
+
+            // Property Growth Line Chart Data
+            var propertyGrowthData = new List<object>();
+            foreach (var month in lastSixMonths)
+            {
+                var endDate = new DateTime(month.Year, month.MonthNumber, 1).AddMonths(1);
+
+                var totalProperties = _context.properties
+                    .Count(p => p.CreatedAt < endDate);
+
+                propertyGrowthData.Add(new
+                {
+                    month = month.Month,
+                    total = totalProperties
+                });
+            }
+            // Get recent approved properties for the activity feed
+            var recentApprovedProperties = _context.properties
+                .Where(p => p.Status == "Approved")
+                .OrderByDescending(p => p.CreatedAt)
+                .Take(5)
+                .Select(p => new {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Location = p.City,
+                    ApprovedDate = p.CreatedAt,
+                    Price = p.Price
+                })
+                .ToList();
             // Pass the data to the view
             ViewBag.TotalUsers = totalUsers;
             ViewBag.ActiveProperties = activeProperties;
             ViewBag.PendingApprovals = pendingApprovals;
+            ViewBag.MonthlyUserRegistrations = Newtonsoft.Json.JsonConvert.SerializeObject(monthlyUserRegistrations);
+            ViewBag.MonthlyPropertyListings = Newtonsoft.Json.JsonConvert.SerializeObject(monthlyPropertyListings);
+            ViewBag.PropertyTypesData = Newtonsoft.Json.JsonConvert.SerializeObject(propertyTypesData);
+            ViewBag.PropertyGrowthData = Newtonsoft.Json.JsonConvert.SerializeObject(propertyGrowthData);
+            ViewBag.RecentApprovedProperties = recentApprovedProperties;
 
             return View();
         }
