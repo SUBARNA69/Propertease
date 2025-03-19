@@ -31,11 +31,13 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
+    <PackageReference Include="plugin.web.eSewa.and.Khalti" Version="1.0.11" />
     <PackageReference Include="THREE" Version="1.0.0" />
     <PackageReference Include="Twilio" Version="7.8.5" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Migrations\" />
     <Folder Include="wwwroot\Images\" />
     <Folder Include="wwwroot\3DModels\" />
   </ItemGroup>

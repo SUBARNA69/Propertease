@@ -1,17 +1,38 @@
-﻿namespace Propertease.Models
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Propertease.Models
 {
     public class Notification
     {
+        [Key]
         public int Id { get; set; }
 
-        // User who should receive the notification (can be null for global notifications)
-        public int? UserId { get; set; }
-        public virtual User User { get; set; }
+        [Required]
+        public string Title { get; set; }
 
-        public string? Message { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        [Required]
+        public string Message { get; set; }
+
+        [Required]
+        public string Type { get; set; } // "PropertyListed", "PropertyApproved", "PropertyRejected", etc.
+
         public bool IsRead { get; set; } = false;
-        public int? PropertyId { get; set; }
-        public string NotificationType { get; set; } // e.g., "PropertyApproval", "PropertyRejection"
+
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        [Required]
+        public int RecipientId { get; set; } // User ID of the recipient
+
+        public int? RelatedPropertyId { get; set; } // Optional: Property ID if notification is related to a property
+
+        // Navigation properties (if using Entity Framework)
+        [ForeignKey("RecipientId")]
+        public virtual User Recipient { get; set; }
+
+        [ForeignKey("RelatedPropertyId")]
+        public virtual Properties RelatedProperty { get; set; }
     }
 }
+

@@ -117,7 +117,6 @@ namespace Propertease.Controllers
             var currentTime = DateTime.UtcNow;
             var boostedPropertyIds = await _context.BoostedProperties
                 .Where(bp => bp.IsActive && bp.StartTime <= currentTime && bp.EndTime >= currentTime)
-                .OrderByDescending(bp => bp.PeopleToReach) // Order by reach (importance)
                 .Select(bp => bp.PropertyId)
                 .ToListAsync();
 

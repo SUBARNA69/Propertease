@@ -12,8 +12,8 @@ using Propertease.Models;
 namespace Propertease.Migrations
 {
     [DbContext(typeof(ProperteaseDbContext))]
-    [Migration("20250222212839_MakeUserOptional")]
-    partial class MakeUserOptional
+    [Migration("20250319055222_AddOrderIdToBoostProperty")]
+    partial class AddOrderIdToBoostProperty
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,59 @@ namespace Propertease.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PROPERTEASE.Models.BoostedProperty", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Hours")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentReference")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("BoostedProperties");
+                });
+
             modelBuilder.Entity("Propertease.Models.Apartment", b =>
                 {
                     b.Property<int>("ID")
@@ -35,6 +88,9 @@ namespace Propertease.Migrations
 
                     b.Property<int?>("Bathrooms")
                         .HasColumnType("int");
+
+                    b.Property<DateOnly>("BuiltYear")
+                        .HasColumnType("date");
 
                     b.Property<int?>("Kitchens")
                         .HasColumnType("int");
@@ -56,34 +112,6 @@ namespace Propertease.Migrations
                     b.HasIndex("PropertyID");
 
                     b.ToTable("Apartments");
-                });
-
-            modelBuilder.Entity("Propertease.Models.DashboardViewModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActiveProperties")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FlaggedProperties")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MonthlyRevenue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("PendingApprovals")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalUsers")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("dashboardViewModels");
                 });
 
             modelBuilder.Entity("Propertease.Models.ForumComment", b =>
@@ -153,14 +181,17 @@ namespace Propertease.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<double?>("Area")
-                        .HasColumnType("float");
-
                     b.Property<int?>("Bathrooms")
                         .HasColumnType("int");
 
                     b.Property<int?>("Bedrooms")
                         .HasColumnType("int");
+
+                    b.Property<double?>("BuildupArea")
+                        .HasColumnType("float");
+
+                    b.Property<DateOnly>("BuiltYear")
+                        .HasColumnType("date");
 
                     b.Property<string>("FacingDirection")
                         .HasColumnType("nvarchar(max)");
@@ -170,6 +201,9 @@ namespace Propertease.Migrations
 
                     b.Property<int?>("Kitchens")
                         .HasColumnType("int");
+
+                    b.Property<double?>("LandArea")
+                        .HasColumnType("float");
 
                     b.Property<int>("PropertyID")
                         .HasColumnType("int");
@@ -192,17 +226,66 @@ namespace Propertease.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
-                    b.Property<double?>("Area")
+                    b.Property<double?>("LandArea")
                         .HasColumnType("float");
+
+                    b.Property<string>("LandType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("PropertyID")
                         .HasColumnType("int");
+
+                    b.Property<string>("SoilQuality")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ID");
 
                     b.HasIndex("PropertyID");
 
                     b.ToTable("Lands");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RecipientId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RelatedPropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipientId");
+
+                    b.HasIndex("RelatedPropertyId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("Propertease.Models.Properties", b =>
@@ -217,6 +300,9 @@ namespace Propertease.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -224,6 +310,12 @@ namespace Propertease.Migrations
                     b.Property<string>("District")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("float");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -233,6 +325,10 @@ namespace Propertease.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Province")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoadAccess")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -324,22 +420,35 @@ namespace Propertease.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("EmailVerificationToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsEmailVerified")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpiry")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
@@ -379,6 +488,17 @@ namespace Propertease.Migrations
                     b.HasIndex("RaterUserId");
 
                     b.ToTable("UserRatings");
+                });
+
+            modelBuilder.Entity("PROPERTEASE.Models.BoostedProperty", b =>
+                {
+                    b.HasOne("Propertease.Models.Properties", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
                 });
 
             modelBuilder.Entity("Propertease.Models.Apartment", b =>
@@ -442,6 +562,23 @@ namespace Propertease.Migrations
                         .IsRequired();
 
                     b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Propertease.Models.Notification", b =>
+                {
+                    b.HasOne("Propertease.Models.User", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.Properties", "RelatedProperty")
+                        .WithMany()
+                        .HasForeignKey("RelatedPropertyId");
+
+                    b.Navigation("Recipient");
+
+                    b.Navigation("RelatedProperty");
                 });
 
             modelBuilder.Entity("Propertease.Models.Properties", b =>

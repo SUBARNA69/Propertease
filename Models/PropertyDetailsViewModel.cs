@@ -3,6 +3,7 @@
     public class PropertyDetailsViewModel
     {
         public int Id { get; set; }
+        public int SellerId { get; set; }
         public string Title { get; set; }
         public decimal Price { get; set; }
         public string Description { get; set; }
@@ -15,6 +16,9 @@
         public string SellerName { get; set; }
         public string Status { get; set; }
         public string SellerContact { get; set; }
+        public string SellerAddress { get; set; }
+        public string SellerEmail { get; set; }
+        
 
         // Specific to House
         public int? Bedrooms { get; set; }
@@ -22,7 +26,6 @@
         public int? SittingRooms { get; set; }
         public int? Bathrooms { get; set; }
         public int? Floors { get; set; }
-        public double? Area { get; set; }
         public string FacingDirection { get; set; }
 
         // Specific to Apartment
@@ -36,6 +39,7 @@
         public string? SoilQuality { get; set; }
         public double? BuildupArea { get; set; } // In square meters or feet
         public DateOnly BuiltYear { get; set; } // In square meters or feet
+        public DateTime? CreatedAt { get; set; } // In square meters or feet
         public string PropertyType { get; set; } // House, Apartment, Land
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }

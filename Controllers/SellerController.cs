@@ -10,12 +10,18 @@ using System.Threading.Tasks;
 using System.Linq;
 using Propertease.Repos;
 using PROPERTEASE.Models;
+using Propertease.Services;
+using System.Security.Cryptography;
+using System.Text;
+using Microsoft.AspNetCore.Identity;
 
 namespace Propertease.Controllers
 {
     [Authorize(Roles = "Seller")]
     public class SellerController : Controller
     {
+        private readonly IConfiguration _configuration;
+        private readonly EsewaService _esewaService;
         IWebHostEnvironment webHostEnvironment;
         private readonly ProperteaseDbContext _context;
         private readonly INotificationService _notificationService;
@@ -24,12 +30,16 @@ namespace Propertease.Controllers
 
 
         // Inject the ApplicationDbContext into the controller
-        public SellerController(ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment, IHubContext<NotificationHub> hubContext, INotificationService _notificationService)
+        public SellerController(ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment,
+      IHubContext<NotificationHub> hubContext, INotificationService notificationService,
+      EsewaService esewaService, IConfiguration _configuration)
         {
             _context = context;
             this.webHostEnvironment = webHostEnvironment;
             _hubContext = hubContext;
-            this._notificationService = _notificationService;
+            this._notificationService = notificationService;
+            _esewaService = esewaService;
+            this._configuration = _configuration;
         }
 
         // GET: Seller/AddProperty
@@ -177,17 +187,19 @@ namespace Propertease.Controllers
 
             // Save specific property type details to the database
             await _context.SaveChangesAsync();
-            string adminNotification = $"New Property Added: {propertyModel.Title} is awaiting approval.";
 
-            try
+            var adminUsers = await _context.Users.Where(u => u.Role == "Admin").ToListAsync();
+
+            // Create notification for each admin
+            foreach (var admin in adminUsers)
             {
-                // Store and send notification
-                await _notificationService.CreateNotificationAsync(adminNotification, propertyId: propertyModel.Id);
-            }
-            catch (Exception ex)
-            {
-                // Log the error
-                Console.WriteLine("Error sending notification: " + ex.Message);
+                await _notificationService.CreateNotificationAsync(
+                    "New Property Listed",
+                    $"A new property '{addUserRequest.Title}' has been listed and requires approval.",
+                    "PropertyListed",
+                    admin.Id,
+                    propertyModel.Id
+                );
             }
 
             return RedirectToAction("Listings");
@@ -249,7 +261,7 @@ namespace Propertease.Controllers
                     viewModel.BuildupArea = house.BuildupArea;
                     viewModel.BuiltYear = house.BuiltYear;
                     viewModel.FacingDirection = house.FacingDirection;
-                    viewModel.Area = house.BuildupArea; // For compatibility
+                    viewModel.BuildupArea = house.BuildupArea; // For compatibility
                 }
             }
             else if (property.PropertyType == "Apartment")
@@ -587,6 +599,7 @@ namespace Propertease.Controllers
                 return Content($"Error: {ex.Message}");
             }
         }
+
         [HttpGet]
         // Modify the Boost action to accept a propertyId parameter
         public IActionResult Boost(int? propertyId = null)
@@ -654,7 +667,6 @@ namespace Propertease.Controllers
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber,
                 Hours = model.SelectedHours,
-                PeopleToReach = model.SelectedPeople,
                 Price = model.TotalPrice,
                 StartTime = DateTime.UtcNow,
                 EndTime = DateTime.UtcNow.AddHours(model.SelectedHours),
@@ -693,8 +705,29 @@ namespace Propertease.Controllers
         }
         // Add this action to your SellerController
         // Modify the MyProperties action method in SellerController.cs
+        // Add this to your MyProperties method in SellerController
+        public async Task UpdateExpiredBoosts()
+        {
+            var currentTime = DateTime.UtcNow;
+            var expiredBoosts = await _context.BoostedProperties
+                .Where(bp => bp.IsActive && bp.EndTime <= currentTime)
+                .ToListAsync();
+
+            if (expiredBoosts.Any())
+            {
+                foreach (var boost in expiredBoosts)
+                {
+                    boost.IsActive = false;
+                }
+                await _context.SaveChangesAsync(); // Save changes to the database
+            }
+        }
+        [HttpGet]
         public async Task<IActionResult> MyProperties()
         {
+            // Update expired boosts
+            await UpdateExpiredBoosts();
+
             // Get the current user's ID
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
@@ -705,19 +738,15 @@ namespace Propertease.Controllers
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
 
-            // Get active boosted properties for this seller's properties
-            var currentTime = DateTime.UtcNow;
-            var propertyIds = properties.Select(p => p.Id).ToList();
-
+            // Get boosted properties for this seller
             var boostedProperties = await _context.BoostedProperties
-    .Include(bp => bp.Property)
-    .Where(bp => bp.Property.SellerId == userId && bp.IsActive && bp.EndTime > currentTime)
-    .ToListAsync();
+                .Include(bp => bp.Property)
+                .Where(bp => bp.Property.SellerId == userId)
+                .ToListAsync();
 
             ViewBag.BoostedProperties = boostedProperties;
 
             return View(properties);
         }
-
     }
 }

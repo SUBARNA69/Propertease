@@ -1,25 +1,28 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Propertease.Models;
 using Propertease.Repos;
-using System.Linq;
 using System.Threading.Tasks;
-
+using Propertease.Services;
 namespace Propertease.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
+
         private readonly ProperteaseDbContext _context;
+        private readonly INotificationService _notificationService;
         private readonly PropertyRepository _propertyService;
         private readonly EmailService _emailService;
 
-        public AdminController(ProperteaseDbContext context, PropertyRepository propertyService, EmailService emailService)
+        public AdminController(ProperteaseDbContext context, PropertyRepository propertyService, EmailService emailService, INotificationService notificationService)
         {
             _context = context;
             _propertyService = propertyService;
             _emailService = emailService;
+            _notificationService = notificationService;
         }
 
         [Authorize]
@@ -190,6 +193,13 @@ namespace Propertease.Controllers
                     var body = $"Dear {seller.FullName},<br><br>Your property '{property.Title}' has been approved.<br><br>Thank you!";
                     await _emailService.SendEmailAsync(seller.Email, subject, body);
                 }
+                await _notificationService.CreateNotificationAsync(
+                   "Property Approved",
+                   $"Your property '{property.Title}' has been approved and is now active.",
+                   "PropertyApproved",
+                   property.SellerId
+                   
+   );
             }
             return RedirectToAction("AdminRequests");
         }
@@ -212,6 +222,12 @@ namespace Propertease.Controllers
                     var body = $"Dear {seller.FullName},<br><br>Your property '{property.Title}' has been rejected.<br><br>Thank you!";
                     await _emailService.SendEmailAsync(seller.Email, subject, body);
                 }
+                await _notificationService.CreateNotificationAsync(
+                   "Property Rejected",
+                   $"Your property '{property.Title}' has been rejected.",
+                   "PropertyRejected",
+                   property.SellerId
+               );
             }
             return RedirectToAction("AdminRequests");
         }

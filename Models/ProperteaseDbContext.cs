@@ -12,7 +12,6 @@ namespace Propertease.Models
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Properties> properties { get; set; }
-        public DbSet<DashboardViewModel> dashboardViewModels { get; set; }
         public DbSet<House> Houses { get; set; }
 
         // DbSet for Lands table

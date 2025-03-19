@@ -43,9 +43,6 @@ namespace Propertease.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("PeopleToReach")
-                        .HasColumnType("int");
-
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -100,34 +97,6 @@ namespace Propertease.Migrations
                     b.HasIndex("PropertyID");
 
                     b.ToTable("Apartments");
-                });
-
-            modelBuilder.Entity("Propertease.Models.DashboardViewModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ActiveProperties")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FlaggedProperties")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("MonthlyRevenue")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("PendingApprovals")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TotalUsers")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("dashboardViewModels");
                 });
 
             modelBuilder.Entity("Propertease.Models.ForumComment", b =>
@@ -278,21 +247,28 @@ namespace Propertease.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NotificationType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PropertyId")
+                    b.Property<int>("RecipientId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int?>("RelatedPropertyId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("RecipientId");
+
+                    b.HasIndex("RelatedPropertyId");
 
                     b.ToTable("Notifications");
                 });
@@ -575,11 +551,19 @@ namespace Propertease.Migrations
 
             modelBuilder.Entity("Propertease.Models.Notification", b =>
                 {
-                    b.HasOne("Propertease.Models.User", "User")
+                    b.HasOne("Propertease.Models.User", "Recipient")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("Propertease.Models.Properties", "RelatedProperty")
+                        .WithMany()
+                        .HasForeignKey("RelatedPropertyId");
+
+                    b.Navigation("Recipient");
+
+                    b.Navigation("RelatedProperty");
                 });
 
             modelBuilder.Entity("Propertease.Models.Properties", b =>

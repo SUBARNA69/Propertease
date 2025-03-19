@@ -25,7 +25,8 @@ builder.Services.AddCors(options =>
 
 // Register other services
 builder.Services.AddScoped<PropertyRepository>();
-builder.Services.AddScoped<INotificationService, NotificationService>();
+// Add this line where your other services are registered
+builder.Services.AddScoped<INotificationService, NotificationService>(); 
 builder.Services.AddDbContext<ProperteaseDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("dbConn"))
            .EnableSensitiveDataLogging());
@@ -35,13 +36,11 @@ builder.Services.AddTransient<EmailService>();
 builder.Services.AddHostedService<BoostedPropertyCleanupService>();
 // Add this line with your other SignalR configuration
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddHttpClient<EsewaService>();
+builder.Services.AddScoped<EsewaService>();
 builder.Services.AddSingleton<SmsService>();
 builder.Services.AddSingleton<ProperteaseSecurityProvider>();
-builder.Services.AddSignalR(options =>
-{
-    options.EnableDetailedErrors = true; // Helpful during development
-    options.MaximumReceiveMessageSize = 102400; // 100 KB
-});
+builder.Services.AddSignalR();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
     {
@@ -79,7 +78,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Map SignalR hubs after authentication
-app.MapHub<NotificationHub>("notificationHub");
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapControllerRoute(
     name: "default",

@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Propertease.Repos;
-using System.Security.Claims;
+using System;
 using System.Threading.Tasks;
+using Propertease.Models;
+using Propertease.Services;
+using Propertease.Repos;
 
-namespace Propertease.Hubs
+namespace Propertease.Repos
 {
     public class NotificationHub : Hub
     {
@@ -14,45 +16,62 @@ namespace Propertease.Hubs
             _notificationService = notificationService;
         }
 
-        // Add these connection management methods
+        // Add user to their own group when they connect
         public override async Task OnConnectedAsync()
         {
-            if (Context.User.Identity.IsAuthenticated)
+            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
             {
-                var userId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
                 await Groups.AddToGroupAsync(Context.ConnectionId, $"User_{userId}");
 
-                // Automatically load notifications on connection
-                await GetUnreadNotifications();
+                // Get unread notifications count for the user
+                var unreadCount = await _notificationService.GetUnreadNotificationCountAsync(int.Parse(userId));
+                await Clients.Caller.SendAsync("ReceiveUnreadCount", unreadCount);
             }
+
             await base.OnConnectedAsync();
         }
 
+        // Remove user from their group when they disconnect
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            if (Context.User.Identity.IsAuthenticated)
+            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
             {
-                var userId = Context.User.FindFirstValue(ClaimTypes.NameIdentifier);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"User_{userId}");
             }
+
             await base.OnDisconnectedAsync(exception);
         }
 
-        // Existing method, no changes needed
-        public async Task GetUnreadNotifications()
+        // Mark notification as read
+        public async Task MarkAsRead(int notificationId)
         {
-            if (Context.User.Identity.IsAuthenticated)
+            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
             {
-                int userId = int.Parse(Context.User.FindFirstValue(ClaimTypes.NameIdentifier));
-                var notifications = await _notificationService.GetUnreadNotificationsAsync(userId);
-                await Clients.Caller.SendAsync("LoadUnreadNotifications", notifications);
+                await _notificationService.MarkAsReadAsync(notificationId, int.Parse(userId));
+
+                // Get updated unread count
+                var unreadCount = await _notificationService.GetUnreadNotificationCountAsync(int.Parse(userId));
+                await Clients.Caller.SendAsync("ReceiveUnreadCount", unreadCount);
             }
         }
 
-        // Existing method, no changes needed
-        public async Task MarkAsRead(int notificationId)
+        // Mark all notifications as read
+        public async Task MarkAllAsRead()
         {
-            await _notificationService.MarkAsReadAsync(notificationId);
+            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await _notificationService.MarkAllAsReadAsync(int.Parse(userId));
+                await Clients.Caller.SendAsync("ReceiveUnreadCount", 0);
+            }
         }
     }
 }
+
