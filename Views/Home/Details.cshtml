@@ -1,18 +1,7 @@
 ﻿@model Propertease.Models.PropertyDetailsViewModel
-@{
-    Layout = "_Layout";
-}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@Model.Title - Property Details</title>
+
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
-</head>
-<body class="bg-gray-100 p-6">
-
     <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
         <div class="relative">
             @if (Model.ImageUrl.Any())
@@ -101,5 +90,4 @@
             .setLngLat([@Model.Longitude, @Model.Latitude])
             .addTo(map);
     </script>
-</body>
-</html>
+

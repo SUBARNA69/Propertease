@@ -4,38 +4,65 @@
     ViewData["Title"] = "Boost Confirmation";
 }
 
-<div class="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-    <div class="text-center mb-6">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-            </svg>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h3>Boost Confirmation</h3>
         </div>
-        <h2 class="text-2xl font-semibold text-gray-800">Boost Successful!</h2>
-        <p class="text-gray-600 mt-2">Your property has been boosted and will be featured on the home page.</p>
-    </div>
-
-    <div class="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Boost Details</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <p class="text-gray-600">Property: <span class="font-semibold">@Model.Property.Title</span></p>
-                <p class="text-gray-600">Duration: <span class="font-semibold">@Model.Hours hours</span></p>
-            </div>
-            <div>
-                <p class="text-gray-600">Start Time: <span class="font-semibold">@Model.StartTime.ToString("MMM dd, yyyy HH:mm")</span></p>
-                <p class="text-gray-600">End Time: <span class="font-semibold">@Model.EndTime.ToString("MMM dd, yyyy HH:mm")</span></p>
-                <p class="text-gray-600">Total Price: <span class="font-semibold text-blue-600">Rs. @Model.Price</span></p>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Boost Details</h5>
+                    <div class="mb-3">
+                        <strong>Property:</strong> @Model.Property.Title
+                    </div>
+                    <div class="mb-3">
+                        <strong>Boosted by:</strong> @Model.FullName
+                    </div>
+                    <div class="mb-3">
+                        <strong>Phone:</strong> @Model.PhoneNumber
+                    </div>
+                    <div class="mb-3">
+                        <strong>Boost Duration:</strong> @Model.Hours hours
+                    </div>
+                    <div class="mb-3">
+                        <strong>Start Time:</strong> @Model.StartTime.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                    <div class="mb-3">
+                        <strong>End Time:</strong> @Model.EndTime.ToString("dd/MM/yyyy HH:mm")
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title">Payment Information</h5>
+                            <div class="mb-3">
+                                <strong>Amount Due:</strong> Rs. @Model.Price
+                            </div>
+                            <div class="mb-3">
+                                <strong>Status:</strong>
+                                @if (Model.IsActive)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Payment Required</span>
+                                }
+                            </div>
+                            @if (!Model.IsActive)
+                            {
+                                <div class="mt-4">
+                                    <a href="@Url.Action("ProcessPayment", "Payment", new { boostedPropertyId = Model.Id })"
+                                       class="btn btn-success btn-lg">
+                                        Proceed to Payment
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="flex justify-center gap-4">
-        <a asp-controller="Seller" asp-action="Index" class="px-6 py-3 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300 transition duration-300">
-            Back to Dashboard
-        </a>
-        <a asp-controller="Seller" asp-action="ViewPropertyDetails" asp-route-id="@Model.PropertyId" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300">
-            View Property
-        </a>
     </div>
 </div>

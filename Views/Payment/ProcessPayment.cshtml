@@ -1,0 +1,71 @@
+﻿@model PROPERTEASE.Models.BoostedProperty
+
+@{
+    ViewData["Title"] = "Process Payment";
+    var esewaData = ViewBag.ESewaData;
+    var isTestMode = ViewBag.IsTestMode;
+    var esewaUrl = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+}
+
+<div class="container mt-4">
+    <!-- Card header and other content remains the same -->
+
+    <div class="card-body">
+        <div class="row">
+            <!-- Left column content remains the same -->
+
+            <div class="col-md-6">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Complete Payment</h5>
+                        <p>Click the button below to proceed with your payment via eSewa.</p>
+
+                        <!-- For debugging purposes, let's display the actual values -->
+                        @if (isTestMode)
+                        {
+                            <div class="alert alert-info mb-3">
+                                <small>
+                                    <strong>Amount:</strong> @esewaData.Amount<br>
+                                    <strong>Tax Amount:</strong> @esewaData.TaxAmount<br>
+                                    <strong>Service Charge:</strong> @esewaData.ServiceCharge<br>
+                                    <strong>Delivery Charge:</strong> @esewaData.DeliveryCharge<br>
+                                    <strong>Total Amount:</strong> @esewaData.TotalAmount<br>
+                                </small>
+                            </div>
+                        }
+
+                        <form action="@esewaUrl" method="POST" id="esewaForm">
+                            <!-- Simplified form with only the essential fields -->
+                            <input value="@esewaData.Amount" name="amount" type="hidden">
+                            <input value="@esewaData.TaxAmount" name="tax_amount" type="hidden">
+                            <input value="@esewaData.ServiceCharge" name="service_charge" type="hidden">
+                            <input value="@esewaData.DeliveryCharge" name="delivery_charge" type="hidden">
+                            <input value="@esewaData.TotalAmount" name="total_amount" type="hidden">
+                            <input value="@esewaData.TransactionUuid" name="transaction_uuid" type="hidden">
+                            <input value="@esewaData.ProductCode" name="product_code" type="hidden">
+                            <input value="@esewaData.MerchantId" name="merchant_id" type="hidden">
+                            <input value="@esewaData.SuccessUrl" name="success_url" type="hidden">
+                            <input value="@esewaData.FailureUrl" name="failure_url" type="hidden">
+                            <input value="@esewaData.SignedFieldNames" name="signed_field_names" type="hidden">
+                            <input value="@esewaData.Signature" name="signature" type="hidden">
+
+                            <button type="submit" class="btn btn-success btn-lg">
+                                Pay with eSewa
+                            </button>
+                        </form>
+
+                        @if (isTestMode)
+                        {
+                            <div class="alert alert-info mt-3">
+                                <small>
+                                    <strong>Test Mode:</strong> This is running in eSewa's test environment.
+                                    Use test credentials for payment.
+                                </small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

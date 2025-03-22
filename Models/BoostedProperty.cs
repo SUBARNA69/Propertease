@@ -18,6 +18,10 @@ namespace PROPERTEASE.Models
         public DateTime EndTime { get; set; }
         public bool IsActive { get; set; }
 
+        //public string PaymentOrderId { get; set; }
+        //public string PaymentTransactionId { get; set; }
+        //public bool IsPaid { get; set; }
+        //public DateTime? PaymentDate { get; set; }
         // Navigation property
         public virtual Properties Property { get; set; }
     }

@@ -14,6 +14,7 @@ using Propertease.Services;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
+using PROPERTEASE.Services;
 
 namespace Propertease.Controllers
 {
@@ -21,7 +22,7 @@ namespace Propertease.Controllers
     public class SellerController : Controller
     {
         private readonly IConfiguration _configuration;
-        private readonly EsewaService _esewaService;
+        private readonly EsewaPaymentService _esewaService;
         IWebHostEnvironment webHostEnvironment;
         private readonly ProperteaseDbContext _context;
         private readonly INotificationService _notificationService;
@@ -32,7 +33,7 @@ namespace Propertease.Controllers
         // Inject the ApplicationDbContext into the controller
         public SellerController(ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment,
       IHubContext<NotificationHub> hubContext, INotificationService notificationService,
-      EsewaService esewaService, IConfiguration _configuration)
+      EsewaPaymentService esewaService, IConfiguration _configuration)
         {
             _context = context;
             this.webHostEnvironment = webHostEnvironment;
@@ -656,11 +657,11 @@ namespace Propertease.Controllers
                 ModelState.AddModelError("PropertyLink", "Invalid property link or you don't own this property.");
                 return View(model);
             }
-
+            DateTime nepalNow = DateTime.UtcNow.ToNepalTime();
             // Calculate the price
             model.CalculateTotalPrice();
 
-            // Create a new boosted property entry
+            // Create a new boosted property entry - but mark it as inactive until payment is made
             var boostedProperty = new BoostedProperty
             {
                 PropertyId = propertyId,
@@ -668,18 +669,17 @@ namespace Propertease.Controllers
                 PhoneNumber = model.PhoneNumber,
                 Hours = model.SelectedHours,
                 Price = model.TotalPrice,
-                StartTime = DateTime.UtcNow,
-                EndTime = DateTime.UtcNow.AddHours(model.SelectedHours),
-                IsActive = true
+                StartTime = DateTime.UtcNow, // This will be updated after payment
+                EndTime = DateTime.UtcNow.AddHours(model.SelectedHours), // This will be updated after payment
+                IsActive = false // Will be set to true after successful payment
             };
 
             _context.BoostedProperties.Add(boostedProperty);
             await _context.SaveChangesAsync();
 
-            // Redirect to a payment page or confirmation page
+            // Redirect to the confirmation page, which will show payment options
             return RedirectToAction("BoostConfirmation", new { id = boostedProperty.Id });
         }
-
         public IActionResult BoostConfirmation(int id)
         {
             var boostedProperty = _context.BoostedProperties
@@ -708,7 +708,7 @@ namespace Propertease.Controllers
         // Add this to your MyProperties method in SellerController
         public async Task UpdateExpiredBoosts()
         {
-            var currentTime = DateTime.UtcNow;
+            var currentTime = DateTime.UtcNow.ToNepalTime(); ;
             var expiredBoosts = await _context.BoostedProperties
                 .Where(bp => bp.IsActive && bp.EndTime <= currentTime)
                 .ToListAsync();

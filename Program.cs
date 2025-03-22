@@ -8,6 +8,7 @@ using Propertease.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
 using Propertease.Services;
+using PROPERTEASE.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,8 +37,8 @@ builder.Services.AddTransient<EmailService>();
 builder.Services.AddHostedService<BoostedPropertyCleanupService>();
 // Add this line with your other SignalR configuration
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
-builder.Services.AddHttpClient<EsewaService>();
-builder.Services.AddScoped<EsewaService>();
+builder.Services.AddHttpClient<EsewaPaymentService>();
+builder.Services.AddScoped<EsewaPaymentService>();
 builder.Services.AddSingleton<SmsService>();
 builder.Services.AddSingleton<ProperteaseSecurityProvider>();
 builder.Services.AddSignalR();

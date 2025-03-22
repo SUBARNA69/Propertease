@@ -26,6 +26,8 @@ namespace Propertease.Models
         public DbSet<ForumComment> ForumComments { get; set; }
         public DbSet<UserRating> UserRatings { get; set; }
         public DbSet<PropertyComment> PropertyComments { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

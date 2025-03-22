@@ -38,8 +38,8 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+    <Folder Include="wwwroot\html\" />
     <Folder Include="wwwroot\Images\" />
-    <Folder Include="wwwroot\3DModels\" />
   </ItemGroup>
 
 </Project>
