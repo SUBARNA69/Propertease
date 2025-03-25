@@ -1,0 +1,46 @@
+﻿@model List<Propertease.Models.PropertyView>
+
+@{
+    ViewData["Title"] = "Recently Viewed Properties";
+}
+
+<div class="container mt-4">
+    <h2>Recently Viewed Properties</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            You haven't viewed any properties yet.
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var view in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        @if (view.Property.PropertyImages != null && view.Property.PropertyImages.Any())
+                        {
+                            <img src="/Images/@view.Property.PropertyImages.First().Photo" class="card-img-top" alt="@view.Property.Title" style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <img src="/placeholder.svg?height=200&width=300" class="card-img-top" alt="No image">
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@view.Property.Title</h5>
+                            <p class="card-text">@view.Property.PropertyType in @view.Property.City, @view.Property.Province</p>
+                            <p class="card-text">Rs. @view.Property.Price</p>
+                            <p class="card-text text-muted">Viewed on @view.ViewedAt.ToString("MMM dd, yyyy")</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="/Home/Details/@view.PropertyId" class="btn btn-primary">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+

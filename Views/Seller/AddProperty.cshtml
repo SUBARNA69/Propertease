@@ -8,110 +8,160 @@
     <!-- Mapbox GL JS CSS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.0/mapbox-gl.css" rel="stylesheet" />
 
+    <!-- Flowbite CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
+
     <!-- Mapbox GL JS JavaScript -->
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.0/mapbox-gl.js"></script>
 </head>
-<body>
-<div class="flex justify-center">
-    <form action="@Url.Action("AddProperty", "Seller")" method="post" enctype="multipart/form-data" class="space-y-6 p-8 bg-gray-50 rounded-lg shadow-md max-w-lg w-full">
-        <!-- Property Type -->
-        <div>
-            <label for="PropertyType" class="block text-sm font-medium text-gray-700">Property Type</label>
-            <select id="PropertyType" name="PropertyType" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                <option value="House">House</option>
-                <option value="Apartment">Apartment</option>
-                <option value="Land">Land</option>
-            </select>
-        </div>
-
-        <!-- Property Title -->
-        <div>
-            <label for="Title" class="block text-sm font-medium text-gray-700">Property Title</label>
-            <input id="Title" name="Title" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter property title">
-        </div>
-
-        <!-- Price -->
-        <div>
-            <label for="Price" class="block text-sm font-medium text-gray-700">Price</label>
-            <input id="Price" name="Price" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="$0.00">
-        </div>
-
-        <!-- Description -->
-        <div>
-            <label for="Description" class="block text-sm font-medium text-gray-700">Description</label>
-            <textarea id="Description" name="Description" rows="4" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Describe your property"></textarea>
-        </div>
-
-        <!-- Location Details -->
-        <div class="grid grid-cols-2 gap-4">
+<body class="bg-gray-100">
+    <div class="flex justify-center p-4">
+        <form action="@Url.Action("AddProperty", "Seller")" method="post" enctype="multipart/form-data" class="space-y-6 p-8 bg-white rounded-lg shadow-md max-w-lg w-full">
+            <!-- Property Type -->
             <div>
-                <label for="District" class="block text-sm font-medium text-gray-700">District</label>
-                <input id="District" name="District" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="District">
-            </div>
-            <div>
-                <label for="City" class="block text-sm font-medium text-gray-700">City</label>
-                <input id="City" name="City" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="City">
-            </div>
-            <div>
-                <label for="Province" class="block text-sm font-medium text-gray-700">State</label>
-                <input id="Province" name="Province" type="text" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="State">
-            </div>
-            <!-- New: Road Access Dropdown -->
-            <div>
-                <label for="RoadAccess" class="block text-sm font-medium text-gray-700">Road Access</label>
-                <select id="RoadAccess" name="RoadAccess" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    <option value="Yes">Yes</option>
-                    <option value="No">No</option>
+                <label for="PropertyType" class="block mb-2 text-sm font-medium text-gray-900">Property Type</label>
+                <select id="PropertyType" name="PropertyType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    <option value="House">House</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Land">Land</option>
                 </select>
             </div>
-        </div>
+
+            <!-- Property Title -->
+            <div>
+                <label for="Title" class="block mb-2 text-sm font-medium text-gray-900">Property Title</label>
+                <input id="Title" name="Title" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter property title">
+            </div>
+
+            <!-- Price -->
+            <div>
+                <label for="Price" class="block mb-2 text-sm font-medium text-gray-900">Price</label>
+                <input id="Price" name="Price" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="$0.00">
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="Description" class="block mb-2 text-sm font-medium text-gray-900">Description</label>
+                <textarea id="Description" name="Description" rows="4" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Describe your property"></textarea>
+            </div>
+
+            <!-- Location Details -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Province Dropdown -->
+                <div>
+                    <label for="Province" class="block mb-2 text-sm font-medium text-gray-900">Province</label>
+                    <select id="Province" name="Province" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="" selected disabled>Select Province</option>
+                        <option value="Koshi">Koshi</option>
+                        <option value="Madhesh">Madhesh</option>
+                        <option value="Bagmati">Bagmati</option>
+                        <option value="Gandaki">Gandaki</option>
+                        <option value="Lumbini">Lumbini</option>
+                        <option value="Karnali">Karnali</option>
+                        <option value="Sudurpashchim">Sudurpashchim</option>
+                    </select>
+                </div>
+
+                <!-- District Dropdown -->
+                <div>
+                    <label for="District" class="block mb-2 text-sm font-medium text-gray-900">District</label>
+                    <select id="District" name="District" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="" selected disabled>Select District</option>
+                        <!-- Districts will be populated dynamically -->
+                    </select>
+                </div>
+
+                <div>
+                    <label for="City" class="block mb-2 text-sm font-medium text-gray-900">City</label>
+                    <input id="City" name="City" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="City">
+                </div>
+
+                <!-- Road Access Dropdown -->
+                <div>
+                    <label for="RoadAccess" class="block mb-2 text-sm font-medium text-gray-900">Road Access</label>
+                    <select id="RoadAccess" name="RoadAccess" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <option value="Yes">Yes</option>
+                        <option value="No">No</option>
+                    </select>
+                </div>
+            </div>
 
             <!-- Map Section: Location Selection -->
             <div>
-                <label for="Location" class="block text-sm font-medium text-gray-700">Location</label>
+                <label for="Location" class="block mb-2 text-sm font-medium text-gray-900">Location</label>
                 <div id="map" style="height: 300px; width: 100%;" class="mt-2 rounded-lg"></div>
                 <input type="hidden" id="Latitude" name="Latitude">
                 <input type="hidden" id="Longitude" name="Longitude">
             </div>
-        <!-- Property Specific Fields -->
-        <div id="property-specific-fields"></div>
+
+            <!-- Property Specific Fields -->
+            <div id="property-specific-fields"></div>
 
             <!-- 3D Model Upload -->
             <div id="3d-model-upload" class="hidden">
-                <label for="ThreeDModel" class="block text-sm font-medium text-gray-700">Upload 3D Model</label>
-                <input id="ThreeDModel" name="ThreeDModel" type="file" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" accept=".obj,.fbx,.glb">
-                <p class="text-xs text-gray-500">Supported formats: .obj, .fbx, .glb</p>
+                <label for="ThreeDModel" class="block mb-2 text-sm font-medium text-gray-900">Upload 3D Model</label>
+                <input id="ThreeDModel" name="ThreeDModel" type="file" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" accept=".obj,.fbx,.glb">
+                <p class="mt-1 text-sm text-gray-500">Supported formats: .obj, .fbx, .glb</p>
             </div>
-        <!-- Photo Upload -->
-        <div>
-            <label for="photo" class="block text-sm font-medium text-gray-700">Upload Photos</label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg">
-                <div class="space-y-1 text-center">
-                    <!-- File Input -->
-                    <input id="photo" name="photo" type="file" multiple class="sr-only" accept=".jpg,.jpeg,.png,.gif">
-                    <label for="photo" class="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                        <span>Upload files</span>
-                    </label>
-                    <p class="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
-                </div>
+
+            <!-- Photo Upload -->
+            <div>
+                <label class="block mb-2 text-sm font-medium text-gray-900" for="photo">Upload Photos</label>
+                <input id="photo" name="photo" type="file" multiple class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" accept=".jpg,.jpeg,.png,.gif">
+                <p class="mt-1 text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
+
+                <!-- Preview Uploaded Images -->
+                <div id="image-preview" class="mt-4 grid grid-cols-3 gap-2"></div>
+                <!-- Validation Message -->
+                <span class="text-sm text-red-600">@Html.ValidationMessage("photo")</span>
             </div>
-            <!-- Preview Uploaded Images -->
-            <div id="image-preview" class="mt-4 grid grid-cols-3 gap-2"></div>
-            <!-- Validation Message -->
-            <span class="text-sm text-red-600">@Html.ValidationMessage("photo")</span>
-        </div>
 
-        <!-- Submit Button -->
-        <div class="flex justify-between">
-            <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600">Submit Listing</button>
-        </div>
-    </form>
-</div>
+            <!-- Submit Button -->
+            <div class="flex justify-between">
+                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Submit Listing</button>
+            </div>
+        </form>
+    </div>
 
-<script>
+    <!-- Flowbite JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 
-    document.addEventListener('DOMContentLoaded', function () {
-             document.getElementById('PropertyType').addEventListener('change', function() {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Province and District data
+            const provinceDistricts = {
+                "Koshi": ["Bhojpur", "Dhankuta", "Ilam", "Jhapa", "Khotang", "Morang", "Okhaldhunga", "Panchthar", "Sankhuwasabha", "Solukhumbu", "Sunsari", "Taplejung", "Terhathum", "Udayapur"],
+                "Madhesh": ["Saptari", "Siraha", "Dhanusha", "Mahottari", "Sarlahi", "Bara", "Rautahat", "Parsa"],
+                "Bagmati": ["Bhaktapur", "Chitwan", "Dhading", "Dolakha", "Kathmandu", "Kavrepalanchok", "Lalitpur", "Makwanpur", "Nuwakot", "Rasuwa", "Ramechhap", "Sindhuli", "Sindhupalchok"],
+                "Gandaki": ["Baglung", "Gorkha", "Kaski", "Lamjung", "Manang", "Mustang", "Myagdi", "Nawalpur", "Parbat", "Syangja", "Tanahun"],
+                "Lumbini": ["Arghakhanchi", "Banke", "Bardiya", "Dang", "Gulmi", "Kapilvastu", "Parasi", "Palpa", "Rupandehi", "Pyuthan", "Rolpa", "Rukum West"],
+                "Karnali": ["Dolpa", "Humla", "Jumla", "Kalikot", "Mugu", "Surkhet", "Dailekh", "Jajarkot", "Rukum East", "Salyan"],
+                "Sudurpashchim": ["Achham", "Baitadi", "Bajhang", "Bajura", "Darchula", "Dadeldhura", "Doti", "Kailali", "Kanchanpur"]
+            };
+
+            // Handle province change to update districts
+            const provinceSelect = document.getElementById('Province');
+            const districtSelect = document.getElementById('District');
+
+            provinceSelect.addEventListener('change', function() {
+                const selectedProvince = this.value;
+
+                // Clear current options
+                districtSelect.innerHTML = '<option value="" selected disabled>Select District</option>';
+
+                // Add new options based on selected province
+                if (selectedProvince && provinceDistricts[selectedProvince]) {
+                    provinceDistricts[selectedProvince].forEach(district => {
+                        const option = document.createElement('option');
+                        option.value = district;
+                        option.textContent = district;
+                        districtSelect.appendChild(option);
+                    });
+                }
+            });
+
+            // Property type change handler
+            document.getElementById('PropertyType').addEventListener('change', function() {
                 const propertyType = this.value;
                 if (propertyType === 'House' || propertyType === 'Apartment') {
                     document.getElementById('3d-model-upload').classList.remove('hidden');
@@ -119,166 +169,176 @@
                     document.getElementById('3d-model-upload').classList.add('hidden');
                 }
             });
-              // Initialize Mapbox
-                mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg'; // Replace with your Mapbox token
-             const map = new mapboxgl.Map({
-            container: 'map', // The ID of the HTML element where the map will be displayed
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [85.3240, 27.7172], // Initial map center coordinates (Kathmandu)
-            zoom: 12 // Initial zoom level
-        });
 
-        let marker = new mapboxgl.Marker({ draggable: true })
-            .setLngLat([85.3240, 27.7172]) // Initial marker position
-            .addTo(map);
+            // Initialize Mapbox
+            mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg'; // Replace with your Mapbox token
+            const map = new mapboxgl.Map({
+                container: 'map', // The ID of the HTML element where the map will be displayed
+                style: 'mapbox://styles/mapbox/streets-v11',
+                center: [85.3240, 27.7172], // Initial map center coordinates (Kathmandu)
+                zoom: 12 // Initial zoom level
+            });
 
-        // Update the coordinates in input fields when the marker is dragged
-        marker.on('dragend', function() {
-            const lngLat = marker.getLngLat();
-            document.getElementById('Latitude').value = lngLat.lat;
-            document.getElementById('Longitude').value = lngLat.lng;
-        });
+            let marker = new mapboxgl.Marker({ draggable: true })
+                .setLngLat([85.3240, 27.7172]) // Initial marker position
+                .addTo(map);
 
-        // Listen for click events to pick a location
-        map.on('click', function(e) {
-            // Get the clicked coordinates
-            const lngLat = e.lngLat;
+            // Update the coordinates in input fields when the marker is dragged
+            marker.on('dragend', function() {
+                const lngLat = marker.getLngLat();
+                document.getElementById('Latitude').value = lngLat.lat;
+                document.getElementById('Longitude').value = lngLat.lng;
+            });
 
-            // Move the marker to the clicked position
-            marker.setLngLat(lngLat);
+            // Listen for click events to pick a location
+            map.on('click', function(e) {
+                // Get the clicked coordinates
+                const lngLat = e.lngLat;
 
-            // Update the input fields with the clicked location's coordinates
-            document.getElementById('Latitude').value = lngLat.lat;
-            document.getElementById('Longitude').value = lngLat.lng;
-        });
-        const propertyTypeSelect = document.getElementById('PropertyType');
-        const propertyFields = document.getElementById('property-specific-fields');
-        const fileInput = document.getElementById('photo');
-        const imagePreview = document.getElementById('image-preview');
+                // Move the marker to the clicked position
+                marker.setLngLat(lngLat);
 
-        // Handle property type change
-        propertyTypeSelect.addEventListener('change', function () {
-            const propertyType = this.value;
-            propertyFields.innerHTML = ''; // Clear previous fields
+                // Update the input fields with the clicked location's coordinates
+                document.getElementById('Latitude').value = lngLat.lat;
+                document.getElementById('Longitude').value = lngLat.lng;
+            });
 
-            if (propertyType === 'House') {
-                propertyFields.innerHTML = `
-                    <div>
-                        <label for="Bedrooms" class="block text-sm font-medium text-gray-700">Number of Bedrooms</label>
-                        <input id="Bedrooms" name="Bedrooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of bedrooms">
-                    </div>
-                    <div>
-                        <label for="Kitchens" class="block text-sm font-medium text-gray-700">Number of Kitchens</label>
-                        <input id="Kitchens" name="Kitchens" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of kitchens">
-                    </div>
-                    <div>
-                        <label for="SittingRooms" class="block text-sm font-medium text-gray-700">Number of Sitting Rooms</label>
-                        <input id="SittingRooms" name="SittingRooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of sitting rooms">
-                    </div>
-                    <div>
-                        <label for="Bathrooms" class="block text-sm font-medium text-gray-700">Number of Bathrooms</label>
-                        <input id="Bathrooms" name="Bathrooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of bathrooms">
-                    </div>
-                    <div>
-                        <label for="Floors" class="block text-sm font-medium text-gray-700">Number of Floors</label>
-                        <input id="Floors" name="Floors" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of floors">
-                    </div>
-                    <div>
-                        <label for="LandArea" class="block text-sm font-medium text-gray-700">Land Area</label>
-                        <input id="LandArea" name="LandArea" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter land area">
-                    </div>
-                    <div>
-                        <label for="BuildupArea" class="block text-sm font-medium text-gray-700">Buildup Area</label>
-                        <input id="BuildupArea" name="BuildupArea" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter buildup area">
-                    </div>
-                    <div>
-                        <label for="BuiltYear" class="block text-sm font-medium text-gray-700">Built Year</label>
-                        <input id="BuiltYear" name="BuiltYear" type="date" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                    <div>
-                        <label for="FacingDirection" class="block text-sm font-medium text-gray-700">Facing Direction</label>
-                        <select id="FacingDirection" name="FacingDirection" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                           <option value="East">East</option>
-                           <option value="West">West</option>
-                           <option value="North">North</option>
-                           <option value="South">South</option>
-                        </select>
-                    </div>
+            const propertyTypeSelect = document.getElementById('PropertyType');
+            const propertyFields = document.getElementById('property-specific-fields');
+            const fileInput = document.getElementById('photo');
+            const imagePreview = document.getElementById('image-preview');
 
-                `;
-            } else if (propertyType === 'Apartment') {
-                propertyFields.innerHTML = `
-                    <div>
-                        <label for="Rooms" class="block text-sm font-medium text-gray-700">Number of Rooms</label>
-                        <input id="Rooms" name="Rooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of rooms">
-                    </div>
-                    <div>
-                        <label for="Kitchens" class="block text-sm font-medium text-gray-700">Number of Kitchens</label>
-                        <input id="Kitchens" name="Kitchens" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of kitchens">
-                    </div>
-                    <div>
-                        <label for="SittingRooms" class="block text-sm font-medium text-gray-700">Number of Sitting Rooms</label>
-                        <input id="SittingRooms" name="SittingRooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of sitting rooms">
-                    </div>
-                    <div>
-                        <label for="Bathrooms" class="block text-sm font-medium text-gray-700">Number of Bathrooms</label>
-                        <input id="Bathrooms" name="Bathrooms" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter number of bathrooms">
-                    </div>
-                    <div>
-                        <label for="RoomSize" class="block text-sm font-medium text-gray-700">Room Size</label>
-                        <input id="RoomSize" name="RoomSize" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter room size">
-                    </div>
-                    <div>
-                        <label for="BuiltYear" class="block text-sm font-medium text-gray-700">Built Year</label>
-                        <input id="BuiltYear" name="BuiltYear" type="date" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-                `;
-            } else if (propertyType === 'Land') {
-                propertyFields.innerHTML = `
-                    <div>
-                        <label for="LandArea" class="block text-sm font-medium text-gray-700">Land Area</label>
-                        <input id="LandArea" name="LandArea" type="number" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Enter land area">
-                    </div>
-                    <div>
-                        <label for="LandType" class="block text-sm font-medium text-gray-700">Land Type</label>
-                        <select id="LandType" name="LandType" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="Agricultural">Agricultural</option>
-                            <option value="Industrial">Industrial</option>
-                            <option value="Residential">Residential</option>
-                            <option value="Commercial">Commercial</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="SoilQuality" class="block text-sm font-medium text-gray-700">Soil Quality</label>
-                        <select id="SoilQuality" name="SoilQuality" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                            <option value="Loamy">Loamy</option>
-                            <option value="Sandy">Sandy</option>
-                            <option value="Rocky">Rocky</option>
-                            <option value="Fertile">Fertile</option>
-                        </select>
-                    </div>
-                `;
-            }
-        });
+            // Handle property type change
+            propertyTypeSelect.addEventListener('change', function () {
+                const propertyType = this.value;
+                propertyFields.innerHTML = ''; // Clear previous fields
 
-        // Handle file input change for image preview
-        fileInput.addEventListener('change', function () {
-            imagePreview.innerHTML = ''; // Clear previous previews
-
-            if (this.files && this.files.length > 0) {
-                for (const file of this.files) {
-                    const reader = new FileReader();
-                    reader.onload = function (e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.classList.add('w-full', 'h-24', 'object-cover', 'rounded-lg');
-                        imagePreview.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
+                if (propertyType === 'House') {
+                    propertyFields.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="Bedrooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Bedrooms</label>
+                                <input id="Bedrooms" name="Bedrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of bedrooms">
+                            </div>
+                            <div>
+                                <label for="Kitchens" class="block mb-2 text-sm font-medium text-gray-900">Number of Kitchens</label>
+                                <input id="Kitchens" name="Kitchens" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of kitchens">
+                            </div>
+                            <div>
+                                <label for="SittingRooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Sitting Rooms</label>
+                                <input id="SittingRooms" name="SittingRooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of sitting rooms">
+                            </div>
+                            <div>
+                                <label for="Bathrooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Bathrooms</label>
+                                <input id="Bathrooms" name="Bathrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of bathrooms">
+                            </div>
+                            <div>
+                                <label for="Floors" class="block mb-2 text-sm font-medium text-gray-900">Number of Floors</label>
+                                <input id="Floors" name="Floors" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of floors">
+                            </div>
+                            <div>
+                                <label for="LandArea" class="block mb-2 text-sm font-medium text-gray-900">Land Area</label>
+                                <input id="LandArea" name="LandArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter land area">
+                            </div>
+                            <div>
+                                <label for="BuildupArea" class="block mb-2 text-sm font-medium text-gray-900">Buildup Area</label>
+                                <input id="BuildupArea" name="BuildupArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter buildup area">
+                            </div>
+                            <div>
+                                <label for="BuiltYear" class="block mb-2 text-sm font-medium text-gray-900">Built Year</label>
+                                <input id="BuiltYear" name="BuiltYear" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            </div>
+                            <div>
+                                <label for="FacingDirection" class="block mb-2 text-sm font-medium text-gray-900">Facing Direction</label>
+                                <select id="FacingDirection" name="FacingDirection" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                   <option value="East">East</option>
+                                   <option value="West">West</option>
+                                   <option value="North">North</option>
+                                   <option value="South">South</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                } else if (propertyType === 'Apartment') {
+                    propertyFields.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="Rooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Rooms</label>
+                                <input id="Rooms" name="Rooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of rooms">
+                            </div>
+                            <div>
+                                <label for="Kitchens" class="block mb-2 text-sm font-medium text-gray-900">Number of Kitchens</label>
+                                <input id="Kitchens" name="Kitchens" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of kitchens">
+                            </div>
+                            <div>
+                                <label for="SittingRooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Sitting Rooms</label>
+                                <input id="SittingRooms" name="SittingRooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of sitting rooms">
+                            </div>
+                            <div>
+                                <label for="Bathrooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Bathrooms</label>
+                                <input id="Bathrooms" name="Bathrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of bathrooms">
+                            </div>
+                            <div>
+                                <label for="RoomSize" class="block mb-2 text-sm font-medium text-gray-900">Room Size</label>
+                                <input id="RoomSize" name="RoomSize" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter room size">
+                            </div>
+                            <div>
+                                <label for="BuiltYear" class="block mb-2 text-sm font-medium text-gray-900">Built Year</label>
+                                <input id="BuiltYear" name="BuiltYear" type="date" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            </div>
+                        </div>
+                    `;
+                } else if (propertyType === 'Land') {
+                    propertyFields.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="LandArea" class="block mb-2 text-sm font-medium text-gray-900">Land Area</label>
+                                <input id="LandArea" name="LandArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter land area">
+                            </div>
+                            <div>
+                                <label for="LandType" class="block mb-2 text-sm font-medium text-gray-900">Land Type</label>
+                                <select id="LandType" name="LandType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                    <option value="Agricultural">Agricultural</option>
+                                    <option value="Industrial">Industrial</option>
+                                    <option value="Residential">Residential</option>
+                                    <option value="Commercial">Commercial</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="SoilQuality" class="block mb-2 text-sm font-medium text-gray-900">Soil Quality</label>
+                                <select id="SoilQuality" name="SoilQuality" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                                    <option value="Loamy">Loamy</option>
+                                    <option value="Sandy">Sandy</option>
+                                    <option value="Rocky">Rocky</option>
+                                    <option value="Fertile">Fertile</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
                 }
-            }
+            });
+
+            // Handle file input change for image preview
+            fileInput.addEventListener('change', function () {
+                imagePreview.innerHTML = ''; // Clear previous previews
+
+                if (this.files && this.files.length > 0) {
+                    for (const file of this.files) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.classList.add('w-full', 'h-24', 'object-cover', 'rounded-lg');
+                            imagePreview.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                }
+            });
+
+            // Trigger the property type change event to initialize the form
+            propertyTypeSelect.dispatchEvent(new Event('change'));
         });
-    });
-</script>
-    </body>
-    </html>
+    </script>
+</body>
+</html>

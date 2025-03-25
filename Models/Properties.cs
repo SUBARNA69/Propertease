@@ -40,5 +40,7 @@ namespace Propertease.Models
         public ICollection<Land> Lands { get; set; }
         public ICollection<PropertyImage> PropertyImages { get; set; }
         public ICollection<PropertyComment> PropertyComments { get; set; }
+        public ICollection<PropertyViewingRequest>? PropertyViewingRequests { get; set; }
+
     }
 }

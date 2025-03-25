@@ -1,234 +1,288 @@
-﻿using System;
-using System.Linq;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+using System.Text.Json;
+using System.Globalization;
 using Propertease.Models;
-using Propertease.Repos;
 
 namespace Propertease.Controllers
 {
-    [Authorize]
     public class PaymentController : Controller
     {
         private readonly ProperteaseDbContext _context;
+        private readonly ILogger<PaymentController> _logger;
         private readonly IConfiguration _configuration;
 
-        public PaymentController(ProperteaseDbContext context, IConfiguration configuration)
+        public PaymentController(
+            ProperteaseDbContext context,
+            ILogger<PaymentController> logger,
+            IConfiguration configuration)
         {
             _context = context;
+            _logger = logger;
             _configuration = configuration;
         }
 
-        // Helper method to generate HMAC SHA256 signature and return it as Base64 string
-        private string GenerateSignature(string totalAmount, string transactionUuid, string productCode, string secretKey)
+        // View Model for Payment Initiation
+        public class EsewaPaymentViewModel
         {
-            // Create the data string in the required format. Adjust the format if needed.
-            string data = $"total_amount={totalAmount},transaction_uuid={transactionUuid},product_code={productCode}";
+            public string Amount { get; set; }
+            public string TotalAmount { get; set; }
+            public string TransactionUuid { get; set; }
+            public string ProductCode { get; set; }
+            public string ProductServiceCharge { get; set; }
+            public string Signature { get; set; }
+            public string SuccessUrl { get; set; }
+            public string FailureUrl { get; set; }
+            public string SignedFieldNames { get; set; }
+            public string PaymentUrl { get; set; }
+        }
+
+        // Payment Response DTO
+        public class EsewaPaymentResponse
+        {
+            public string TransactionCode { get; set; }
+            public string Status { get; set; }
+            public string TotalAmount { get; set; }
+            public string TransactionUuid { get; set; }
+            public string ProductCode { get; set; }
+            public string SignedFieldNames { get; set; }
+            public string Signature { get; set; }
+        }
+
+        // Initiate eSewa Payment
+        [HttpGet]
+        public async Task<IActionResult> InitiateEsewaPayment(int boostId)
+        {
+            _logger.LogInformation("Initiating eSewa payment for boost {BoostId}", boostId);
+
+            try
+            {
+                // Retrieve boost record
+                var boost = await _context.BoostedProperties
+                    .FirstOrDefaultAsync(b => b.Id == boostId && b.PaymentStatus == "Pending");
+
+                if (boost == null)
+                {
+                    _logger.LogWarning("Boost not found or already processed: {BoostId}", boostId);
+                    return RedirectToAction("PaymentError", new { error = "invalid_boost" });
+                }
+
+                // Get eSewa configuration
+                var secretKey = _configuration["Esewa:SecretKey"] ?? "8gBm/:&EnhH.1/q";
+                var merchantCode = _configuration["Esewa:MerchantCode"] ?? "EPAYTEST";
+                var paymentUrl = _configuration["Esewa:PaymentUrl"] ?? "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+
+                // Prepare payment parameters
+                var totalAmount = boost.Price.ToString("0.00", CultureInfo.InvariantCulture);
+                var transactionUuid = Guid.NewGuid().ToString();
+
+                // Generate signature
+                var signatureString = $"total_amount={totalAmount},transaction_uuid={transactionUuid},product_code={merchantCode}";
+                var signature = GenerateEsewaSignature(signatureString, secretKey);
+
+                // Prepare callback URLs
+                var successUrl = Url.Action("EsewaSuccess", "Payment", null, Request.Scheme);
+                var failureUrl = Url.Action("EsewaFailure", "Payment", null, Request.Scheme);
+
+                // Create view model
+                var viewModel = new EsewaPaymentViewModel
+                {
+                    Amount = totalAmount,
+                    TotalAmount = totalAmount,
+                    TransactionUuid = transactionUuid,
+                    ProductCode = merchantCode,
+                    ProductServiceCharge = "0.00",
+                    Signature = signature,
+                    SuccessUrl = successUrl,
+                    FailureUrl = failureUrl,
+                    SignedFieldNames = "total_amount,transaction_uuid,product_code",
+                    PaymentUrl = paymentUrl
+                };
+
+                return View("EsewaPaymentForm", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initiating eSewa payment for boost {BoostId}", boostId);
+                return RedirectToAction("PaymentError", new { error = "payment_initiation_failed" });
+            }
+        }
+
+        // eSewa Payment Success Callback
+        [HttpGet]
+        public async Task<IActionResult> EsewaSuccess([FromQuery] string data)
+        {
+            _logger.LogInformation("Received eSewa success callback with data: {Data}", data);
+
+            try
+            {
+                // Decode base64 data
+                var decodedData = Encoding.UTF8.GetString(Convert.FromBase64String(data));
+                _logger.LogInformation("Decoded data: {DecodedData}", decodedData);
+
+                // Deserialize payment response
+                var paymentResponse = JsonSerializer.Deserialize<EsewaPaymentResponse>(decodedData);
+
+                if (paymentResponse == null)
+                {
+                    _logger.LogWarning("Failed to deserialize eSewa payment response");
+                    return RedirectToAction("PaymentError", new { error = "invalid_response" });
+                }
+
+                // Validate payment response
+                if (!ValidateEsewaPaymentResponse(paymentResponse))
+                {
+                    _logger.LogWarning("eSewa payment response validation failed");
+                    return RedirectToAction("PaymentError", new { error = "validation_failed" });
+                }
+
+                // Find corresponding boosted property
+                var boostedProperty = await _context.BoostedProperties
+                    .FirstOrDefaultAsync(b => b.Id.ToString() == paymentResponse.TransactionUuid);
+
+                if (boostedProperty == null)
+                {
+                    _logger.LogWarning("No boosted property found for transaction UUID: {TransactionUuid}",
+                        paymentResponse.TransactionUuid);
+                    return RedirectToAction("PaymentError", new { error = "boost_not_found" });
+                }
+
+                // Update payment status
+                boostedProperty.PaymentStatus = paymentResponse.Status == "COMPLETE" ? "Paid" : "Failed";
+                boostedProperty.TransactionCode = paymentResponse.TransactionCode;
+
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Payment processed successfully for boost ID: {BoostId}", boostedProperty.Id);
+
+                return RedirectToAction("PaymentConfirmation", new
+                {
+                    boostId = boostedProperty.Id,
+                    transactionCode = paymentResponse.TransactionCode
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing eSewa payment success callback");
+                return RedirectToAction("PaymentError", new { error = "processing_failed" });
+            }
+        }
+
+        // eSewa Payment Failure Callback
+        [HttpGet]
+        public IActionResult EsewaFailure([FromQuery] string data)
+        {
+            _logger.LogWarning("eSewa payment failed. Received data: {Data}", data);
+            return RedirectToAction("PaymentError", new { error = "payment_failed" });
+        }
+
+        // Payment Error Page
+        public IActionResult PaymentError(string error)
+        {
+            var errorMessages = new Dictionary<string, string>
+            {
+                { "invalid_boost", "Invalid boost selected for payment." },
+                { "payment_initiation_failed", "Failed to initiate payment. Please try again." },
+                { "invalid_response", "Invalid payment response received." },
+                { "validation_failed", "Payment validation failed." },
+                { "boost_not_found", "Boost record not found." },
+                { "payment_failed", "Payment was unsuccessful." },
+                { "processing_failed", "An error occurred while processing the payment." }
+            };
+
+            ViewBag.ErrorMessage = errorMessages.ContainsKey(error)
+                ? errorMessages[error]
+                : "An unexpected error occurred during payment.";
+
+            return View();
+        }
+
+        // Payment Confirmation Page
+        public IActionResult PaymentConfirmation(int boostId, string transactionCode)
+        {
+            var boostedProperty = _context.BoostedProperties
+                .Include(b => b.Property)
+                .FirstOrDefault(b => b.Id == boostId);
+
+            if (boostedProperty == null)
+            {
+                return RedirectToAction("PaymentError", new { error = "boost_not_found" });
+            }
+
+            var viewModel = new PaymentConfirmationViewModel
+            {
+                BoostId = boostId,
+                TransactionCode = transactionCode,
+                Amount = boostedProperty.Price,
+                PaymentDate = DateTime.UtcNow,
+                IsSuccessful = boostedProperty.PaymentStatus == "Paid"
+            };
+
+            return View(viewModel);
+        }
+
+        // Signature Generation Method
+        private string GenerateEsewaSignature(string signatureString, string secretKey)
+        {
             using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey)))
             {
-                byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+                byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(signatureString));
                 return Convert.ToBase64String(hashBytes);
             }
         }
 
-        [HttpGet]
-        public async Task<IActionResult> ProcessPayment(int boostedPropertyId)
+        // Payment Response Validation
+        private bool ValidateEsewaPaymentResponse(EsewaPaymentResponse response)
         {
-            // Get the boosted property details
-            var boostedProperty = await _context.BoostedProperties
-                .Include(bp => bp.Property)
-                .FirstOrDefaultAsync(bp => bp.Id == boostedPropertyId);
-
-            if (boostedProperty == null)
+            // Comprehensive validation checks
+            if (response == null)
             {
-                return NotFound();
+                _logger.LogWarning("Payment response is null");
+                return false;
             }
 
-            // Verify property ownership
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var property = await _context.properties
-                .FirstOrDefaultAsync(p => p.Id == boostedProperty.PropertyId && p.SellerId == userId);
-
-            if (property == null)
+            // Validate required fields
+            if (string.IsNullOrEmpty(response.TransactionCode) ||
+                string.IsNullOrEmpty(response.Status) ||
+                string.IsNullOrEmpty(response.TotalAmount))
             {
-                return Forbid();
+                _logger.LogWarning("Missing required payment response fields");
+                return false;
             }
 
-            // Create a new payment record. Set ReferenceId to empty since it will be updated later.
-            var payment = new Payment
+            // Verify product code
+            if (response.ProductCode != "EPAYTEST")
             {
-                BoostedPropertyId = boostedPropertyId,
-                Amount = (decimal)boostedProperty.Price,
-                PaymentMethod = "eSewa",
-                Status = "Pending",
-                TransactionId = $"BOOST-{boostedPropertyId}-{DateTime.UtcNow.Ticks}",
-                ReferenceId = string.Empty
-            };
-
-            _context.Payments.Add(payment);
-            await _context.SaveChangesAsync();
-
-            // Read configuration values for eSewa integration
-            string merchantId =  "EPAYTEST"; // Use real merchantId in production
-            string productCode =  "EPAYTEST"; // Usually provided by eSewa
-            string secretKey =  "8gBm/:&EnhH.1/q"; // Example secret for UAT
-            string esewaUrl =  "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
-
-            // Make sure these values are set correctly
-            string amount = payment.Amount.ToString("F2"); // The actual product amount
-            string taxAmount = "0.00"; // Use "0.00" instead of "0"
-            string serviceCharge = "0.00"; // Use "0.00" instead of "0"
-            string deliveryCharge = "0.00"; // Use "0.00" instead of "0"
-
-            // Calculate total amount
-            decimal totalAmountDecimal = payment.Amount +
-                                        decimal.Parse(taxAmount) +
-                                        decimal.Parse(serviceCharge) +
-                                        decimal.Parse(deliveryCharge);
-            string totalAmount = totalAmountDecimal.ToString("F2");
-
-            // Set up the transaction UUID
-            string transactionUuid = payment.TransactionId;
-
-            // Define the signed field names in the correct order
-            string signedFieldNames = "total_amount,transaction_uuid,product_code";
-
-            // Generate the signature based on required fields
-            string signature = GenerateSignature(totalAmount, transactionUuid, productCode, secretKey);
-
-            var esewaData = new
-            {
-                MerchantId = merchantId,
-                Amount = amount,
-                TaxAmount = taxAmount,
-                ServiceCharge = serviceCharge,
-                DeliveryCharge = deliveryCharge,
-                TotalAmount = totalAmount,
-                TransactionUuid = transactionUuid,
-                ProductCode = productCode,
-                SuccessUrl = Url.Action("PaymentSuccess", "Payment", null, Request.Scheme),
-                FailureUrl = Url.Action("PaymentFailure", "Payment", null, Request.Scheme),
-                SignedFieldNames = signedFieldNames,
-                Signature = signature
-            };
-
-
-            // Pass the payment data to the view to be used in the form post to eSewa
-            ViewBag.ESewaData = esewaData;
-            ViewBag.PaymentId = payment.Id;
-            ViewBag.ESewaUrl = esewaUrl;
-            ViewBag.IsTestMode = true; // Set to false in production
-
-            return View(boostedProperty);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> PaymentSuccess(string pid, string amt, string refId)
-        {
-            // Validate incoming parameters (consider enhancing validation)
-            if (string.IsNullOrEmpty(pid) || string.IsNullOrEmpty(amt) || string.IsNullOrEmpty(refId))
-            {
-                return BadRequest("Invalid payment details received.");
+                _logger.LogWarning("Invalid product code: {ProductCode}", response.ProductCode);
+                return false;
             }
 
-            // Find the payment by transaction id (pid)
-            var payment = await _context.Payments
-                .Include(p => p.BoostedProperty)
-                .FirstOrDefaultAsync(p => p.TransactionId == pid);
-
-            if (payment == null)
+            // Verify payment status
+            if (response.Status != "COMPLETE")
             {
-                return NotFound();
+                _logger.LogWarning("Payment status is not COMPLETE: {Status}", response.Status);
+                return false;
             }
 
-            // Here, you should decode and verify the response if it is Base64 encoded.
-            // For this example, we assume the payment is verified via an external API call.
-            bool isVerified = await VerifyESewaPayment(pid, amt, refId);
-
-            DateTime nepalNow = DateTime.UtcNow.ToNepalTime(); // Assuming you have an extension method ToNepalTime()
-
-            if (isVerified)
-            {
-                // Update payment status and details
-                payment.Status = "Success";
-                payment.ReferenceId = refId;
-                payment.UpdatedAt = nepalNow;
-
-                // Activate the boost
-                var boostedProperty = payment.BoostedProperty;
-                boostedProperty.IsActive = true;
-                boostedProperty.StartTime = nepalNow;
-                boostedProperty.EndTime = nepalNow.AddHours(boostedProperty.Hours);
-
-                await _context.SaveChangesAsync();
-                return RedirectToAction("PaymentConfirmation", new { id = payment.Id });
-            }
-            else
-            {
-                payment.Status = "Failed";
-                payment.UpdatedAt = nepalNow;
-                await _context.SaveChangesAsync();
-                return RedirectToAction("PaymentFailure", new { id = payment.Id });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> PaymentFailure(string pid = null, int id = 0)
-        {
-            Payment payment = null;
-
-            if (!string.IsNullOrEmpty(pid))
-            {
-                payment = await _context.Payments
-                    .Include(p => p.BoostedProperty)
-                    .FirstOrDefaultAsync(p => p.TransactionId == pid);
-            }
-            else if (id > 0)
-            {
-                payment = await _context.Payments
-                    .Include(p => p.BoostedProperty)
-                    .FirstOrDefaultAsync(p => p.Id == id);
-            }
-
-            if (payment == null)
-            {
-                return NotFound();
-            }
-
-            payment.Status = "Failed";
-            payment.UpdatedAt = DateTime.UtcNow.ToNepalTime();
-            await _context.SaveChangesAsync();
-            return View(payment);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> PaymentConfirmation(int id)
-        {
-            var payment = await _context.Payments
-                .Include(p => p.BoostedProperty)
-                .ThenInclude(bp => bp.Property)
-                .FirstOrDefaultAsync(p => p.Id == id);
-
-            if (payment == null)
-            {
-                return NotFound();
-            }
-            return View(payment);
-        }
-
-        // Helper method to verify eSewa payment
-        private async Task<bool> VerifyESewaPayment(string pid, string amt, string refId)
-        {
-            // In a real implementation, call eSewa's transaction verification API and validate the response.
-            // For testing purposes, we assume verification is successful.
-            await Task.Delay(10);
             return true;
         }
+    }
+
+    // View Model for Payment Confirmation
+    public class PaymentConfirmationViewModel
+    {
+        public int BoostId { get; set; }
+        public string TransactionCode { get; set; }
+        public decimal Amount { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public string PropertyName { get; set; }
+        public string BoostType { get; set; }
+        public bool IsSuccessful { get; set; } = true;
+
+        // Formatted properties
+        public string FormattedAmount => Amount.ToString("C2");
+        public string FormattedPaymentDate => PaymentDate.ToString("f");
     }
 }

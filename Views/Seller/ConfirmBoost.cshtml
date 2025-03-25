@@ -1,0 +1,76 @@
+﻿@model PROPERTEASE.Models.BoostViewModel
+@{
+    ViewData["Title"] = "Confirm Boost";
+}
+
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <div class="text-center mb-6">
+        <h2 class="text-2xl font-semibold text-gray-800">Confirm Your Boost</h2>
+        <p class="text-gray-600 mt-2">Please review the details before confirming your property boost.</p>
+    </div>
+
+    <!-- Add validation summary -->
+    <div asp-validation-summary="All" class="text-red-500 mb-4"></div>
+
+    <div class="bg-gray-50 p-6 rounded-lg shadow-sm mb-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Boost Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-600">Duration: <span class="font-semibold">@Model.SelectedHours hours</span></p>
+                <p class="text-gray-600">Full Name: <span class="font-semibold">@Html.DisplayFor(m => m.FullName)</span></p>
+                <p class="text-gray-600">Phone Number: <span class="font-semibold">@Html.DisplayFor(m => m.PhoneNumber)</span></p>
+            </div>
+            <div>
+                <p class="text-gray-600">Start Time: <span class="font-semibold">@Model.StartTime</span></p>
+                <p class="text-gray-600">End Time: <span class="font-semibold">@Model.EndTime</span></p>
+                <p class="text-gray-600">Total Price: <span class="font-semibold text-blue-600">Rs. @Model.TotalPrice.ToString("N2")</span></p>
+            </div>
+        </div>
+    </div>
+
+    <form method="post" asp-action="ConfirmBoost" id="confirmForm">
+        <!-- Add anti-forgery token -->
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="PropertyLink" /> <!-- Add this line -->
+        <input type="hidden" asp-for="PropertyId" />
+        <input type="hidden" asp-for="FullName" />
+        <input type="hidden" asp-for="PhoneNumber" />
+        <input type="hidden" asp-for="SelectedHours" />
+        <input type="hidden" asp-for="TotalPrice" />
+        <input type="hidden" asp-for="StartTime" />
+        <input type="hidden" asp-for="EndTime" />
+
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a asp-action="Boost" class="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg text-center">
+                Back
+            </a>
+            <button type="submit" id="submitButton" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50" aria-label="Confirm and pay with eSewa">
+                <span class="flex items-center justify-center">
+                    <span>Confirm and Pay with eSewa</span>
+                    <!-- Add eSewa logo or icon here if available -->
+                    <img src="/images/esewa-logo.png" alt="eSewa" class="h-5 ml-2" onerror="this.style.display='none'" />
+                </span>
+            </button>
+        </div>
+    </form>
+
+    <!-- Payment method information -->
+    <div class="mt-6 text-center text-sm text-gray-600">
+        <p>You'll be redirected to eSewa to complete your payment securely.</p>
+    </div>
+</div>
+
+
+    <script>
+        // Add loading state to form submission
+        document.getElementById('confirmForm').addEventListener('submit', function() {
+            const button = document.getElementById('submitButton');
+            button.disabled = true;
+            button.innerHTML = '<span class="flex items-center justify-center"><span>Processing...</span></span>';
+        });
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }

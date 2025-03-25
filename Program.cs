@@ -25,6 +25,7 @@ builder.Services.AddCors(options =>
 });
 
 // Register other services
+
 builder.Services.AddScoped<PropertyRepository>();
 // Add this line where your other services are registered
 builder.Services.AddScoped<INotificationService, NotificationService>(); 
@@ -53,8 +54,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddSession(o =>
 {
-    o.IdleTimeout = TimeSpan.FromMinutes(1);
+    o.IdleTimeout = TimeSpan.FromMinutes(15);
     o.Cookie.HttpOnly = true;
+    o.Cookie.IsEssential = true;
+
 });
 builder.Services.AddControllersWithViews();
 

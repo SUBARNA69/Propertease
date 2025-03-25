@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Hosting;
 using Propertease.Repos;
 using Propertease.Repos.Propertease.Services;
 using Esri.ArcGISRuntime.Ogc;
+using System.Text.RegularExpressions;
 
 namespace Propertease.Controllers
 {
@@ -51,6 +52,11 @@ namespace Propertease.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (!IsValidEmail(user.Email))
+                {
+                    ModelState.AddModelError("Email", "Email must end with @gmail.com or @yahoo.com.");
+                    return View(user);
+                }
                 // Check if email is already registered
                 if (UserDbContext.Users.Any(u => u.Email.ToUpper() == user.Email.ToUpper()))
                 {
@@ -91,6 +97,12 @@ namespace Propertease.Controllers
 
             // If ModelState is invalid, return the same form with validation errors
             return View(user);
+        }
+        private bool IsValidEmail(string email)
+        {
+            // Regex pattern to validate email format and specific domains
+            string emailPattern = @"^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com)$";
+            return Regex.IsMatch(email, emailPattern);
         }
         [HttpGet]
         public IActionResult VerificationSent()
@@ -358,15 +370,51 @@ namespace Propertease.Controllers
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
-            // Replace with actual method to get the current user ID
-            int userId = GetCurrentUserId();
+            // Get the current user's ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            var user = await UserDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            // Get the user from the database
+            var user = await UserDbContext.Users.FindAsync(userId);
 
             if (user == null)
             {
-                // Handle the case where the user is not found
-                return RedirectToAction("Error", new { message = "User not found" });
+                return NotFound();
+            }
+
+            // Get ratings if the user is a seller
+            if (user.Role == "Seller")
+            {
+                var ratings = await UserDbContext.SellerRatings
+                    .Where(r => r.SellerId == userId)
+                    .ToListAsync();
+
+                // Calculate average rating
+                double averageRating = 0;
+                if (ratings.Any())
+                {
+                    averageRating = ratings.Average(r => r.Rating);
+                }
+
+                // Count ratings by star value
+                ViewBag.Rating5Count = ratings.Count(r => r.Rating == 5);
+                ViewBag.Rating4Count = ratings.Count(r => r.Rating == 4);
+                ViewBag.Rating3Count = ratings.Count(r => r.Rating == 3);
+                ViewBag.Rating2Count = ratings.Count(r => r.Rating == 2);
+                ViewBag.Rating1Count = ratings.Count(r => r.Rating == 1);
+
+                ViewBag.AverageRating = averageRating;
+                ViewBag.TotalRatings = ratings.Count;
+            }
+            else
+            {
+                // For non-sellers, set default values
+                ViewBag.AverageRating = 0;
+                ViewBag.TotalRatings = 0;
+                ViewBag.Rating5Count = 0;
+                ViewBag.Rating4Count = 0;
+                ViewBag.Rating3Count = 0;
+                ViewBag.Rating2Count = 0;
+                ViewBag.Rating1Count = 0;
             }
 
             return View(user);
@@ -425,79 +473,60 @@ namespace Propertease.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Profile(User user, IFormFile Photo)
+        public async Task<IActionResult> Profile(User model, IFormFile Photo)
         {
             if (!ModelState.IsValid)
             {
-                return View(user);
+                return View(model);
             }
 
-            // Get the logged-in user ID
-            string loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(loggedInUserId) || !int.TryParse(loggedInUserId, out int userId))
+            // Get the current user's ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Get the user from the database
+            var user = await UserDbContext.Users.FindAsync(userId);
+
+            if (user == null)
             {
-                return Unauthorized("User is not logged in.");
+                return NotFound();
             }
 
-            // Fetch the existing user from the database
-            var existingUser = await UserDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (existingUser == null)
-            {
-                return NotFound("User not found.");
-            }
+            // Update user properties
+            user.FullName = model.FullName;
+            user.Email = model.Email;
+            user.ContactNumber = model.ContactNumber;
+            user.Address = model.Address;
 
-            // Update user details
-            existingUser.FullName = user.FullName;
-            existingUser.Email = user.Email;
-            existingUser.ContactNumber = user.ContactNumber;
-            existingUser.Address = user.Address;
-
-            // Handle profile picture upload (only if a new file is uploaded)
+            // Handle profile image upload
             if (Photo != null && Photo.Length > 0)
             {
-                // Validate the uploaded file (e.g., file type, size)
-                if (!Photo.ContentType.StartsWith("image/"))
+                // Delete old image if exists
+                if (!string.IsNullOrEmpty(user.Image))
                 {
-                    ModelState.AddModelError("Photo", "Only image files are allowed.");
-                    return View(user);
+                    var oldImagePath = Path.Combine(webHostEnvironment.WebRootPath, "Images", user.Image);
+                    if (System.IO.File.Exists(oldImagePath))
+                    {
+                        System.IO.File.Delete(oldImagePath);
+                    }
                 }
 
-                // Save the new image file
+                // Save new image
                 string fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(Photo.FileName);
-                string uploadFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
-
-                if (!Directory.Exists(uploadFolder))
-                {
-                    Directory.CreateDirectory(uploadFolder);
-                }
-
-                string filePath = Path.Combine(uploadFolder, fileName);
+                string filePath = Path.Combine(webHostEnvironment.WebRootPath, "Images", fileName);
 
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await Photo.CopyToAsync(fileStream);
                 }
 
-                // Delete the old image file if it exists
-                if (!string.IsNullOrEmpty(existingUser.Image))
-                {
-                    string oldFilePath = Path.Combine(uploadFolder, existingUser.Image);
-                    if (System.IO.File.Exists(oldFilePath))
-                    {
-                        System.IO.File.Delete(oldFilePath);
-                    }
-                }
-
-                // Update the user's profile picture
-                existingUser.Image = fileName;
+                user.Image = fileName;
             }
 
             // Save changes
-            UserDbContext.Users.Update(existingUser);
             await UserDbContext.SaveChangesAsync();
 
-            // Redirect to Profile page
-            return RedirectToAction("Profile", "User");
+            // Redirect to profile page
+            return RedirectToAction(nameof(Profile));
         }
 
 
@@ -563,5 +592,31 @@ namespace Propertease.Controllers
                 return View(model);
             }
         }
-    }  
+
+        // Add this action to the UserController to display viewed properties
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> ViewedProperties()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Get the user's property views, ordered by most recent
+            var propertyViews = await UserDbContext.PropertyViews
+                .Include(pv => pv.Property)
+                    .ThenInclude(p => p.PropertyImages)
+                .Where(pv => pv.UserId == userId)
+                .OrderByDescending(pv => pv.ViewedAt)
+                .ToListAsync();
+
+            // Group by property to avoid duplicates, taking the most recent view date
+            var groupedViews = propertyViews
+                .GroupBy(pv => pv.PropertyId)
+                .Select(g => g.OrderByDescending(pv => pv.ViewedAt).First())
+                .ToList();
+
+            return View(groupedViews);
+        }
+
+
+    }
 }

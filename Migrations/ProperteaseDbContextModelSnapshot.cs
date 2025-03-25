@@ -43,6 +43,15 @@ namespace Propertease.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("nvarchar(max)")
+                        .HasDefaultValue("Pending");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -55,6 +64,16 @@ namespace Propertease.Migrations
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("TransactionCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TransactionUuid")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -273,49 +292,6 @@ namespace Propertease.Migrations
                     b.ToTable("Notifications");
                 });
 
-            modelBuilder.Entity("Propertease.Models.Payment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("BoostedPropertyId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentMethod")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ReferenceId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TransactionId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BoostedPropertyId");
-
-                    b.ToTable("Payments");
-                });
-
             modelBuilder.Entity("Propertease.Models.Properties", b =>
                 {
                     b.Property<int>("Id")
@@ -432,6 +408,127 @@ namespace Propertease.Migrations
                     b.ToTable("PropertyImages");
                 });
 
+            modelBuilder.Entity("Propertease.Models.PropertyView", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ViewedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PropertyViews");
+                });
+
+            modelBuilder.Entity("Propertease.Models.PropertyViewingRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BuyerContact")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BuyerEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("BuyerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BuyerName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RequestedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ViewingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ViewingTime")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuyerId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.ToTable("PropertyViewingRequests");
+                });
+
+            modelBuilder.Entity("Propertease.Models.SellerRating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BuyerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Review")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ViewingRequestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuyerId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("ViewingRequestId");
+
+                    b.ToTable("SellerRatings");
+                });
+
             modelBuilder.Entity("Propertease.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -523,7 +620,7 @@ namespace Propertease.Migrations
                     b.HasOne("Propertease.Models.Properties", "Property")
                         .WithMany()
                         .HasForeignKey("PropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Property");
@@ -609,17 +706,6 @@ namespace Propertease.Migrations
                     b.Navigation("RelatedProperty");
                 });
 
-            modelBuilder.Entity("Propertease.Models.Payment", b =>
-                {
-                    b.HasOne("PROPERTEASE.Models.BoostedProperty", "BoostedProperty")
-                        .WithMany()
-                        .HasForeignKey("BoostedPropertyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BoostedProperty");
-                });
-
             modelBuilder.Entity("Propertease.Models.Properties", b =>
                 {
                     b.HasOne("Propertease.Models.User", "Seller")
@@ -661,6 +747,77 @@ namespace Propertease.Migrations
                     b.Navigation("Property");
                 });
 
+            modelBuilder.Entity("Propertease.Models.PropertyView", b =>
+                {
+                    b.HasOne("Propertease.Models.Properties", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Property");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Propertease.Models.PropertyViewingRequest", b =>
+                {
+                    b.HasOne("Propertease.Models.User", "Buyer")
+                        .WithMany("PropertyViewingRequests")
+                        .HasForeignKey("BuyerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.Properties", "Properties")
+                        .WithMany("PropertyViewingRequests")
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Buyer");
+
+                    b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Propertease.Models.SellerRating", b =>
+                {
+                    b.HasOne("Propertease.Models.User", "Buyer")
+                        .WithMany()
+                        .HasForeignKey("BuyerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.Properties", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.User", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.PropertyViewingRequest", "ViewingRequest")
+                        .WithMany()
+                        .HasForeignKey("ViewingRequestId");
+
+                    b.Navigation("Buyer");
+
+                    b.Navigation("Property");
+
+                    b.Navigation("Seller");
+
+                    b.Navigation("ViewingRequest");
+                });
+
             modelBuilder.Entity("Propertease.Models.UserRating", b =>
                 {
                     b.HasOne("Propertease.Models.User", "RatedUser")
@@ -694,6 +851,8 @@ namespace Propertease.Migrations
                     b.Navigation("PropertyComments");
 
                     b.Navigation("PropertyImages");
+
+                    b.Navigation("PropertyViewingRequests");
                 });
 
             modelBuilder.Entity("Propertease.Models.User", b =>
@@ -705,6 +864,8 @@ namespace Propertease.Migrations
                     b.Navigation("Properties");
 
                     b.Navigation("PropertyComments");
+
+                    b.Navigation("PropertyViewingRequests");
 
                     b.Navigation("RatingsGiven");
 

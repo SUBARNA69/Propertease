@@ -15,12 +15,17 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Identity;
 using PROPERTEASE.Services;
+using payment_gateway_nepal;
+using System.Globalization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Propertease.Controllers
 {
     [Authorize(Roles = "Seller")]
     public class SellerController : Controller
     {
+        private readonly ILogger<SellerController> _logger;
         private readonly IConfiguration _configuration;
         private readonly EsewaPaymentService _esewaService;
         IWebHostEnvironment webHostEnvironment;
@@ -33,7 +38,7 @@ namespace Propertease.Controllers
         // Inject the ApplicationDbContext into the controller
         public SellerController(ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment,
       IHubContext<NotificationHub> hubContext, INotificationService notificationService,
-      EsewaPaymentService esewaService, IConfiguration _configuration)
+      EsewaPaymentService esewaService, IConfiguration _configuration, ILogger<SellerController> logger)
         {
             _context = context;
             this.webHostEnvironment = webHostEnvironment;
@@ -41,6 +46,7 @@ namespace Propertease.Controllers
             this._notificationService = notificationService;
             _esewaService = esewaService;
             this._configuration = _configuration;
+            _logger = logger;
         }
 
         // GET: Seller/AddProperty
@@ -155,7 +161,7 @@ namespace Propertease.Controllers
                     BuildupArea = addUserRequest.BuildupArea,  // New field
                     BuiltYear = addUserRequest.BuiltYear,      // New field (assumed DateOnly or DateTime)
                     FacingDirection = addUserRequest.FacingDirection,
-                   
+
                     PropertyID = propertyModel.Id // Foreign key
                 };
                 await _context.Houses.AddAsync(house);
@@ -432,7 +438,7 @@ namespace Propertease.Controllers
             // Handle 3D model upload if provided
             if (model.ThreeDModel != null && model.ThreeDModel.Length > 0 &&
                  (property.PropertyType == "House" || property.PropertyType == "Apartment"))
-            { 
+            {
                 // Delete old 3D model if exists
                 if (!string.IsNullOrEmpty(property.ThreeDModel))
                 {
@@ -602,11 +608,9 @@ namespace Propertease.Controllers
         }
 
         [HttpGet]
-        // Modify the Boost action to accept a propertyId parameter
         public IActionResult Boost(int? propertyId = null)
         {
             var model = new BoostViewModel();
-
             // If propertyId is provided, pre-fill the property link
             if (propertyId.HasValue)
             {
@@ -614,16 +618,15 @@ namespace Propertease.Controllers
                 var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
                 var property = _context.properties
                     .FirstOrDefault(p => p.Id == propertyId && p.SellerId == userId);
-
                 if (property != null)
                 {
                     // Pre-fill the property link
                     model.PropertyLink = Url.Action("ViewPropertyDetails", "Seller", new { id = propertyId }, Request.Scheme);
                 }
             }
-
             return View(model);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Boost(BoostViewModel model)
@@ -638,7 +641,6 @@ namespace Propertease.Controllers
             if (!string.IsNullOrEmpty(model.PropertyLink))
             {
                 // Parse the property ID from the URL
-                // Example URL: https://localhost:7152/Seller/ViewPropertyDetails/23
                 var segments = model.PropertyLink.Split('/');
                 var idSegment = segments.LastOrDefault();
                 if (int.TryParse(idSegment, out int id))
@@ -651,41 +653,250 @@ namespace Propertease.Controllers
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var property = await _context.properties
                 .FirstOrDefaultAsync(p => p.Id == propertyId && p.SellerId == userId);
-
             if (property == null)
             {
                 ModelState.AddModelError("PropertyLink", "Invalid property link or you don't own this property.");
                 return View(model);
             }
-            DateTime nepalNow = DateTime.UtcNow.ToNepalTime();
+
             // Calculate the price
             model.CalculateTotalPrice();
 
-            // Create a new boosted property entry - but mark it as inactive until payment is made
-            var boostedProperty = new BoostedProperty
+            // Instead of saving to database, pass to confirmation view
+            var confirmationModel = new BoostViewModel
             {
                 PropertyId = propertyId,
                 FullName = model.FullName,
                 PhoneNumber = model.PhoneNumber,
-                Hours = model.SelectedHours,
-                Price = model.TotalPrice,
-                StartTime = DateTime.UtcNow, // This will be updated after payment
-                EndTime = DateTime.UtcNow.AddHours(model.SelectedHours), // This will be updated after payment
-                IsActive = false // Will be set to true after successful payment
+                SelectedHours = model.SelectedHours,
+                TotalPrice = model.TotalPrice,
+                StartTime = DateTime.UtcNow,
+                EndTime = DateTime.UtcNow.AddHours(model.SelectedHours)
             };
 
-            _context.BoostedProperties.Add(boostedProperty);
-            await _context.SaveChangesAsync();
-
-            // Redirect to the confirmation page, which will show payment options
-            return RedirectToAction("BoostConfirmation", new { id = boostedProperty.Id });
+            // Pass to confirmation view instead of saving
+            return View("ConfirmBoost", confirmationModel);
         }
-        public IActionResult BoostConfirmation(int id)
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ConfirmBoost(BoostViewModel model)
+        {
+            // Add this before the ModelState.IsValid check
+            foreach (var state in ModelState)
+            {
+                if (state.Value.Errors.Count > 0)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error in {state.Key}: {state.Value.Errors[0].ErrorMessage}");
+                    // Or use a breakpoint here to inspect in the debugger
+                }
+            }
+
+            if (!ModelState.IsValid) return View(model);
+
+            var boostedProperty = new BoostedProperty
+            {
+                PropertyId = model.PropertyId,
+                FullName = model.FullName,
+                PhoneNumber = model.PhoneNumber,
+                Hours = model.SelectedHours,
+                Price = model.TotalPrice,
+                StartTime = DateTime.UtcNow,
+                EndTime = DateTime.UtcNow.AddHours(model.SelectedHours),
+                PaymentStatus = "Pending"
+            };
+
+            try
+            {
+                _context.BoostedProperties.Add(boostedProperty);
+                await _context.SaveChangesAsync();
+
+                // Log success
+                Console.WriteLine($"Successfully saved boost ID: {boostedProperty.Id}");
+
+                return RedirectToAction("InitiateEsewaPayment", new { boostId = boostedProperty.Id });
+            }
+            catch (Exception ex)
+            {
+                // Log the full error details
+                var errorMessage = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errorMessage += " | Inner Exception: " + ex.InnerException.Message;
+                }
+
+                Console.WriteLine($"Error saving boost: {errorMessage}");
+                ModelState.AddModelError("", "Failed to save boost: " + errorMessage);
+                return View(model);
+            }
+
+            return Redirect(Url.Action("InitiateEsewaPayment", "Seller", new { boostId = boostedProperty.Id }));
+        }
+        public async Task<IActionResult> InitiateEsewaPayment(int boostId)
+        {
+            try
+            {
+                // Get the boost record
+                var boost = await _context.BoostedProperties
+                    .FirstOrDefaultAsync(b => b.Id == boostId && b.PaymentStatus == "Pending");
+
+                if (boost == null)
+                {
+                    return RedirectToAction("BoostFailed", new { error = "invalid_boost" });
+                }
+
+                // Configuration
+                string secretKey = "8gBm/:&EnhH.1/q";
+                string merchantCode = "EPAYTEST";
+                string paymentUrl = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+
+                // Payment parameters
+                string totalAmount = boost.Price.ToString("0.00", CultureInfo.InvariantCulture);
+                string transactionUuid = Guid.NewGuid().ToString();
+
+                // Store the transaction UUID in the boost record
+                boost.TransactionUuid = transactionUuid;
+                await _context.SaveChangesAsync();
+
+                // Generate signature
+                string signatureString = $"total_amount={totalAmount},transaction_uuid={transactionUuid},product_code={merchantCode}";
+                string signature = GenerateEsewaSignature(signatureString, secretKey);
+
+                // Prepare view model
+                var viewModel = new EsewaPaymentViewModel
+                {
+                    Amount = totalAmount,
+                    TotalAmount = totalAmount,
+                    TransactionUuid = transactionUuid,
+                    ProductCode = merchantCode,
+                    ProductServiceCharge = "0.00",
+                    Signature = signature,
+                    SuccessUrl = Url.Action("EsewaSuccess", "Seller", null, Request.Scheme),
+                    FailureUrl = Url.Action("EsewaFailure", "Seller", null, Request.Scheme),
+                    SignedFieldNames = "total_amount,transaction_uuid,product_code",
+                    PaymentUrl = paymentUrl
+                };
+
+                return View("EsewaPaymentForm", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error initiating eSewa payment");
+                return RedirectToAction("BoostFailed", new { error = "payment_initiation_failed" });
+            }
+        }
+
+        // Generate Base64 signature
+        private string GenerateEsewaSignature(string signatureString, string secretKey)
+        {
+            using (var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey)))
+            {
+                byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(signatureString));
+                return Convert.ToBase64String(hashBytes);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EsewaSuccess([FromQuery] string data)
+        {
+            try
+            {
+                // Decode the base64 encoded data
+                var decodedData = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(data));
+
+                // Log the decoded data for debugging
+                _logger.LogInformation($"Decoded eSewa response: {decodedData}");
+
+                // Parse the JSON data
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var paymentResponse = JsonSerializer.Deserialize<EsewaPaymentResponse>(decodedData, options);
+
+                if (paymentResponse == null || paymentResponse.Status != "COMPLETE")
+                {
+                    _logger.LogWarning($"Payment incomplete: {decodedData}");
+                    return RedirectToAction("BoostFailed", new { error = "payment_incomplete" });
+                }
+
+                // Log the transaction UUID we're looking for
+                _logger.LogInformation($"Looking for boost with transaction UUID: {paymentResponse.TransactionUuid}");
+
+                // Try to find by transaction UUID first
+                var boostedProperty = await _context.BoostedProperties
+                    .FirstOrDefaultAsync(b => b.TransactionUuid == paymentResponse.TransactionUuid && b.PaymentStatus == "Pending");
+
+                // If not found by UUID, fall back to finding the most recent pending boost
+                if (boostedProperty == null)
+                {
+                    _logger.LogWarning("Boost not found by transaction UUID, falling back to most recent pending boost");
+                    boostedProperty = await _context.BoostedProperties
+                        .Where(b => b.PaymentStatus == "Pending")
+                        .OrderByDescending(b => b.Id)
+                        .FirstOrDefaultAsync();
+                }
+
+                if (boostedProperty == null)
+                {
+                    _logger.LogError("No pending boosted property found");
+                    return RedirectToAction("BoostFailed", new { error = "boost_not_found" });
+                }
+
+                // Log which boost we found
+                _logger.LogInformation($"Found boost ID: {boostedProperty.Id} for property ID: {boostedProperty.PropertyId}");
+
+                // Update payment status
+                boostedProperty.PaymentStatus = "Paid";
+                boostedProperty.TransactionId = paymentResponse.TransactionCode;
+                boostedProperty.IsActive = true;
+                boostedProperty.StartTime = DateTime.UtcNow;
+                boostedProperty.EndTime = DateTime.UtcNow.AddHours(boostedProperty.Hours);
+
+                await _context.SaveChangesAsync();
+
+                // Redirect to success page
+                return RedirectToAction("BoostSuccess", new { id = boostedProperty.Id });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing eSewa payment: " + ex.Message);
+                return RedirectToAction("BoostFailed", new { error = "processing_error" });
+            }
+        }
+
+        public IActionResult EsewaFailure()
+        {
+            return View("BoostFailed");
+        }
+
+        // Response model
+        public class EsewaPaymentResponse
+        {
+            [JsonPropertyName("transaction_code")]
+            public string TransactionCode { get; set; } = string.Empty;
+
+            [JsonPropertyName("status")]
+            public string Status { get; set; } = string.Empty;
+
+            [JsonPropertyName("total_amount")]
+            public string TotalAmount { get; set; } = string.Empty;
+
+            [JsonPropertyName("transaction_uuid")]
+            public string TransactionUuid { get; set; } = string.Empty;
+
+            [JsonPropertyName("product_code")]
+            public string ProductCode { get; set; } = string.Empty;
+
+            [JsonPropertyName("signed_field_names")]
+            public string SignedFieldNames { get; set; } = string.Empty;
+
+            [JsonPropertyName("signature")]
+            public string Signature { get; set; } = string.Empty;
+        }
+
+        public IActionResult BoostSuccess(int id)
         {
             var boostedProperty = _context.BoostedProperties
                 .Include(bp => bp.Property)
                 .FirstOrDefault(bp => bp.Id == id);
-
             if (boostedProperty == null)
             {
                 return NotFound();
@@ -693,6 +904,13 @@ namespace Propertease.Controllers
 
             return View(boostedProperty);
         }
+        public IActionResult BoostFailed(string errorMessage)
+        {
+            ViewBag.ErrorMessage = errorMessage;
+            return View();
+        }
+
+
         [HttpGet]
         public IActionResult CalculatePrice(int hours, int people)
         {
@@ -708,7 +926,7 @@ namespace Propertease.Controllers
         // Add this to your MyProperties method in SellerController
         public async Task UpdateExpiredBoosts()
         {
-            var currentTime = DateTime.UtcNow.ToNepalTime(); ;
+            var currentTime = DateTime.UtcNow;
             var expiredBoosts = await _context.BoostedProperties
                 .Where(bp => bp.IsActive && bp.EndTime <= currentTime)
                 .ToListAsync();
@@ -748,5 +966,232 @@ namespace Propertease.Controllers
 
             return View(properties);
         }
+
+        // Add these methods to your SellerController class
+
+        [HttpGet]
+        public async Task<IActionResult> ViewingRequests()
+        {
+            // Get the current seller's ID
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Get all properties belonging to this seller
+            var sellerProperties = await _context.properties
+                .Where(p => p.SellerId == sellerId)
+                .Select(p => p.Id)
+                .ToListAsync();
+
+            // Get all viewing requests for these properties
+            var viewingRequests = await _context.PropertyViewingRequests
+                .Include(r => r.Properties)
+                .Include(r => r.Buyer)
+                .Where(r => sellerProperties.Contains(r.PropertyId))
+                .OrderByDescending(r => r.RequestedAt)
+                .ToListAsync();
+
+            return View(viewingRequests);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApproveRequest(int id)
+        {
+            var request = await _context.PropertyViewingRequests.FindAsync(id);
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the property belongs to the current seller
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var property = await _context.properties
+                .FirstOrDefaultAsync(p => p.Id == request.PropertyId && p.SellerId == sellerId);
+
+            if (property == null)
+            {
+                return Forbid();
+            }
+
+            // Update request status
+            request.Status = "Approved";
+            await _context.SaveChangesAsync();
+
+            // Notify the buyer
+            if (request.BuyerId > 0)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    "Viewing Request Approved",
+                    $"Your request to view property '{property.Title}' has been approved.",
+                    "ViewingApproved",
+                    request.BuyerId,
+                    property.Id
+                );
+            }
+
+            return RedirectToAction(nameof(ViewingRequests));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RejectRequest(int id)
+        {
+            var request = await _context.PropertyViewingRequests.FindAsync(id);
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the property belongs to the current seller
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var property = await _context.properties
+                .FirstOrDefaultAsync(p => p.Id == request.PropertyId && p.SellerId == sellerId);
+
+            if (property == null)
+            {
+                return Forbid();
+            }
+
+            // Update request status
+            request.Status = "Rejected";
+            await _context.SaveChangesAsync();
+
+            // Notify the buyer
+            if (request.BuyerId > 0)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    "Viewing Request Rejected",
+                    $"Your request to view property '{property.Title}' has been rejected.",
+                    "ViewingRejected",
+                    request.BuyerId,
+                    property.Id
+                );
+            }
+
+            return RedirectToAction(nameof(ViewingRequests));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAsSold(int id)
+        {
+            // Get the viewing request
+            var request = await _context.PropertyViewingRequests.FindAsync(id);
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the property belongs to the current seller
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var property = await _context.properties
+                .FirstOrDefaultAsync(p => p.Id == request.PropertyId && p.SellerId == sellerId);
+
+            if (property == null)
+            {
+                return Forbid();
+            }
+
+            // Update property status to "Sold"
+            property.Status = "Sold";
+
+            // Update request status to "Completed"
+            request.Status = "Completed";
+
+            // Update any other pending requests for this property to "Cancelled" since the property is now sold
+            var otherRequests = await _context.PropertyViewingRequests
+                .Where(r => r.PropertyId == property.Id && r.Id != request.Id && r.Status == "Pending")
+                .ToListAsync();
+
+            foreach (var otherRequest in otherRequests)
+            {
+                otherRequest.Status = "Cancelled";
+
+                // Notify the buyer that the property is no longer available
+                if (otherRequest.BuyerId > 0)
+                {
+                    await _notificationService.CreateNotificationAsync(
+                        "Property No Longer Available",
+                        $"The property '{property.Title}' you requested to view has been sold.",
+                        "PropertySold",
+                        otherRequest.BuyerId,
+                        property.Id
+                    );
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            // Notify the buyer who viewed the property
+            if (request.BuyerId > 0)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    "Property Sold",
+                    $"The property '{property.Title}' you viewed has been sold. You can now rate the seller from your purchases page.",
+                    "PropertySold",
+                    request.BuyerId,
+                    property.Id
+                );
+            }
+
+            TempData["SuccessMessage"] = $"Property '{property.Title}' has been marked as sold.";
+            return RedirectToAction(nameof(ViewingRequests));
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetRequestDetails(int id)
+        {
+            var request = await _context.PropertyViewingRequests
+                .Include(r => r.Properties)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the property belongs to the current seller
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (request.Properties.SellerId != sellerId)
+            {
+                return Forbid();
+            }
+
+            return Json(new
+            {
+                requestId = request.Id,
+                propertyId = request.PropertyId,
+                propertyTitle = request.Properties.Title,
+                buyerName = request.BuyerName,
+                buyerEmail = request.BuyerEmail,
+                buyerContact = request.BuyerContact,
+                viewingDate = request.ViewingDate,
+                viewingTime = request.ViewingTime,
+                notes = request.Notes,
+                status = request.Status,
+                requestedAt = request.RequestedAt
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MyRatings()
+        {
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var ratings = await _context.SellerRatings
+                .Include(r => r.Buyer)
+                .Include(r => r.Property)
+                .Where(r => r.SellerId == sellerId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            // Calculate average rating
+            double averageRating = 0;
+            if (ratings.Any())
+            {
+                averageRating = ratings.Average(r => r.Rating);
+            }
+
+            ViewBag.AverageRating = averageRating;
+            ViewBag.TotalRatings = ratings.Count;
+
+            return View(ratings);
+        }
     }
+    
 }

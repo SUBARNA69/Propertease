@@ -1,60 +1,60 @@
-﻿@model Propertease.Models.Payment
+﻿@* @model Propertease.Models.Payment *@
 
-@{
-    ViewData["Title"] = "Payment Failed";
-}
+@* @{ *@
+@*     ViewData["Title"] = "Payment Failed"; *@
+@* } *@
 
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header bg-danger text-white">
-            <h3>Payment Failed</h3>
-        </div>
-        <div class="card-body">
-            <div class="alert alert-danger">
-                <h5><i class="fas fa-exclamation-circle"></i> Your payment was not successful</h5>
-                <p>There was a problem processing your payment. Please try again or contact support if the issue persists.</p>
-            </div>
+@* <div class="container mt-4"> *@
+@*     <div class="card"> *@
+@*         <div class="card-header bg-danger text-white"> *@
+@*             <h3>Payment Failed</h3> *@
+@*         </div> *@
+@*         <div class="card-body"> *@
+@*             <div class="alert alert-danger"> *@
+@*                 <h5><i class="fas fa-exclamation-circle"></i> Your payment was not successful</h5> *@
+@*                 <p>There was a problem processing your payment. Please try again or contact support if the issue persists.</p> *@
+@*             </div> *@
 
-            <div class="row mt-4">
-                <div class="col-md-6">
-                    <h5>Payment Details</h5>
-                    <div class="mb-3">
-                        <strong>Transaction ID:</strong> @Model.TransactionId
-                    </div>
-                    <div class="mb-3">
-                        <strong>Amount:</strong> Rs. @Model.Amount
-                    </div>
-                    <div class="mb-3">
-                        <strong>Payment Method:</strong> @Model.PaymentMethod
-                    </div>
-                    <div class="mb-3">
-                        <strong>Date:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <h5>Boost Details</h5>
-                    <div class="mb-3">
-                        <strong>Property:</strong> @Model.BoostedProperty.Property.Title
-                    </div>
-                    <div class="mb-3">
-                        <strong>Boost Duration:</strong> @Model.BoostedProperty.Hours hours
-                    </div>
-                    <div class="mb-3">
-                        <strong>Status:</strong>
-                        <span class="badge bg-warning">Payment Required</span>
-                    </div>
-                </div>
-            </div>
+@*             <div class="row mt-4"> *@
+@*                 <div class="col-md-6"> *@
+@*                     <h5>Payment Details</h5> *@
+@*                     <div class="mb-3"> *@
+@*                         <strong>Transaction ID:</strong> @Model.TransactionId *@
+@*                     </div> *@
+@*                     <div class="mb-3"> *@
+@*                         <strong>Amount:</strong> Rs. @Model.Amount *@
+@*                     </div> *@
+@*                     <div class="mb-3"> *@
+@*                         <strong>Payment Method:</strong> @Model.PaymentMethod *@
+@*                     </div> *@
+@*                     <div class="mb-3"> *@
+@*                         <strong>Date:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm") *@
+@*                     </div> *@
+@*                 </div> *@
+@*                 <div class="col-md-6"> *@
+@*                     <h5>Boost Details</h5> *@
+@*                     <div class="mb-3"> *@
+@*                         <strong>Property:</strong> @Model.BoostedProperty.Property.Title *@
+@*                     </div> *@
+@*                     <div class="mb-3"> *@
+@*                         <strong>Boost Duration:</strong> @Model.BoostedProperty.Hours hours *@
+@*                     </div> *@
+@*                     <div class="mb-3"> *@
+@*                         <strong>Status:</strong> *@
+@*                         <span class="badge bg-warning">Payment Required</span> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
 
-            <div class="text-center mt-4">
-                <a href="@Url.Action("ProcessPayment", "Payment", new { boostedPropertyId = Model.BoostedProperty.Id })"
-                   class="btn btn-success me-2">
-                    Try Again
-                </a>
-                <a href="@Url.Action("MyProperties", "Seller")" class="btn btn-primary">
-                    Back to My Properties
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+@*             <div class="text-center mt-4"> *@
+@*                 <a href="@Url.Action("ProcessPayment", "Payment", new { boostedPropertyId = Model.BoostedProperty.Id })" *@
+@*                    class="btn btn-success me-2"> *@
+@*                     Try Again *@
+@*                 </a> *@
+@*                 <a href="@Url.Action("MyProperties", "Seller")" class="btn btn-primary"> *@
+@*                     Back to My Properties *@
+@*                 </a> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </div> *@

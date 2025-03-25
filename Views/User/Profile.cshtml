@@ -8,7 +8,7 @@
     <!-- Profile Card -->
     <div class="bg-white rounded-lg shadow-lg overflow-hidden">
         <!-- Profile Header/Banner -->
-        <div class="h-48 bg-gradient-to-r from-blue-500 to-cyan-400 relative">
+        <div class="h-48 bg-gradient-to-r from-blue-600 to-cyan-400 relative">
             <!-- Profile Image -->
             <div class="absolute -bottom-16 left-6">
                 <div class="relative" id="profileImageContainer">
@@ -23,8 +23,8 @@
                         }
                     </div>
                     <div class="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1.5 border-2 border-white">
-                        <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.408 7.5h.01m-6.876 0h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                        <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                            <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
                         </svg>
                     </div>
                 </div>
@@ -33,10 +33,69 @@
 
         <!-- Profile Content -->
         <div class="pt-20 px-6 pb-6">
-            <!-- User Information -->
-            <div class="mb-6">
-                <h2 class="text-3xl font-bold text-gray-900 mb-1">@Model.FullName</h2>
-                <p class="text-gray-500">Member since @DateTime.Now.AddYears(-1).ToString("MMMM yyyy")</p>
+            <!-- User Information with Rating -->
+            <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 mb-1">@Model.FullName</h2>
+                    <p class="text-gray-500">Member since @DateTime.Now.AddYears(-1).ToString("MMMM yyyy")</p>
+                </div>
+
+                <!-- Rating Badge -->
+                <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end">
+                    <div class="flex items-center mb-1">
+                        <span class="bg-blue-100 text-blue-800 text-lg font-semibold px-3 py-1 rounded-lg flex items-center gap-1">
+                            <svg class="w-5 h-5 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                            </svg>
+                            <span>@ViewBag.AverageRating.ToString("0.0")</span>
+                        </span>
+                        <span class="ml-2 text-sm text-gray-500">(@ViewBag.TotalRatings ratings)</span>
+                    </div>
+                    <button id="editProfileButton" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none flex items-center">
+                        <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.109 17H1v-2a4 4 0 0 1 4-4h.87M10 4.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm7.95 2.55a2 2 0 0 1 0 2.829l-6.364 6.364-3.536.707.707-3.536 6.364-6.364a2 2 0 0 1 2.829 0Z" />
+                        </svg>
+                        Edit Profile
+                    </button>
+                </div>
+            </div>
+            <a asp-controller="User" asp-action="ViewedProperties" class="text-gray-900 hover:text-blue-500">activity</a>
+
+            <!-- Rating Breakdown -->
+            <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <h3 class="font-semibold text-lg mb-3">Rating Breakdown</h3>
+                <div class="space-y-2">
+                    @{
+                        // This would be populated from your controller with actual data
+                        var ratingBreakdown = new List<(int Stars, int Count)>
+                    {
+                    (5, ViewBag.Rating5Count ?? 0),
+                    (4, ViewBag.Rating4Count ?? 0),
+                    (3, ViewBag.Rating3Count ?? 0),
+                    (2, ViewBag.Rating2Count ?? 0),
+                    (1, ViewBag.Rating1Count ?? 0)
+                    };
+
+                        foreach (var item in ratingBreakdown)
+                        {
+                            var percentage = ViewBag.TotalRatings > 0 ? (item.Count * 100) / ViewBag.TotalRatings : 0;
+                            <div class="flex items-center">
+                                <div class="w-16 flex items-center">
+                                    <span class="mr-1">@item.Stars</span>
+                                    <svg class="w-4 h-4 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                                    </svg>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
+                                    <div class="bg-yellow-400 h-2.5 rounded-full" style="width: @percentage%"></div>
+                                </div>
+                                <div class="w-10 text-right text-sm text-gray-500">
+                                    @item.Count
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
             </div>
 
             <!-- Information Cards -->
@@ -87,22 +146,19 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Edit Profile Button -->
-            <div>
-                <button id="editProfileButton" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none flex items-center">
-                    <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.109 17H1v-2a4 4 0 0 1 4-4h.87M10 4.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm7.95 2.55a2 2 0 0 1 0 2.829l-6.364 6.364-3.536.707.707-3.536 6.364-6.364a2 2 0 0 1 2.829 0Z" />
-                    </svg>
-                    Edit Profile
-                </button>
-            </div>
         </div>
     </div>
 
     <!-- Edit Profile Form -->
     <div id="editProfileForm" class="mt-6 bg-white shadow-lg rounded-lg p-6 hidden">
-        <h3 class="text-xl font-bold mb-4 text-gray-900">Edit Profile</h3>
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900">Edit Profile</h3>
+            <button type="button" id="closeEditButton" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
         <form asp-action="Profile" asp-controller="User" method="post" enctype="multipart/form-data">
             <div class="grid gap-6 mb-6 md:grid-cols-2">
                 <div>
@@ -153,6 +209,10 @@
     });
 
     document.getElementById('cancelEditButton').addEventListener('click', function() {
+        document.getElementById('editProfileForm').classList.add('hidden');
+    });
+
+    document.getElementById('closeEditButton').addEventListener('click', function() {
         document.getElementById('editProfileForm').classList.add('hidden');
     });
 

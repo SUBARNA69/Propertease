@@ -1,93 +1,693 @@
 ﻿@model Propertease.Models.PropertyDetailsViewModel
 
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
-    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-        <div class="relative">
-            @if (Model.ImageUrl.Any())
-            {
-                <img src="@Model.ImageUrl.First()" alt="@Model.Title" class="w-full h-64 object-cover">
-            }
-            else
-            {
-                <img src="https://via.placeholder.com/800x400" alt="Property Main Image" class="w-full h-64 object-cover">
-            }
+@{
+    // Assign the 3D Virtual Tour URL to a variable to avoid nested quote issues.
+    var modelViewerUrl = Url.Action("ModelViewer", "Home", new { id = Model.Id });
+}
 
-            <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-4">
-                <h1 class="text-2xl font-bold">$@Model.Price</h1>
-                <p class="text-sm">@Model.City, @Model.District, @Model.Province</p>
-            </div>
-        </div>
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
 
-        <div class="p-6">
-            @if (!string.IsNullOrEmpty(Model.ThreeDModel))
-            {
-                <a href="@Url.Action("ModelViewer", "Home", new { id = Model.Id })" class="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-purple-600 dark:hover:bg-purple-700 focus:outline-none dark:focus:ring-purple-800">
-                    <svg class="w-4 h-4 inline-block mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
-                        <path d="M8 0a8 8 0 0 0-8 8 8.034 8.034 0 0 0 1.014 3.9.5.5 0 0 0 .131.172l.414.42 7.067 7.069a.5.5 0 0 0 .707 0l7.067-7.069.414-.42a.5.5 0 0 0 .131-.172A8.034 8.034 0 0 0 16 8a8 8 0 0 0-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
-                    </svg>
-                    View 3D Virtual Tour
-                </a>
-            }
+<div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+    <div class="relative">
+        @if (Model.ImageUrl.Any())
+        {
+            <img src="@Model.ImageUrl.First()" alt="@Model.Title" class="w-full h-64 object-cover">
+        }
+        else
+        {
+            <img src="https://via.placeholder.com/800x400" alt="Property Main Image" class="w-full h-64 object-cover">
+        }
 
-            <div class="text-gray-600 space-y-2">
-                <p>📍 Location: @Model.City, @Model.District, @Model.Province</p>
-                <p>📘 Road Access: @Model.RoadAccess</p>
-
-                @if (Model.PropertyType == "House")
-                {
-                    <p>🏠 House - @Model.Bedrooms Bedrooms, @Model.Bathrooms Bathrooms, @Model.Kitchens Kitchens</p>
-                    <p>📎 Area: @Model.LandArea sq ft</p>
-                    <p>📅 Built Year: @Model.BuiltYear</p>
-                }
-                else if (Model.PropertyType == "Apartment")
-                {
-                    <p>🏢 Apartment - @Model.Rooms Rooms, @Model.Bathrooms Bathrooms, @Model.Kitchens Kitchens</p>
-                    <p>📎 Room Size: @Model.RoomSize sq ft</p>
-                }
-                else if (Model.PropertyType == "Land")
-                {
-                    <p>🌍 Land - @Model.LandType, Soil Quality: @Model.SoilQuality</p>
-                    <p>📎 Land Area: @Model.LandArea sq ft</p>
-                }
-            </div>
-
-            <p class="mt-4 text-gray-700">@Model.Description</p>
-
-            <div class="mt-6">
-                <h2 class="text-lg font-semibold">Map View</h2>
-                <div id="map" class="mt-2 h-48 bg-gray-200 rounded-lg"></div>
-            </div>
-
-            <div class="mt-6 flex items-center space-x-4">
-                <div class="flex-shrink-0">
-                    <img src="https://via.placeholder.com/50" alt="@Model.SellerName" class="h-12 w-12 rounded-full">
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold">@Model.SellerName</h3>
-                    <p class="text-gray-600">📘 @Model.SellerContact</p>
-                </div>
-            </div>
-
-            <div class="mt-6 flex space-x-4">
-                <button class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Contact Agent</button>
-                <button class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Schedule Viewing</button>
-            </div>
+        <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-4">
+            <h1 class="text-2xl font-bold">$@Model.Price</h1>
+            <p class="text-sm">@Model.City, @Model.District, @Model.Province</p>
         </div>
     </div>
 
-    <script>
-        mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
+    <div class="p-6">
+        @if (!string.IsNullOrEmpty(Model.ThreeDModel))
+        {
+            <a href="@modelViewerUrl" class="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-purple-600 dark:hover:bg-purple-700 focus:outline-none dark:focus:ring-purple-800">
+                <svg class="w-4 h-4 inline-block mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 20">
+                    <path d="M8 0a8 8 0 0 0-8 8 8.034 8.034 0 0 0 1.014 3.9.5.5 0 0 0 .131.172l.414.42 7.067 7.069a.5.5 0 0 0 .707 0l7.067-7.069.414-.42a.5.5 0 0 0 .131-.172A8.034 8.034 0 0 0 16 8a8 8 0 0 0-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z" />
+                </svg>
+                View 3D Virtual Tour
+            </a>
+        }
 
-        var map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/streets-v11',
-            center: [@Model.Longitude, @Model.Latitude],
-            zoom: 12
-        });
+        <div class="text-gray-600 space-y-2">
+            <p>📍 Location: @Model.City, @Model.District, @Model.Province</p>
+            <p>📘 Road Access: @Model.RoadAccess</p>
 
-        new mapboxgl.Marker()
-            .setLngLat([@Model.Longitude, @Model.Latitude])
-            .addTo(map);
-    </script>
+            @if (Model.PropertyType == "House")
+            {
+                <p>🏠 House - @Model.Bedrooms Bedrooms, @Model.Bathrooms Bathrooms, @Model.Kitchens Kitchens</p>
+                <p>📎 Area: @Model.LandArea sq ft</p>
+                <p>📅 Built Year: @Model.BuiltYear</p>
+            }
+            else if (Model.PropertyType == "Apartment")
+            {
+                <p>🏢 Apartment - @Model.Rooms Rooms, @Model.Bathrooms Bathrooms, @Model.Kitchens Kitchens</p>
+                <p>📎 Room Size: @Model.RoomSize sq ft</p>
+            }
+            else if (Model.PropertyType == "Land")
+            {
+                <p>🌍 Land - @Model.LandType, Soil Quality: @Model.SoilQuality</p>
+                <p>📎 Land Area: @Model.LandArea sq ft</p>
+            }
+        </div>
 
+        <p class="mt-4 text-gray-700">@Model.Description</p>
+
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold">Map View</h2>
+            <div id="map" class="mt-2 h-48 bg-gray-200 rounded-lg"></div>
+        </div>
+
+        <div class="mt-6 flex items-center space-x-4">
+            <div class="flex-shrink-0 relative" id="sellerProfileContainer">
+                @if (!string.IsNullOrEmpty(Model.SellerImage))
+                {
+                    <img src="~/Images/@Model.SellerImage" alt="@Model.SellerName" class="h-12 w-12 rounded-full cursor-pointer" id="sellerImage">
+                }
+                else
+                {
+                    <img src="https://via.placeholder.com/50" alt="@Model.SellerName" class="h-12 w-12 rounded-full cursor-pointer" id="sellerImage">
+                }
+                <!-- Dropdown menu for seller profile options -->
+                <div id="sellerOptions" class="absolute left-0 mt-2 w-36 bg-white rounded-md shadow-lg z-10 hidden">
+                    <ul class="py-1">
+                        <li><a href="#" id="viewProfileBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a></li>
+                        <li><a href="#" id="reportSellerBtn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Report</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold">@Model.SellerName</h3>
+                <p class="text-gray-600">📘 @Model.SellerContact</p>
+
+                <!-- Add seller rating display -->
+                <div class="flex items-center mt-1">
+                    <div class="flex items-center">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(Model.SellerAverageRating))
+                            {
+                                <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            }
+                            else
+                            {
+                                <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            }
+                        }
+                    </div>
+                    <span class="ml-1 text-xs text-gray-500">(@Model.SellerAverageRating.ToString("F1")) from @Model.SellerTotalRatings reviews</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-6 flex space-x-4">
+            <button id="contactAgentBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Contact Agent</button>
+            <button id="scheduleViewingBtn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Schedule Viewing</button>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Viewing Modal -->
+<div id="scheduleViewingModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Schedule Property Viewing</h3>
+            <div class="mt-2 px-7 py-3">
+                <form action="@Url.Action("ScheduleViewing", "Home")" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="PropertyId" value="@Model.Id" />
+                    <input type="hidden" name="Status" value="Pending" />
+
+                    <div class="mb-4">
+                        <label for="buyerName" class="block text-gray-700 text-sm font-bold mb-2">Your Name</label>
+                        <input type="text" id="buyerName" name="BuyerName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="buyerEmail" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                        <input type="email" id="buyerEmail" name="BuyerEmail" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="buyerContact" class="block text-gray-700 text-sm font-bold mb-2">Contact Number</label>
+                        <input type="tel" id="buyerContact" name="BuyerContact" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="viewingDate" class="block text-gray-700 text-sm font-bold mb-2">Preferred Date</label>
+                        <input type="date" id="viewingDate" name="ViewingDate" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required min="@DateTime.Now.ToString("yyyy-MM-dd")">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="viewingTime" class="block text-gray-700 text-sm font-bold mb-2">Preferred Time</label>
+                        <select id="viewingTime" name="ViewingTime" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                            <option value="">Select Time</option>
+                            <option value="09:00">9:00 AM</option>
+                            <option value="10:00">10:00 AM</option>
+                            <option value="11:00">11:00 AM</option>
+                            <option value="12:00">12:00 PM</option>
+                            <option value="13:00">1:00 PM</option>
+                            <option value="14:00">2:00 PM</option>
+                            <option value="15:00">3:00 PM</option>
+                            <option value="16:00">4:00 PM</option>
+                            <option value="17:00">5:00 PM</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="notes" class="block text-gray-700 text-sm font-bold mb-2">Additional Notes</label>
+                        <textarea id="notes" name="Notes" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" rows="3"></textarea>
+                    </div>
+
+                    <div class="flex items-center justify-between mt-4">
+                        <button type="button" id="closeModal" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">Cancel</button>
+                        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">Submit Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Seller Profile Modal -->
+<div id="sellerProfileModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="text-xl font-medium text-gray-900">Seller Profile</h3>
+            <button type="button" id="closeProfileModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="mt-4 max-h-[70vh] overflow-y-auto">
+            <div class="flex items-center space-x-4 mb-4">
+                <div class="flex-shrink-0">
+                    @if (!string.IsNullOrEmpty(Model.SellerImage))
+                    {
+                        <img src="~/Images/@Model.SellerImage" alt="@Model.SellerName" class="h-20 w-20 rounded-full">
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/80" alt="@Model.SellerName" class="h-20 w-20 rounded-full">
+                    }
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold">@Model.SellerName</h4>
+                    <p class="text-gray-600">Member since @Model.CreatedAt</p>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="font-semibold text-lg mb-2">Contact Information</h5>
+                <p class="text-gray-700">📱 Phone: @Model.SellerContact</p>
+                <p class="text-gray-700">📧 Email: @Model.SellerEmail</p>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="font-semibold text-lg mb-2">Ratings & Reviews</h5>
+                <div class="flex items-center mb-2">
+                    <div class="flex items-center">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= Math.Round(Model.SellerAverageRating))
+                            {
+                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            }
+                            else
+                            {
+                                <svg class="w-5 h-5 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            }
+                        }
+                        <span class="ml-2 text-gray-600">@Model.SellerAverageRating.ToString("F1") out of 5</span>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-3">Based on @Model.SellerTotalRatings reviews</p>
+
+                <!-- Rating distribution bars -->
+                @if (Model.SellerTotalRatings > 0)
+                {
+                    <div class="space-y-2 mb-4">
+                        @for (int i = 5; i >= 1; i--)
+                        {
+                            var count = Model.SellerReviews?.Count(r => r.Rating == i) ?? 0;
+                            var percentage = Model.SellerTotalRatings > 0 ? (count * 100) / Model.SellerTotalRatings : 0;
+
+                            <div class="flex items-center text-sm">
+                                <span class="w-8 text-gray-600">@i star</span>
+                                <div class="w-48 h-2 mx-2 bg-gray-200 rounded">
+                                    <div class="h-2 bg-yellow-400 rounded" style="width: @percentage%"></div>
+                                </div>
+                                <span class="text-gray-600">@count</span>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Recent reviews -->
+                @if (Model.SellerReviews != null && Model.SellerReviews.Any())
+                {
+                    <div class="space-y-3 mt-4">
+                        <h6 class="font-medium text-gray-700">Recent Reviews</h6>
+                        @foreach (var review in Model.SellerReviews)
+                        {
+                            <div class="border-t pt-3">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium text-gray-800">@review.BuyerName</p>
+                                        <div class="flex items-center mt-1">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                if (i <= review.Rating)
+                                                {
+                                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                }
+                                                else
+                                                {
+                                                    <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                    <span class="text-xs text-gray-500">@review.CreatedAt.ToString("MMM dd, yyyy")</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(review.Review))
+                                {
+                                    <p class="text-gray-600 text-sm mt-2">@review.Review</p>
+                                }
+                            </div>
+                        }
+
+                        @if (Model.SellerTotalRatings > 3)
+                        {
+                            <div class="text-center mt-2">
+                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm">View all @Model.SellerTotalRatings reviews</a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-gray-600 text-sm italic">No reviews yet</p>
+                }
+            </div>
+
+            <div class="mb-4">
+                <h5 class="font-semibold text-lg mb-2">Past Properties</h5>
+                @if (Model.SellerPastProperties != null && Model.SellerPastProperties.Any())
+                {
+                    <div class="grid grid-cols-2 gap-3">
+                        @foreach (var property in Model.SellerPastProperties)
+                        {
+                            <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="block border rounded-md overflow-hidden hover:shadow-md transition-shadow">
+                                <div class="relative">
+                                    <img src="@property.ImageUrl" alt="@property.Title" class="w-full h-24 object-cover">
+                                    @if (property.Status == "Sold")
+                                    {
+                                        <div class="absolute top-0 right-0 bg-red-500 text-white text-xs px-2 py-1 m-1 rounded">Sold</div>
+                                    }
+                                </div>
+                                <div class="p-2">
+                                    <p class="text-sm font-medium line-clamp-1">@property.Title</p>
+                                    <p class="text-xs text-gray-600">$@property.Price.ToString("N0")</p>
+                                    <p class="text-xs text-gray-500">Listed: @property.ListedDate</p>
+                                </div>
+                            </a>
+                        }
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <a href="#" class="text-blue-600 hover:text-blue-800 text-sm">View all properties by this seller</a>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-gray-600 text-sm italic">No other properties listed by this seller</p>
+                }
+            </div>
+
+            <div class="mt-6">
+                <button type="button" id="profileContactBtn" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Contact Seller</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Seller Modal (Placeholder - not implemented yet) -->
+<div id="reportSellerModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="text-xl font-medium text-gray-900">Report Seller</h3>
+            <button type="button" id="closeReportModal" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="mt-4 text-center">
+            <p class="text-gray-700">Report functionality will be implemented in the future.</p>
+            <button type="button" id="closeReportBtn" class="mt-4 bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Box Modal -->
+<div id="chatModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-0 border w-full max-w-md shadow-lg rounded-md bg-white">
+        <!-- Chat Header -->
+        <div class="flex justify-between items-center bg-blue-600 text-white p-4 rounded-t-md">
+            <div class="flex items-center space-x-3">
+                @if (!string.IsNullOrEmpty(Model.SellerImage))
+                {
+                    <img src="~/Images/@Model.SellerImage" alt="@Model.SellerName" class="h-10 w-10 rounded-full">
+                }
+                else
+                {
+                    <img src="https://via.placeholder.com/40" alt="@Model.SellerName" class="h-10 w-10 rounded-full">
+                }
+                <div>
+                    <h3 class="font-medium">@Model.SellerName</h3>
+                    <p class="text-xs">@Model.Title</p>
+                </div>
+            </div>
+            <button type="button" id="closeChatModal" class="text-white hover:bg-blue-700 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Chat Messages -->
+        <div id="chatMessages" class="h-80 overflow-y-auto p-4 bg-gray-50">
+            <!-- Seller welcome message -->
+            <div class="flex mb-4">
+                <div class="flex-shrink-0 mr-3">
+                    @if (!string.IsNullOrEmpty(Model.SellerImage))
+                    {
+                        <img src="~/Images/@Model.SellerImage" alt="@Model.SellerName" class="h-8 w-8 rounded-full">
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/32" alt="@Model.SellerName" class="h-8 w-8 rounded-full">
+                    }
+                </div>
+                <div class="bg-white rounded-lg py-2 px-3 max-w-[75%] shadow-sm">
+                    <p class="text-sm">Hello! I'm @Model.SellerName. How can I help you with this property?</p>
+                    <p class="text-xs text-gray-500 mt-1">Just now</p>
+                </div>
+            </div>
+
+            <!-- Sample message from buyer (for demonstration) -->
+            <div class="flex justify-end mb-4 hidden" id="sampleBuyerMessage">
+                <div class="bg-blue-100 rounded-lg py-2 px-3 max-w-[75%] shadow-sm">
+                    <p class="text-sm">Hi, I'm interested in this property. Is it still available?</p>
+                    <p class="text-xs text-gray-500 mt-1">Just now</p>
+                </div>
+            </div>
+
+            <!-- Sample response from seller (for demonstration) -->
+            <div class="flex mb-4 hidden" id="sampleSellerResponse">
+                <div class="flex-shrink-0 mr-3">
+                    @if (!string.IsNullOrEmpty(Model.SellerImage))
+                    {
+                        <img src="~/Images/@Model.SellerImage" alt="@Model.SellerName" class="h-8 w-8 rounded-full">
+                    }
+                    else
+                    {
+                        <img src="https://via.placeholder.com/32" alt="@Model.SellerName" class="h-8 w-8 rounded-full">
+                    }
+                </div>
+                <div class="bg-white rounded-lg py-2 px-3 max-w-[75%] shadow-sm">
+                    <p class="text-sm">Yes, it's still available! Would you like to schedule a viewing?</p>
+                    <p class="text-xs text-gray-500 mt-1">Just now</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="border-t p-4">
+            <form id="chatForm" class="flex items-center">
+                <input type="text" id="messageInput" placeholder="Type your message..." class="flex-1 border rounded-l-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="bg-blue-600 text-white rounded-r-lg px-4 py-2 hover:bg-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                    </svg>
+                </button>
+            </form>
+
+            <div class="flex justify-between mt-2 text-xs text-gray-500">
+                <span>Press Enter to send</span>
+                <span id="typingIndicator" class="hidden">Seller is typing...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Mapbox initialization
+    mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
+
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [@Model.Longitude, @Model.Latitude],
+        zoom: 12
+    });
+
+    new mapboxgl.Marker()
+        .setLngLat([@Model.Longitude, @Model.Latitude])
+        .addTo(map);
+
+    // Schedule Viewing Modal
+    const modal = document.getElementById('scheduleViewingModal');
+    const openModalBtn = document.getElementById('scheduleViewingBtn');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    // Open modal and fetch user data
+    openModalBtn.addEventListener('click', function() {
+        modal.classList.remove('hidden');
+
+        // Fetch buyer details if user is logged in
+        fetch('/Home/GetBuyerDetails')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('buyerName').value = data.name || '';
+                    document.getElementById('buyerEmail').value = data.email || '';
+                    document.getElementById('buyerContact').value = data.contactNumber || '';
+                }
+            })
+            .catch(error => console.error('Error fetching buyer details:', error));
+    });
+
+    // Close modal when clicking the close button
+    closeModalBtn.addEventListener('click', function() {
+        modal.classList.add('hidden');
+    });
+
+    // Close modal when clicking outside of the modal content
+    window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+
+    // Seller Profile Functionality
+    const sellerImage = document.getElementById('sellerImage');
+    const sellerOptions = document.getElementById('sellerOptions');
+    const sellerProfileModal = document.getElementById('sellerProfileModal');
+    const reportSellerModal = document.getElementById('reportSellerModal');
+    const viewProfileBtn = document.getElementById('viewProfileBtn');
+    const reportSellerBtn = document.getElementById('reportSellerBtn');
+    const closeProfileModal = document.getElementById('closeProfileModal');
+    const closeReportModal = document.getElementById('closeReportModal');
+    const closeReportBtn = document.getElementById('closeReportBtn');
+
+    // Toggle dropdown menu when clicking on seller image
+    sellerImage.addEventListener('click', function(event) {
+        event.stopPropagation();
+        sellerOptions.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking elsewhere
+    document.addEventListener('click', function() {
+        sellerOptions.classList.add('hidden');
+    });
+
+    // Prevent dropdown from closing when clicking inside it
+    sellerOptions.addEventListener('click', function(event) {
+        event.stopPropagation();
+    });
+
+    // Open profile modal when clicking "Profile" option
+    viewProfileBtn.addEventListener('click', function(event) {
+        event.preventDefault();
+        sellerOptions.classList.add('hidden');
+        sellerProfileModal.classList.remove('hidden');
+    });
+
+    // Open report modal when clicking "Report" option
+    reportSellerBtn.addEventListener('click', function(event) {
+        event.preventDefault();
+        sellerOptions.classList.add('hidden');
+        reportSellerModal.classList.remove('hidden');
+    });
+
+    // Close profile modal
+    closeProfileModal.addEventListener('click', function() {
+        sellerProfileModal.classList.add('hidden');
+    });
+
+    // Close report modal
+    closeReportModal.addEventListener('click', function() {
+        reportSellerModal.classList.add('hidden');
+    });
+
+    closeReportBtn.addEventListener('click', function() {
+        reportSellerModal.classList.add('hidden');
+    });
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === sellerProfileModal) {
+            sellerProfileModal.classList.add('hidden');
+        }
+        if (event.target === reportSellerModal) {
+            reportSellerModal.classList.add('hidden');
+        }
+    });
+
+    // Chat Box Functionality
+    const chatModal = document.getElementById('chatModal');
+    const contactAgentBtn = document.getElementById('contactAgentBtn');
+    const profileContactBtn = document.getElementById('profileContactBtn');
+    const closeChatModal = document.getElementById('closeChatModal');
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const typingIndicator = document.getElementById('typingIndicator');
+    const sampleBuyerMessage = document.getElementById('sampleBuyerMessage');
+    const sampleSellerResponse = document.getElementById('sampleSellerResponse');
+
+    // Open chat modal when clicking "Contact Agent" button
+    contactAgentBtn.addEventListener('click', function() {
+        chatModal.classList.remove('hidden');
+        messageInput.focus();
+    });
+
+    // Open chat modal when clicking "Contact Seller" button in profile
+    profileContactBtn.addEventListener('click', function() {
+        sellerProfileModal.classList.add('hidden');
+        chatModal.classList.remove('hidden');
+        messageInput.focus();
+    });
+
+    // Close chat modal
+    closeChatModal.addEventListener('click', function() {
+        chatModal.classList.add('hidden');
+    });
+
+    // Close chat modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === chatModal) {
+            chatModal.classList.add('hidden');
+        }
+    });
+
+    // Handle chat form submission
+    chatForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const message = messageInput.value.trim();
+
+        if (message) {
+            // Add buyer message to chat
+            const buyerMessageDiv = document.createElement('div');
+            buyerMessageDiv.className = 'flex justify-end mb-4';
+            buyerMessageDiv.innerHTML = `
+                <div class="bg-blue-100 rounded-lg py-2 px-3 max-w-[75%] shadow-sm">
+                    <p class="text-sm">${message}</p>
+                    <p class="text-xs text-gray-500 mt-1">Just now</p>
+                </div>
+            `;
+            chatMessages.appendChild(buyerMessageDiv);
+
+            // Clear input
+            messageInput.value = '';
+
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Show typing indicator
+            setTimeout(() => {
+                typingIndicator.classList.remove('hidden');
+            }, 500);
+
+            // Simulate seller response after delay
+            setTimeout(() => {
+                typingIndicator.classList.add('hidden');
+
+                // For demo purposes, show a predefined response
+                // In a real app, this would be handled by a backend API
+                let responseText = '';
+
+                if (message.toLowerCase().includes('available')) {
+                    responseText = 'Yes, this property is still available! Would you like to schedule a viewing?';
+                } else if (message.toLowerCase().includes('price') || message.toLowerCase().includes('cost')) {
+                    responseText = 'The price is $@Model.Price. We may have some flexibility depending on your requirements.';
+                } else if (message.toLowerCase().includes('viewing') || message.toLowerCase().includes('visit')) {
+                    responseText = 'I\'d be happy to arrange a viewing. You can use the "Schedule Viewing" button or let me know what dates work for you.';
+                } else {
+                    responseText = 'Thank you for your message. I\'ll get back to you as soon as possible. Feel free to ask any questions about the property.';
+                }
+
+                const sellerResponseDiv = document.createElement('div');
+                sellerResponseDiv.className = 'flex mb-4';
+                sellerResponseDiv.innerHTML = `
+                    <div class="flex-shrink-0 mr-3">
+                        <img src="${!('@Model.SellerImage'.includes('null') || '@Model.SellerImage' === '') ? '/Images/@Model.SellerImage' : 'https://via.placeholder.com/32'}" alt="@Model.SellerName" class="h-8 w-8 rounded-full">
+                    </div>
+                    <div class="bg-white rounded-lg py-2 px-3 max-w-[75%] shadow-sm">
+                        <p class="text-sm">${responseText}</p>
+                        <p class="text-xs text-gray-500 mt-1">Just now</p>
+                    </div>
+                `;
+                chatMessages.appendChild(sellerResponseDiv);
+
+                // Scroll to bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 2000);
+        }
+    });
+
+    // For demonstration purposes, show sample conversation after a delay
+    setTimeout(() => {
+        if (chatModal.classList.contains('hidden')) {
+            // Only show sample if user hasn't started chatting yet
+            sampleBuyerMessage.classList.remove('hidden');
+
+            setTimeout(() => {
+                sampleSellerResponse.classList.remove('hidden');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+    }, 5000);
+</script>

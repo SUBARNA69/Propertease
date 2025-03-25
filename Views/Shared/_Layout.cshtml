@@ -35,6 +35,7 @@
                             <a asp-controller="Home" asp-action="Properties" class="text-gray-900 hover:text-blue-500">Properties</a>
                             <a asp-controller="Home" asp-action="About" class="text-gray-900 hover:text-blue-500">About</a>
                             <a asp-controller="Home" asp-action="Forum" class="text-gray-900 hover:text-blue-500">Forum</a>
+                            <a asp-controller="Home" asp-action="MyPurchases" class="text-gray-900 hover:text-blue-500">My Purchases</a>
                             <a href="~/3DModels/index.html" class="text-gray-900 hover:text-blue-500">3d</a>
                         }
                         @* Role-based navigation links *@
@@ -45,6 +46,8 @@
                             <a asp-controller="Seller" asp-action="Listings" class="text-gray-900 hover:text-blue-500">My Listings</a>
                             <a asp-controller="Activity" asp-action="Index" class="text-gray-900 hover:text-blue-500">Activity</a>
                             <a asp-controller="Seller" asp-action="MyProperties" class="text-gray-900 hover:text-blue-500">Boosted Properties</a>
+                            <a asp-controller="Seller" asp-action="ViewingRequests" class="text-gray-900 hover:text-blue-500">Property View Requests</a>
+                            <a asp-controller="Seller" asp-action="MyRatings" class="text-gray-900 hover:text-blue-500">My Ratings</a>
                         }
                         else if (User.IsInRole("Admin"))
                         {

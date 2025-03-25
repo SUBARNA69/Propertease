@@ -1,0 +1,65 @@
+﻿@model PaymentConfirmationViewModel
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-md mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="@(Model.IsSuccessful ? "bg-green-500" : "bg-red-500") p-4">
+            <h2 class="text-white text-2xl font-bold text-center">
+                @(Model.IsSuccessful ? "Payment Confirmed" : "Payment Failed")
+            </h2>
+        </div>
+
+        <div class="p-6">
+            <div class="mb-4">
+                <p class="text-gray-600">Transaction Details</p>
+                <h3 class="text-xl font-semibold text-gray-800">Boost #@Model.BoostId</h3>
+            </div>
+
+            <div class="space-y-4">
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-600">Transaction Code:</span>
+                    <span class="font-medium">@Model.TransactionCode</span>
+                </div>
+
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-600">Amount Paid:</span>
+                    <span class="font-medium text-green-600">@Model.FormattedAmount</span>
+                </div>
+
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-600">Payment Date:</span>
+                    <span class="font-medium">@Model.FormattedPaymentDate</span>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.PropertyName))
+                {
+                    <div class="flex justify-between border-b pb-2">
+                        <span class="text-gray-600">Property:</span>
+                        <span class="font-medium">@Model.PropertyName</span>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.BoostType))
+                {
+                    <div class="flex justify-between pb-2">
+                        <span class="text-gray-600">Boost Type:</span>
+                        <span class="font-medium">@Model.BoostType</span>
+                    </div>
+                }
+            </div>
+
+            <div class="mt-6 text-center">
+                <a href="@Url.Action("Index", "Seller")"
+                   class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                    Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Optional: Add print functionality
+    function printReceipt() {
+        window.print();
+    }
+</script>
