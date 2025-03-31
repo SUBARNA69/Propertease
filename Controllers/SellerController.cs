@@ -1192,6 +1192,168 @@ namespace Propertease.Controllers
 
             return View(ratings);
         }
+        // Add these methods to your SellerController class
+
+        [HttpGet]
+        public async Task<IActionResult> SoldProperties()
+        {
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Get all properties belonging to this seller that are marked as sold
+            var soldProperties = await _context.properties
+                .Include(p => p.PropertyImages)
+                .Where(p => p.SellerId == sellerId && p.Status == "Sold")
+                .ToListAsync();
+
+            // Get all completed viewing requests for these properties
+            var propertyIds = soldProperties.Select(p => p.Id).ToList();
+            var completedRequests = await _context.PropertyViewingRequests
+                .Include(r => r.Properties)
+                .Include(r => r.Buyer)
+                .Where(r => propertyIds.Contains(r.PropertyId) && r.Status == "Completed")
+                .ToListAsync();
+
+            // Check which buyers have already been rated by this seller
+            var ratedBuyerProperties = await _context.BuyerRatings
+                .Where(r => r.SellerId == sellerId)
+                .Select(r => new { r.BuyerId, r.PropertyId })
+                .ToListAsync();
+
+            // Create view model
+            var viewModel = completedRequests.Select(r => new SoldPropertyViewModel
+            {
+                ViewingRequestId = r.Id,
+                PropertyId = r.PropertyId,
+                PropertyTitle = r.Properties.Title,
+                PropertyDescription = r.Properties.Description,
+                PropertyType = r.Properties.PropertyType,
+                PropertyPrice = r.Properties.Price,
+                PropertyLocation = $"{r.Properties.District}, {r.Properties.City}, {r.Properties.Province}",
+                PropertyImage = r.Properties.PropertyImages.FirstOrDefault()?.Photo != null
+                    ? "/Images/" + r.Properties.PropertyImages.FirstOrDefault()?.Photo
+                    : "/placeholder.svg?height=200&width=300",
+                BuyerId = r.BuyerId,
+                BuyerName = r.Buyer?.FullName ?? r.BuyerName,
+                CompletionDate = r.RequestedAt,
+                HasBeenRated = ratedBuyerProperties.Any(rp => rp.BuyerId == r.BuyerId && rp.PropertyId == r.PropertyId)
+            }).ToList();
+
+            return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RateBuyer(int propertyId, int? requestId = null)
+        {
+            // Get the property
+            var property = await _context.properties
+                .FirstOrDefaultAsync(p => p.Id == propertyId);
+
+            if (property == null)
+            {
+                return NotFound();
+            }
+
+            // Check if the property belongs to the current seller
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            if (property.SellerId != sellerId)
+            {
+                return Forbid();
+            }
+
+            // Check if the property is sold
+            if (property.Status != "Sold")
+            {
+                TempData["ErrorMessage"] = "You can only rate buyers for properties that have been sold.";
+                return RedirectToAction("SoldProperties");
+            }
+
+            // Get the viewing request
+            PropertyViewingRequest request = null;
+            if (requestId.HasValue)
+            {
+                request = await _context.PropertyViewingRequests
+                    .Include(r => r.Buyer)
+                    .FirstOrDefaultAsync(r => r.Id == requestId.Value);
+            }
+            else
+            {
+                // If no specific request ID is provided, get the completed request for this property
+                request = await _context.PropertyViewingRequests
+                    .Include(r => r.Buyer)
+                    .FirstOrDefaultAsync(r => r.PropertyId == propertyId && r.Status == "Completed");
+            }
+
+            if (request == null)
+            {
+                TempData["ErrorMessage"] = "No completed viewing request found for this property.";
+                return RedirectToAction("SoldProperties");
+            }
+
+            // Check if the buyer has already been rated for this property
+            var existingRating = await _context.BuyerRatings
+                .FirstOrDefaultAsync(r => r.PropertyId == propertyId && r.BuyerId == request.BuyerId && r.SellerId == sellerId);
+
+            if (existingRating != null)
+            {
+                TempData["ErrorMessage"] = "You have already rated this buyer for this property.";
+                return RedirectToAction("SoldProperties");
+            }
+
+            // Create the view model
+            var viewModel = new BuyerRatingViewModel
+            {
+                PropertyId = propertyId,
+                PropertyTitle = property.Title,
+                BuyerId = request.BuyerId,
+                BuyerName = request.Buyer?.FullName ?? request.BuyerName,
+                ViewingRequestId = request.Id
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RateBuyer(BuyerRatingViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            // Get the seller ID
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Create the rating
+            var rating = new BuyerRating
+            {
+                SellerId = sellerId,
+                BuyerId = model.BuyerId,
+                PropertyId = model.PropertyId,
+                Rating = model.Rating,
+                Review = model.Review,
+                ViewingRequestId = model.ViewingRequestId,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            // Save to database
+            _context.BuyerRatings.Add(rating);
+            await _context.SaveChangesAsync();
+
+            // Notify the buyer
+            await _notificationService.CreateNotificationAsync(
+                "New Rating Received",
+                $"You received a {model.Rating}-star rating for property '{model.PropertyTitle}'.",
+                "NewRating",
+                model.BuyerId,
+                model.PropertyId
+            );
+
+            TempData["SuccessMessage"] = "Thank you for your rating and review!";
+            return RedirectToAction("SoldProperties");
+        }
+
+       
     }
     
 }

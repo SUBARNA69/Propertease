@@ -9,6 +9,8 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.SignalR;
 using Propertease.Services;
 using PROPERTEASE.Services;
+using OfficeOpenXml;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,9 +25,22 @@ builder.Services.AddCors(options =>
               .WithExposedHeaders("Content-Disposition"); // Useful for file downloads
     });
 });
-
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("MessagePolicy", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.User.Identity?.Name ?? context.Request.Headers["X-Client-Id"],
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+});
 // Register other services
-
+// Add this before building the host
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // For non-commercial use
+// Or use LicenseContext.Commercial if you have a commercial license
 builder.Services.AddScoped<PropertyRepository>();
 // Add this line where your other services are registered
 builder.Services.AddScoped<INotificationService, NotificationService>(); 
@@ -34,15 +49,30 @@ builder.Services.AddDbContext<ProperteaseDbContext>(options =>
            .EnableSensitiveDataLogging());
 builder.Services.AddSingleton<AwsSnsService>();
 builder.Services.AddTransient<EmailService>();
+// Add this to your services configuration
+builder.Services.AddSingleton<PricePredictionService>();
 // Add this to your ConfigureServices method
 builder.Services.AddHostedService<BoostedPropertyCleanupService>();
 // Add this line with your other SignalR configuration
-builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>(); 
 builder.Services.AddHttpClient<EsewaPaymentService>();
 builder.Services.AddScoped<EsewaPaymentService>();
 builder.Services.AddSingleton<SmsService>();
 builder.Services.AddSingleton<ProperteaseSecurityProvider>();
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = true;
+    options.MaximumReceiveMessageSize = 102400; // 100 KB
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+});
+// In Program.cs
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.AddDebug();
+    logging.SetMinimumLevel(LogLevel.Debug);
+});
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(o =>
     {
@@ -82,7 +112,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 // Map SignalR hubs after authentication
+
 app.MapHub<NotificationHub>("/notificationHub");
+
 
 app.MapControllerRoute(
     name: "default",

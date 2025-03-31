@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -27,7 +28,7 @@ namespace Propertease.Models
 
         public int? RelatedPropertyId { get; set; } // Optional: Property ID if notification is related to a property
 
-        // Navigation properties (if using Entity Framework)
+        // Navigation properties
         [ForeignKey("RecipientId")]
         public virtual User Recipient { get; set; }
 
@@ -35,4 +36,3 @@ namespace Propertease.Models
         public virtual Properties RelatedProperty { get; set; }
     }
 }
-

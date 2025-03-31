@@ -1,0 +1,238 @@
+﻿<!-- Views/Home/CompareProperties.cshtml -->
+@model Propertease.Models.ComparePropertyViewModel
+
+@{
+    ViewData["Title"] = "Compare Properties";
+}
+
+<div class="container mx-auto py-6">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold">Compare Properties</h1>
+        @if (Model.Properties.Any())
+        {
+            <button id="clearCompareBtn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">Clear All</button>
+        }
+    </div>
+
+    @if (!Model.Properties.Any())
+    {
+        <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
+            <p>You haven't added any properties to compare yet. Browse properties and click "Add to Compare" to start comparing.</p>
+        </div>
+        <a href="@Url.Action("Home", "Home")" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Browse Properties</a>
+    }
+    else
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr>
+                        <th class="p-4 text-left bg-gray-100 font-medium text-gray-600 w-1/4">Property</th>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <th class="p-4 text-center">
+                                <div class="flex flex-col items-center">
+                                    <div class="relative w-full h-48 mb-4">
+                                        @if (property.ImageUrl.Any())
+                                        {
+                                            <img src="~/Images/@property.ImageUrl.First()" alt="@property.Title" class="object-cover rounded-md w-full h-full" />
+                                        }
+                                        else
+                                        {
+                                            <img src="https://via.placeholder.com/300x200" alt="Property Image" class="object-cover rounded-md w-full h-full" />
+                                        }
+                                    </div>
+                                    <h3 class="font-bold text-lg mb-2">@property.Title</h3>
+                                    <p class="text-2xl font-bold text-blue-600 mb-2">$@property.Price.ToString("N0")</p>
+                                    <p class="text-sm text-gray-500 mb-4">
+                                        @property.City, @property.District
+                                    </p>
+                                    <button class="remove-property-btn bg-white border border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1 rounded text-sm"
+                                            data-id="@property.Id">
+                                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                        Remove
+                                    </button>
+                                </div>
+                            </th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Property Type</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @property.PropertyType
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Location</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @property.City, @property.District, @property.Province
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Price</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                $@property.Price.ToString("N0")
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Conditional rows based on property type -->
+                    @if (Model.Properties.Any(p => p.PropertyType == "House" || p.PropertyType == "Apartment"))
+                    {
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Bedrooms</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "House" ? property.Bedrooms.ToString() :
+                                        property.PropertyType == "Apartment" ? property.Rooms.ToString() : "-")
+                                </td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Bathrooms</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "House" || property.PropertyType == "Apartment"
+                                        ? property.Bathrooms.ToString() : "-")
+                                </td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Kitchens</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "House" || property.PropertyType == "Apartment"
+                                        ? property.Kitchens.ToString() : "-")
+                                </td>
+                            }
+                        </tr>
+                    }
+
+                    @if (Model.Properties.Any(p => p.PropertyType == "House" || p.PropertyType == "Land"))
+                    {
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Land Area</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "House" || property.PropertyType == "Land"
+                                        ? $"{property.LandArea} sq ft" : "-")
+                                </td>
+                            }
+                        </tr>
+                    }
+
+                    @if (Model.Properties.Any(p => p.PropertyType == "House"))
+                    {
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Built Year</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "House" ? property.BuiltYear.ToString() : "-")
+                                </td>
+                            }
+                        </tr>
+                    }
+
+                    @if (Model.Properties.Any(p => p.PropertyType == "Apartment"))
+                    {
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Room Size</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "Apartment" ? $"{property.RoomSize} sq ft" : "-")
+                                </td>
+                            }
+                        </tr>
+                    }
+
+                    @if (Model.Properties.Any(p => p.PropertyType == "Land"))
+                    {
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Land Type</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "Land" ? property.LandType : "-")
+                                </td>
+                            }
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Soil Quality</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @(property.PropertyType == "Land" ? property.SoilQuality : "-")
+                                </td>
+                            }
+                        </tr>
+                    }
+
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Road Access</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @property.RoadAccess
+                            </td>
+                        }
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+
+    <script>
+        // Add to Compare functionality
+        $(document).ready(function() {
+            // Remove property from comparison
+            $('.remove-property-btn').click(function() {
+                const propertyId = $(this).data('id');
+
+                $.ajax({
+                    url: '@Url.Action("RemoveFromCompare", "Home")',
+                    type: 'POST',
+                    data: { id: propertyId },
+                    success: function(response) {
+                        if (response.success) {
+                            // Reload the page to update the comparison table
+                            location.reload();
+                        }
+                    }
+                });
+            });
+
+            // Clear all properties from comparison
+            $('#clearCompareBtn').click(function() {
+                $.ajax({
+                    url: '@Url.Action("ClearCompare", "Home")',
+                    type: 'POST',
+                    success: function(response) {
+                        if (response.success) {
+                            // Reload the page to update the comparison table
+                            location.reload();
+                        }
+                    }
+                });
+            });
+        });
+    </script>

@@ -3,10 +3,13 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Propertease.Hubs;
 using Propertease.Models;
 using Propertease.Repos;
+using Propertease.Services;
 
 namespace Propertease.Controllers
 {
@@ -18,15 +21,23 @@ namespace Propertease.Controllers
         IWebHostEnvironment webHostEnvironment;
         private readonly INotificationService _notificationService;
         private readonly IHubContext<NotificationHub> _hubContext;
+        private readonly PricePredictionService _pricePredictionService;
+        private readonly PropertyRepository propertyRepository;
 
-        public HomeController(ILogger<HomeController> logger, ProperteaseDbContext context, IWebHostEnvironment webHostEnvironment, IHubContext<NotificationHub> _hubContext, INotificationService _notificationService)
+        public HomeController(ILogger<HomeController> logger, 
+            ProperteaseDbContext context, 
+            IWebHostEnvironment webHostEnvironment, 
+            IHubContext<NotificationHub> _hubContext, 
+            INotificationService _notificationService, 
+            PricePredictionService _pricePredictionService,
+            PropertyRepository propertyRepository)
         {
             _logger = logger;
             _context = context;
             this.webHostEnvironment = webHostEnvironment;
             this._notificationService = _notificationService;
-
-
+            this._pricePredictionService = _pricePredictionService;
+            this.propertyRepository = propertyRepository;
         }
 
         public IActionResult Properties()
@@ -172,8 +183,102 @@ namespace Propertease.Controllers
 
             return View(viewModel);
         }
+        // Controllers/HomeController.cs (or create a new controller)
+        [HttpGet]
+        // Add this method to your existing controller
+        // Add this method to your existing controller
+        public async Task<IActionResult> GetPropertyModel(int id)
+        {
+            var property = await _context.properties
+                .FirstOrDefaultAsync(p => p.Id == id);
 
+            if (property == null || string.IsNullOrEmpty(property.ThreeDModel))
+            {
+                return NotFound();
+            }
 
+            // Assuming 3D models are stored in a specific directory
+            string modelPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "3DModels", property.ThreeDModel);
+
+            if (!System.IO.File.Exists(modelPath))
+            {
+                return NotFound();
+            }
+
+            // Return the file with the appropriate MIME type
+            return PhysicalFile(modelPath, "model/gltf-binary");
+        }
+        public async Task<IActionResult> PredictPrice(int propertyId)
+        {
+            try
+            {
+                // Get property location with error handling
+                var property = await _context.properties
+                    .Where(p => p.Id == propertyId)
+                    .Select(p => new { p.Latitude, p.Longitude })
+                    .FirstOrDefaultAsync();
+
+                if (property == null)
+                {
+                    _logger.LogWarning($"Property with ID {propertyId} not found");
+                    return NotFound(new { success = false, message = "Property not found" });
+                }
+
+                // Get house details with error handling
+                var house = await _context.Houses
+                    .FirstOrDefaultAsync(h => h.ID == propertyId);
+
+                if (house == null)
+                {
+                    _logger.LogWarning($"House details for property ID {propertyId} not found");
+                    return NotFound(new { success = false, message = "House details not found" });
+                }
+
+                // Validate critical fields
+                if (!property.Latitude.HasValue || !property.Longitude.HasValue)
+                {
+                    _logger.LogWarning($"Property {propertyId} has missing coordinates");
+                    return BadRequest(new { success = false, message = "Property coordinates are missing" });
+                }
+
+                // IMPORTANT: Make sure these field mappings are correct
+                // Prepare input features with correct field mappings
+                var inputFeatures = new PropertyInputFeatures
+                {
+                    // Make sure these field mappings match your database schema and model expectations
+                    HouseArea = house.BuildupArea, // This should be the actual house area, not land area
+                    Bedrooms = house.Bedrooms,
+                    Bathrooms = house.Bathrooms,
+                    LotArea = house.LandArea, // This should be the land area
+                    Floors = house.Floors,
+                    Latitude = property.Latitude,
+                    Longitude = property.Longitude,
+                    BuiltYear = house.BuiltYear
+                };
+
+                // Log the input features for debugging
+                _logger.LogInformation($"Predicting price for property {propertyId} with features: " +
+                    $"HouseArea={inputFeatures.HouseArea}, Bedrooms={inputFeatures.Bedrooms}, " +
+                    $"Bathrooms={inputFeatures.Bathrooms}, LotArea={inputFeatures.LotArea}");
+
+                // Get prediction with try-catch
+                var predictedPrice = _pricePredictionService.PredictPrice(inputFeatures);
+
+                // Validate prediction result
+                if (float.IsNaN(predictedPrice) || float.IsInfinity(predictedPrice) || predictedPrice <= 0)
+                {
+                    _logger.LogWarning($"Invalid prediction result for property {propertyId}: {predictedPrice}");
+                    return BadRequest(new { success = false, message = "Invalid prediction result" });
+                }
+
+                return Json(new { success = true, predictedPrice });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error predicting price for property {propertyId}");
+                return StatusCode(500, new { success = false, message = "An error occurred during price prediction" });
+            }
+        }
         [AllowAnonymous]
         public async Task<IActionResult> Home()
         {
@@ -192,11 +297,83 @@ namespace Propertease.Controllers
             // Get all approved properties that are not sold
             var allProperties = await _context.properties
                 .Include(p => p.PropertyImages)
+                .Include(p => p.Seller)
                 .Where(p => p.Status == "Approved" && p.Status != "Sold")
                 .ToListAsync();
 
+            // Create a list to hold our view models
+            var propertyViewModels = new List<PropertyDetailsViewModel>();
+
+            // Convert each property to a PropertyDetailsViewModel
+            foreach (var property in allProperties)
+            {
+                var viewModel = new PropertyDetailsViewModel
+                {
+                    Id = property.Id,
+                    Title = property.Title,
+                    Price = property.Price,
+                    Description = property.Description,
+                    District = property.District,
+                    City = property.City,
+                    Province = property.Province,
+                    ImageUrl = property.PropertyImages?.Select(img => "/Images/" + img.Photo).ToList() ?? new List<string>(),
+                    SellerName = property.Seller?.FullName,
+                    SellerContact = property.Seller?.ContactNumber,
+                    SellerEmail = property.Seller?.Email,
+                    SellerImage = property.Seller?.Image,
+                    PropertyType = property.PropertyType,
+                    Latitude = property.Latitude,
+                    Longitude = property.Longitude,
+                    RoadAccess = property.RoadAccess,
+                    ThreeDModel = property.ThreeDModel
+                };
+
+                // Add property-specific details based on property type
+                if (property.PropertyType == "House")
+                {
+                    var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+                    if (house != null)
+                    {
+                        viewModel.Bedrooms = house.Bedrooms;
+                        viewModel.Kitchens = house.Kitchens;
+                        viewModel.SittingRooms = house.SittingRooms;
+                        viewModel.Bathrooms = house.Bathrooms;
+                        viewModel.Floors = house.Floors;
+                        viewModel.LandArea = house.LandArea;
+                        viewModel.BuildupArea = house.BuildupArea;
+                        viewModel.BuiltYear = house.BuiltYear;
+                        viewModel.FacingDirection = house.FacingDirection;
+                    }
+                }
+                else if (property.PropertyType == "Apartment")
+                {
+                    var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == property.Id);
+                    if (apartment != null)
+                    {
+                        viewModel.Rooms = apartment.Rooms;
+                        viewModel.Kitchens = apartment.Kitchens;
+                        viewModel.Bathrooms = apartment.Bathrooms;
+                        viewModel.SittingRooms = apartment.SittingRooms;
+                        viewModel.RoomSize = apartment.RoomSize;
+                        viewModel.BuiltYear = apartment.BuiltYear;
+                    }
+                }
+                else if (property.PropertyType == "Land")
+                {
+                    var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == property.Id);
+                    if (land != null)
+                    {
+                        viewModel.LandArea = land.LandArea;
+                        viewModel.LandType = land.LandType;
+                        viewModel.SoilQuality = land.SoilQuality;
+                    }
+                }
+
+                propertyViewModels.Add(viewModel);
+            }
+
             // Reorder properties to show boosted ones first
-            var orderedProperties = allProperties
+            var orderedViewModels = propertyViewModels
                 .OrderByDescending(p => boostedPropertyIds.Contains(p.Id)) // Boosted properties first
                 .ThenByDescending(p => p.Id) // Then by newest
                 .ToList();
@@ -204,11 +381,112 @@ namespace Propertease.Controllers
             // Pass the boosted property IDs to the view
             ViewBag.BoostedPropertyIds = boostedPropertyIds;
 
-            return View(orderedProperties);
-        }
-        // GET: Property/ModelViewer/5
+            return View(orderedViewModels);
+        }        // GET: Property/ModelViewer/5
         [HttpGet]
         // GET: Property/ModelViewer/5
+        // Controllers/HomeController.cs - Add these methods to your existing controller
+
+        public async Task<IActionResult> CompareProperties()
+        {
+            // Get properties from session
+            var compareList = HttpContext.Session.GetString("CompareProperties");
+            var model = new ComparePropertyViewModel();
+
+            if (!string.IsNullOrEmpty(compareList))
+            {
+                var propertyIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(compareList);
+
+                // Fetch properties from database using your PropertyRepository
+                foreach (var id in propertyIds)
+                {
+                    if (int.TryParse(id, out int propertyId))
+                    {
+                        var property = await propertyRepository.GetPropertyDetails(propertyId);
+                        if (property != null)
+                        {
+                            model.Properties.Add(property);
+                        }
+                    }
+                }
+            }
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult AddToCompare(string id)
+        {
+            // Get current compare list from session
+            var compareList = HttpContext.Session.GetString("CompareProperties");
+            List<string> propertyIds = new List<string>();
+
+            if (!string.IsNullOrEmpty(compareList))
+            {
+                propertyIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(compareList);
+            }
+
+            // Check if property is already in the list
+            if (!propertyIds.Contains(id))
+            {
+                // Limit to 4 properties
+                if (propertyIds.Count >= 4)
+                {
+                    return Json(new { success = false, message = "You can compare up to 4 properties at a time" });
+                }
+
+                propertyIds.Add(id);
+            }
+
+            // Save back to session
+            HttpContext.Session.SetString("CompareProperties", System.Text.Json.JsonSerializer.Serialize(propertyIds));
+
+            return Json(new { success = true, count = propertyIds.Count });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveFromCompare(string id)
+        {
+            // Get current compare list from session
+            var compareList = HttpContext.Session.GetString("CompareProperties");
+
+            if (!string.IsNullOrEmpty(compareList))
+            {
+                var propertyIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(compareList);
+                propertyIds.Remove(id);
+
+                // Save back to session
+                HttpContext.Session.SetString("CompareProperties", System.Text.Json.JsonSerializer.Serialize(propertyIds));
+
+                return Json(new { success = true, count = propertyIds.Count });
+            }
+
+            return Json(new { success = false });
+        }
+
+        [HttpPost]
+        public IActionResult ClearCompare()
+        {
+            HttpContext.Session.Remove("CompareProperties");
+            return Json(new { success = true });
+        }
+
+        [HttpGet]
+        public IActionResult GetCompareList()
+        {
+            var compareList = HttpContext.Session.GetString("CompareProperties");
+            List<string> propertyIds = new List<string>();
+
+            if (!string.IsNullOrEmpty(compareList))
+            {
+                propertyIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(compareList);
+            }
+
+            return Json(new { properties = propertyIds, count = propertyIds.Count });
+        }
+        // Add to HomeController.cs
+        [HttpGet]
+        
         public IActionResult ModelViewer(int id)
         {
             // Get the property details
@@ -395,17 +673,25 @@ namespace Propertease.Controllers
                 return RedirectToAction("Details", new { id = request.PropertyId });
             }
         }
+        // Add this method to your existing HomeController.cs
+        // This assumes you already have a Details action for property details
 
+        // Add this method to your existing HomeController.cs
+        // This assumes you already have a Details action for property details
 
+       
+        [HttpGet]
         public async Task<IActionResult> Forum()
         {
-            // Fetch all forum posts with user and comment information
+            // Fetch all forum posts with their related user and comments
             var posts = await _context.ForumPosts
                 .Include(p => p.User)
                 .Include(p => p.Comments)
+                    .ThenInclude(c => c.User)  // Include the user for each comment
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
+            // Create a new view model with an empty forum post for the form
             var viewModel = new ForumViewModel
             {
                 ForumPost = new ForumPost(),
@@ -414,8 +700,81 @@ namespace Propertease.Controllers
 
             return View(viewModel);
         }
-        // ... existing code ...
 
+        // POST: /Forum (Create a new post)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Forum([Bind("Title,Content,AudioFile")] ForumPost forumPost)
+        {
+            if (ModelState.IsValid)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return NotFound("User ID not found.");
+                }
+
+                forumPost.UserId = int.Parse(userId);
+                forumPost.CreatedAt = DateTime.UtcNow;
+
+                // If an audio recording is attached, process it.
+                if (!string.IsNullOrEmpty(forumPost.AudioFile))
+                {
+                    try
+                    {
+                        // The AudioFile property holds a Base64 string (e.g., "data:audio/wav;base64,AAAA...")
+                        var base64Data = forumPost.AudioFile.Split(',')[1];
+                        var audioBytes = Convert.FromBase64String(base64Data);
+                        var fileName = $"audio_{Guid.NewGuid()}.wav";
+                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+
+                        // Ensure the uploads folder exists.
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        var filePath = Path.Combine(uploadsFolder, fileName);
+                        await System.IO.File.WriteAllBytesAsync(filePath, audioBytes);
+
+                        // Save only the file name (or relative path) in the database.
+                        forumPost.AudioFile = fileName;
+
+                        // Debug information
+                        Console.WriteLine($"Audio file saved as: {fileName}");
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error
+                        Console.WriteLine($"Error saving audio file: {ex.Message}");
+                        // Continue without the audio file
+                        forumPost.AudioFile = null;
+                    }
+                }
+
+                _context.ForumPosts.Add(forumPost);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Forum));
+            }
+
+            // If model state is invalid, re-fetch posts to display on the view.
+            var posts = await _context.ForumPosts
+                .Include(p => p.User)
+                .Include(p => p.Comments)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            var viewModel = new ForumViewModel
+            {
+                ForumPost = forumPost,
+                Posts = posts
+            };
+
+            return View(viewModel);
+        }
+
+
+        // POST: /Forum/AddForumComment (Add a comment to a post)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddForumComment(int postId, string content)
@@ -425,7 +784,6 @@ namespace Propertease.Controllers
                 return BadRequest("Comment content cannot be empty.");
             }
 
-            // Get the current user's ID
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
@@ -442,51 +800,7 @@ namespace Propertease.Controllers
 
             _context.ForumComments.Add(comment);
             await _context.SaveChangesAsync();
-
             return RedirectToAction(nameof(Forum));
-        }
-
-        // ... existing code ...
-        // POST: /Forum
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Forum([Bind("Title,Content")] ForumPost forumPost)
-        {
-            if (ModelState.IsValid)
-            {
-                // Get the UserId from the user's claims
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(userId))
-                {
-                    return NotFound("User ID not found in claims.");
-                }
-
-                // Set the UserId of the ForumPost
-                forumPost.UserId = int.Parse(userId);
-                forumPost.CreatedAt = DateTime.UtcNow;
-
-                // Add the ForumPost to the database
-                _context.ForumPosts.Add(forumPost);
-                await _context.SaveChangesAsync();
-
-                // Redirect back to the forum page
-                return RedirectToAction(nameof(Forum));
-            }
-
-            // If the model state is invalid, fetch posts again and return the full view model
-            var posts = await _context.ForumPosts
-                .Include(p => p.User)
-                .Include(p => p.Comments)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
-
-            var viewModel = new ForumViewModel
-            {
-                ForumPost = forumPost,
-                Posts = posts
-            };
-
-            return View(viewModel);
         }
 
 
@@ -621,6 +935,30 @@ namespace Propertease.Controllers
             return View(viewModel);
         }
 
+        [Authorize(Roles = "Buyer")]
+        public async Task<IActionResult> MyBuyerRatings()
+        {
+            var buyerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            var ratings = await _context.BuyerRatings // Using UserRatings since that's what's in your DbContext
+                .Include(r => r.Seller)
+                .Include(r => r.Property)
+                .Where(r => r.BuyerId == buyerId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            // Calculate average rating
+            double averageRating = 0;
+            if (ratings.Any())
+            {
+                averageRating = ratings.Average(r => r.Rating);
+            }
+
+            ViewBag.AverageRating = averageRating;
+            ViewBag.TotalRatings = ratings.Count;
+
+            return View(ratings);
+        }
         // Add this method to the HomeController class to track property views
         private async Task TrackPropertyView(int propertyId)
         {

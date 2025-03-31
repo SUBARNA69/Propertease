@@ -26,11 +26,12 @@ namespace Propertease.Models
         public DbSet<PropertyView> PropertyViews { get; set; }
         public DbSet<ForumComment> ForumComments { get; set; }
         //public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
-        public DbSet<UserRating> UserRatings { get; set; }
+        public DbSet<BuyerRating> BuyerRatings { get; set; }
         public DbSet<PropertyComment> PropertyComments { get; set; }
         public DbSet<SellerRating> SellerRatings { get; set; }
         //public DbSet<Payment> Payments { get; set; }
         public DbSet<PropertyViewingRequest> PropertyViewingRequests { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -40,6 +41,7 @@ namespace Propertease.Models
 
             
             modelBuilder.Entity<Apartment>().HasOne(a => a.Properties).WithMany(p => p.Apartments).HasForeignKey(a => a.PropertyID).OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<BoostedProperty>(entity =>
             {
@@ -62,6 +64,21 @@ namespace Propertease.Models
                 .HasForeignKey(pvr => pvr.PropertyId)
                 .OnDelete(DeleteBehavior.NoAction);
 
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                // Define the relationship with User (Recipient)
+                entity.HasOne(n => n.Recipient)
+                      .WithMany(u => u.Notifications)
+                      .HasForeignKey(n => n.RecipientId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                // Define the relationship with Property (optional relationship)
+                entity.HasOne(n => n.RelatedProperty)
+                      .WithMany(p => p.Notifications)
+                      .HasForeignKey(n => n.RelatedPropertyId)
+                      .IsRequired(false) // Make it optional
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
             modelBuilder.Entity<SellerRating>()
                .HasOne(sr => sr.Buyer)
                .WithMany()
@@ -91,28 +108,29 @@ namespace Propertease.Models
                 .HasForeignKey(sr => sr.PropertyId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            //modelBuilder.Entity<PaymentTransaction>()
-            //      .HasOne(p => p.Property)
-            //      .WithMany()
-            //      .HasForeignKey(p => p.PropertyId)
-            //      .OnDelete(DeleteBehavior.Restrict);
-            //modelBuilder.Entity<PaymentTransaction>()
-            //     .HasOne(pt => pt.User)
-            //     .WithMany()
-            //     .HasForeignKey(pt => pt.UserId)
-            //     .OnDelete(DeleteBehavior.Restrict);
-
             modelBuilder.Entity<ForumPost>()
                         .HasOne(fp => fp.User)
                         .WithMany(u => u.ForumPosts)
                         .HasForeignKey(fp => fp.UserId)
                         .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserRating>()
-                           .HasOne(ur => ur.RatedUser)
-                           .WithMany(u => u.RatingsReceived)
-                           .HasForeignKey(ur => ur.RatedUserId)
-                           .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<BuyerRating>()
+                .HasOne(ur => ur.Buyer)
+                .WithMany()
+                .HasForeignKey(ur => ur.BuyerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<BuyerRating>()
+                .HasOne(ur => ur.Seller)
+                .WithMany()
+                .HasForeignKey(ur => ur.SellerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<BuyerRating>()
+                .HasOne(ur => ur.Property)
+                .WithMany()
+                .HasForeignKey(ur => ur.PropertyId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<PropertyImage>()
                     .HasOne(pi => pi.Property)
@@ -120,11 +138,7 @@ namespace Propertease.Models
                     .HasForeignKey(pi => pi.PropertyId)
                     .OnDelete(DeleteBehavior.Cascade);
             // Configure UserRating -> User (RaterUser) relationship
-            modelBuilder.Entity<UserRating>()
-                        .HasOne(ur => ur.RaterUser)
-                        .WithMany(u => u.RatingsGiven)
-                        .HasForeignKey(ur => ur.RaterUserId)
-                        .OnDelete(DeleteBehavior.NoAction);
+       
 
             modelBuilder.Entity<PropertyComment>()
                         .HasOne(pc => pc.Property)

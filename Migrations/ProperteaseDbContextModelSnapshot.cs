@@ -118,6 +118,48 @@ namespace Propertease.Migrations
                     b.ToTable("Apartments");
                 });
 
+            modelBuilder.Entity("Propertease.Models.BuyerRating", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BuyerId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("PropertyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Review")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SellerId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ViewingRequestId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BuyerId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("SellerId");
+
+                    b.HasIndex("ViewingRequestId");
+
+                    b.ToTable("BuyerRatings");
+                });
+
             modelBuilder.Entity("Propertease.Models.ForumComment", b =>
                 {
                     b.Property<int>("Id")
@@ -155,6 +197,9 @@ namespace Propertease.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AudioFile")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -586,35 +631,6 @@ namespace Propertease.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Propertease.Models.UserRating", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("RatedUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RaterUserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("RatedUserId");
-
-                    b.HasIndex("RaterUserId");
-
-                    b.ToTable("UserRatings");
-                });
-
             modelBuilder.Entity("PROPERTEASE.Models.BoostedProperty", b =>
                 {
                     b.HasOne("Propertease.Models.Properties", "Property")
@@ -635,6 +651,39 @@ namespace Propertease.Migrations
                         .IsRequired();
 
                     b.Navigation("Properties");
+                });
+
+            modelBuilder.Entity("Propertease.Models.BuyerRating", b =>
+                {
+                    b.HasOne("Propertease.Models.User", "Buyer")
+                        .WithMany()
+                        .HasForeignKey("BuyerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.Properties", "Property")
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.User", "Seller")
+                        .WithMany()
+                        .HasForeignKey("SellerId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Propertease.Models.PropertyViewingRequest", "ViewingRequest")
+                        .WithMany()
+                        .HasForeignKey("ViewingRequestId");
+
+                    b.Navigation("Buyer");
+
+                    b.Navigation("Property");
+
+                    b.Navigation("Seller");
+
+                    b.Navigation("ViewingRequest");
                 });
 
             modelBuilder.Entity("Propertease.Models.ForumComment", b =>
@@ -692,14 +741,15 @@ namespace Propertease.Migrations
             modelBuilder.Entity("Propertease.Models.Notification", b =>
                 {
                     b.HasOne("Propertease.Models.User", "Recipient")
-                        .WithMany()
+                        .WithMany("Notifications")
                         .HasForeignKey("RecipientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Propertease.Models.Properties", "RelatedProperty")
-                        .WithMany()
-                        .HasForeignKey("RelatedPropertyId");
+                        .WithMany("Notifications")
+                        .HasForeignKey("RelatedPropertyId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Recipient");
 
@@ -818,23 +868,6 @@ namespace Propertease.Migrations
                     b.Navigation("ViewingRequest");
                 });
 
-            modelBuilder.Entity("Propertease.Models.UserRating", b =>
-                {
-                    b.HasOne("Propertease.Models.User", "RatedUser")
-                        .WithMany("RatingsReceived")
-                        .HasForeignKey("RatedUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Propertease.Models.User", "RaterUser")
-                        .WithMany("RatingsGiven")
-                        .HasForeignKey("RaterUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("RatedUser");
-
-                    b.Navigation("RaterUser");
-                });
-
             modelBuilder.Entity("Propertease.Models.ForumPost", b =>
                 {
                     b.Navigation("Comments");
@@ -847,6 +880,8 @@ namespace Propertease.Migrations
                     b.Navigation("Houses");
 
                     b.Navigation("Lands");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("PropertyComments");
 
@@ -861,15 +896,13 @@ namespace Propertease.Migrations
 
                     b.Navigation("ForumPosts");
 
+                    b.Navigation("Notifications");
+
                     b.Navigation("Properties");
 
                     b.Navigation("PropertyComments");
 
                     b.Navigation("PropertyViewingRequests");
-
-                    b.Navigation("RatingsGiven");
-
-                    b.Navigation("RatingsReceived");
                 });
 #pragma warning restore 612, 618
         }

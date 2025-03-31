@@ -13,49 +13,49 @@ public class PropertyRepository
     public async Task<PropertyDetailsViewModel> GetPropertyDetails(int propertyId)
     {
         string query = @"
-        SELECT 
-            p.Id,
-            p.Title,
-            p.Description,
-            p.Price,
-            p.City,
-            p.District,
-            p.Province,
-            p.PropertyType,
-            p.Status,
-            p.RoadAccess,
-            p.Latitude,
-            p.Longitude,
-            p.CreatedAt,
-            p.ThreeDModel,
-            p.SellerId,
-            s.FullName AS SellerName,
-            s.ContactNumber AS SellerContact,
-            s.Email AS SellerEmail,
-            s.Address AS SellerAddress,
-            h.Bedrooms,
-            h.Kitchens,
-            h.SittingRooms,
-            h.Bathrooms,
-            h.Floors,
-            h.LandArea AS HouseLandArea,
-            h.BuildupArea,
-            h.BuiltYear AS HouseBuiltYear,
-            h.FacingDirection,
-            a.Rooms,
-            a.RoomSize,
-            a.BuiltYear AS ApartmentBuiltYear,
-            l.LandArea AS LandLandArea,
-            l.LandType,
-            l.SoilQuality,
-            pi.Photo AS ImageUrl
-        FROM Properties p
-        LEFT JOIN Users s ON p.SellerId = s.Id
-        LEFT JOIN Houses h ON p.Id = h.PropertyID
-        LEFT JOIN Apartments a ON p.Id = a.PropertyID
-        LEFT JOIN Lands l ON p.Id = l.PropertyID
-        LEFT JOIN PropertyImages pi ON p.Id = pi.PropertyId
-        WHERE p.Id = @PropertyId";
+    SELECT 
+        p.Id,
+        p.Title,
+        p.Description,
+        p.Price,
+        p.City,
+        p.District,
+        p.Province,
+        p.PropertyType,
+        p.Status,
+        p.RoadAccess,
+        p.Latitude,
+        p.Longitude,
+        p.CreatedAt,
+        p.ThreeDModel,
+        p.SellerId,
+        s.FullName AS SellerName,
+        s.ContactNumber AS SellerContact,
+        s.Email AS SellerEmail,
+        s.Address AS SellerAddress,
+        h.Bedrooms,
+        h.Kitchens,
+        h.SittingRooms,
+        h.Bathrooms,
+        h.Floors,
+        h.LandArea AS HouseLandArea,
+        h.BuildupArea,
+        h.BuiltYear AS HouseBuiltYear,
+        h.FacingDirection,
+        a.Rooms,
+        a.RoomSize,
+        a.BuiltYear AS ApartmentBuiltYear,
+        l.LandArea AS LandLandArea,
+        l.LandType,
+        l.SoilQuality,
+        pi.Photo AS ImageUrl
+    FROM Properties p
+    LEFT JOIN Users s ON p.SellerId = s.Id
+    LEFT JOIN Houses h ON p.Id = h.PropertyID
+    LEFT JOIN Apartments a ON p.Id = a.PropertyID
+    LEFT JOIN Lands l ON p.Id = l.PropertyID
+    LEFT JOIN PropertyImages pi ON p.Id = pi.PropertyId
+    WHERE p.Id = @PropertyId";
 
         using (var connection = new SqlConnection(_connectionString))
         {
@@ -73,6 +73,30 @@ public class PropertyRepository
                 {
                     if (propertyDetails == null)
                     {
+                        string propertyType = reader["PropertyType"].ToString();
+
+                        // Handle LandArea based on property type during initial object creation
+                        double? landArea = null;
+                        if (propertyType == "House" && reader["HouseLandArea"] != DBNull.Value)
+                        {
+                            landArea = Convert.ToDouble(reader["HouseLandArea"]);
+                        }
+                        else if (propertyType == "Land" && reader["LandLandArea"] != DBNull.Value)
+                        {
+                            landArea = Convert.ToDouble(reader["LandLandArea"]);
+                        }
+
+                        // Handle BuiltYear based on property type during initial object creation
+                        DateOnly builtYear = DateOnly.MinValue;
+                        if (propertyType == "House" && reader["HouseBuiltYear"] != DBNull.Value)
+                        {
+                            builtYear = DateOnly.FromDateTime(Convert.ToDateTime(reader["HouseBuiltYear"]));
+                        }
+                        else if (propertyType == "Apartment" && reader["ApartmentBuiltYear"] != DBNull.Value)
+                        {
+                            builtYear = DateOnly.FromDateTime(Convert.ToDateTime(reader["ApartmentBuiltYear"]));
+                        }
+
                         propertyDetails = new PropertyDetailsViewModel
                         {
                             Id = Convert.ToInt32(reader["Id"]),
@@ -82,7 +106,7 @@ public class PropertyRepository
                             City = reader["City"].ToString(),
                             District = reader["District"].ToString(),
                             Province = reader["Province"].ToString(),
-                            PropertyType = reader["PropertyType"].ToString(),
+                            PropertyType = propertyType,
                             Status = reader["Status"].ToString(),
                             RoadAccess = reader["RoadAccess"].ToString(),
                             Latitude = reader["Latitude"] != DBNull.Value ? Convert.ToDouble(reader["Latitude"]) : (double?)null,
@@ -105,17 +129,10 @@ public class PropertyRepository
                             Rooms = reader["Rooms"] != DBNull.Value ? Convert.ToInt32(reader["Rooms"]) : (int?)null,
                             RoomSize = reader["RoomSize"] != DBNull.Value ? Convert.ToDouble(reader["RoomSize"]) : (double?)null,
 
-                            // Handle different LandArea fields based on property type
-                            LandArea = propertyDetails?.PropertyType == "House" ?
-                                (reader["HouseLandArea"] != DBNull.Value ? Convert.ToDouble(reader["HouseLandArea"]) : (double?)null) :
-                                (reader["LandLandArea"] != DBNull.Value ? Convert.ToDouble(reader["LandLandArea"]) : (double?)null),
-
+                            // Set LandArea and BuiltYear using the values we calculated above
+                            LandArea = landArea,
                             BuildupArea = reader["BuildupArea"] != DBNull.Value ? Convert.ToDouble(reader["BuildupArea"]) : (double?)null,
-
-                            // Handle different BuiltYear fields based on property type
-                            BuiltYear = propertyDetails?.PropertyType == "House" ?
-                                (reader["HouseBuiltYear"] != DBNull.Value ? DateOnly.FromDateTime(Convert.ToDateTime(reader["HouseBuiltYear"])) : DateOnly.MinValue) :
-                                (reader["ApartmentBuiltYear"] != DBNull.Value ? DateOnly.FromDateTime(Convert.ToDateTime(reader["ApartmentBuiltYear"])) : DateOnly.MinValue),
+                            BuiltYear = builtYear,
                             LandType = reader["LandType"] != DBNull.Value ? reader["LandType"].ToString() : null,
                             SoilQuality = reader["SoilQuality"] != DBNull.Value ? reader["SoilQuality"].ToString() : null,
                         };
@@ -131,18 +148,6 @@ public class PropertyRepository
                 if (propertyDetails != null)
                 {
                     propertyDetails.ImageUrl = imageUrls; // Ensure this matches the property name in the ViewModel
-
-                    // Set LandArea based on property type after the object is created
-                    if (propertyDetails.PropertyType == "House")
-                    {
-                        propertyDetails.LandArea = reader["HouseLandArea"] != DBNull.Value ?
-                            Convert.ToDouble(reader["HouseLandArea"]) : (double?)null;
-                    }
-                    else if (propertyDetails.PropertyType == "Land")
-                    {
-                        propertyDetails.LandArea = reader["LandLandArea"] != DBNull.Value ?
-                            Convert.ToDouble(reader["LandLandArea"]) : (double?)null;
-                    }
                 }
 
                 return propertyDetails;
@@ -150,3 +155,4 @@ public class PropertyRepository
         }
     }
 }
+    

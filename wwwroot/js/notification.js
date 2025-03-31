@@ -4,41 +4,70 @@
 const signalR = window.signalR;
 
 // Initialize SignalR connection
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/notificationHub")
-    .withAutomaticReconnect()
-    .build();
+let connection = null;
 
 // Start the connection
 async function startConnection() {
     try {
-        await connection.start();
-        console.log("SignalR Connected.");
-        // Load initial notifications after connection is established
-        loadInitialNotifications();
+        // Check if connection exists and is not in Disconnected state
+        if (connection) {
+            // Only try to start if it's in the Disconnected state
+            if (connection.state === signalR.HubConnectionState.Disconnected) {
+                await connection.start();
+                console.log("SignalR Reconnected.");
+                // Load initial notifications after reconnection
+                loadInitialNotifications();
+            } else {
+                console.log("Connection is already in state:", connection.state);
+                return; // Exit if connection is already starting or connected
+            }
+        } else {
+            // Create a new connection
+            connection = new signalR.HubConnectionBuilder()
+                .withUrl("/notificationHub")
+                .withAutomaticReconnect()
+                .build();
+
+            // Set up event handlers
+            setupSignalREventHandlers();
+
+            // Start the new connection
+            await connection.start();
+            console.log("SignalR Connected.");
+
+            // Load initial notifications after connection is established
+            loadInitialNotifications();
+        }
     } catch (err) {
         console.error("SignalR Connection Error: ", err);
+        // Reset connection to null if it failed to start
+        connection = null;
         setTimeout(startConnection, 5000); // Try to reconnect after 5 seconds
     }
 }
 
-// Handle connection closed
-connection.onclose(async () => {
-    await startConnection();
-});
+// Set up SignalR event handlers
+function setupSignalREventHandlers() {
+    // Handle connection closed
+    connection.onclose(async () => {
+        console.log("SignalR connection closed. Attempting to reconnect...");
+        // Don't call startConnection directly here, as it might cause an infinite loop
+        setTimeout(startConnection, 5000);
+    });
 
-// Handle receiving a new notification
-connection.on("ReceiveNotification", function (notification) {
-    console.log("Received notification:", notification);
-    // Add notification to the list
-    addNotificationToList(notification);
-});
+    // Handle receiving a new notification
+    connection.on("ReceiveNotification", function (notification) {
+        console.log("Received notification:", notification);
+        // Add notification to the list
+        addNotificationToList(notification);
+    });
 
-// Handle receiving unread count
-connection.on("ReceiveUnreadCount", function (count) {
-    console.log("Received unread count:", count);
-    updateNotificationBadgeCount(count);
-});
+    // Handle receiving unread count
+    connection.on("ReceiveUnreadCount", function (count) {
+        console.log("Received unread count:", count);
+        updateNotificationBadgeCount(count);
+    });
+}
 
 // Add a notification to the notification list
 function addNotificationToList(notification) {
@@ -48,6 +77,12 @@ function addNotificationToList(notification) {
     }
 
     const notificationList = document.getElementById("notification-list");
+
+    // Check if notificationList exists
+    if (!notificationList) {
+        console.error("Notification list element not found");
+        return;
+    }
 
     // Remove "No new notifications" message if it exists
     const emptyNotification = notificationList.querySelector(".empty-notification");
@@ -124,9 +159,11 @@ function markNotificationAsRead(notificationId) {
             if (response.ok) {
                 console.log(`Notification ${notificationId} marked as read`);
                 // Still use SignalR to update other connected clients
-                connection.invoke("MarkAsRead", notificationId).catch(function (err) {
-                    console.error("SignalR error:", err);
-                });
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("MarkAsRead", notificationId).catch(function (err) {
+                        console.error("SignalR error:", err);
+                    });
+                }
             } else {
                 console.error("Failed to mark notification as read");
             }
@@ -149,14 +186,18 @@ function markAllNotificationsAsRead() {
             if (response.ok) {
                 console.log("All notifications marked as read");
                 // Still use SignalR to update other connected clients
-                connection.invoke("MarkAllAsRead").catch(function (err) {
-                    console.error("SignalR error:", err);
-                });
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("MarkAllAsRead").catch(function (err) {
+                        console.error("SignalR error:", err);
+                    });
+                }
 
                 // Update UI
                 const notificationList = document.getElementById("notification-list");
-                notificationList.innerHTML = '<li class="text-sm text-gray-700 py-2 border-b empty-notification">No new notifications</li>';
-                updateNotificationBadgeCount(0);
+                if (notificationList) {
+                    notificationList.innerHTML = '<li class="text-sm text-gray-700 py-2 border-b empty-notification">No new notifications</li>';
+                    updateNotificationBadgeCount(0);
+                }
             } else {
                 console.error("Failed to mark all notifications as read");
             }
@@ -180,12 +221,20 @@ function markAllNotificationsAsReadOnly() {
                 console.log("All notifications marked as read");
 
                 // Still use SignalR to update other connected clients
-                connection.invoke("MarkAllAsRead").catch(function (err) {
-                    console.error("SignalR error:", err);
-                });
+                if (connection && connection.state === signalR.HubConnectionState.Connected) {
+                    connection.invoke("MarkAllAsRead").catch(function (err) {
+                        console.error("SignalR error:", err);
+                    });
+                }
 
                 // Update UI - mark all as read but don't clear them
-                const notificationItems = document.querySelectorAll("#notification-list li:not(.empty-notification)");
+                const notificationList = document.getElementById("notification-list");
+                if (!notificationList) {
+                    console.error("Notification list element not found");
+                    return;
+                }
+
+                const notificationItems = notificationList.querySelectorAll("li:not(.empty-notification)");
 
                 if (notificationItems.length === 0) {
                     return; // No notifications to mark as read
@@ -222,6 +271,10 @@ function markAllNotificationsAsReadOnly() {
 // Update the notification badge count
 function updateNotificationBadgeCount(count) {
     const badge = document.getElementById("notification-badge");
+    if (!badge) {
+        console.error("Notification badge element not found");
+        return;
+    }
 
     if (count > 0) {
         badge.textContent = count > 99 ? "99+" : count;
@@ -234,6 +287,11 @@ function updateNotificationBadgeCount(count) {
 // Update notification badge based on unread notifications
 function updateNotificationBadge() {
     const notificationList = document.getElementById("notification-list");
+    if (!notificationList) {
+        console.error("Notification list element not found");
+        return;
+    }
+
     // Count only notifications that are not marked as read
     const unreadCount = notificationList.querySelectorAll("li:not(.empty-notification)[data-is-read='false']").length;
     updateNotificationBadgeCount(unreadCount);
@@ -279,6 +337,11 @@ function loadInitialNotifications() {
             console.log("Loaded initial notifications:", data);
             const notificationList = document.getElementById("notification-list");
 
+            if (!notificationList) {
+                console.error("Notification list element not found");
+                return;
+            }
+
             // Clear the list
             notificationList.innerHTML = "";
 
@@ -307,12 +370,19 @@ function loadInitialNotifications() {
 // Toggle notification panel visibility
 function toggleNotificationPanel() {
     const panel = document.getElementById("notification-panel");
+    if (!panel) {
+        console.error("Notification panel element not found");
+        return;
+    }
+
     panel.classList.toggle("hidden");
 }
 
 // Start the connection when the document is ready
 document.addEventListener("DOMContentLoaded", function () {
     console.log("DOM loaded, starting SignalR connection");
+
+    // Only start the connection once when the page loads
     startConnection();
 
     // Set up event listeners

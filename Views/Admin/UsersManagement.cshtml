@@ -4,90 +4,418 @@
 }
 
 <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Users Management</h1>
+    <!-- Page Header with Animation -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 animate-fade-in">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Users Management</h1>
+            <p class="text-gray-600">Manage user accounts and permissions</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="@Url.Action("ExportUsers", "Admin")" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all duration-300 inline-flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export Users
+            </a>
+        </div>
     </div>
 
-    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 animate-slide-up">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Users</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Verified Users</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count(u => u.IsEmailVerified)</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Unverified Users</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count(u => !u.IsEmailVerified)</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 animate-slide-up" style="animation-delay: 0.2s;">
+        <div class="relative w-full md:w-64">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                </svg>
+            </div>
+            <input type="text" id="searchInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Search users...">
+        </div>
+
+        <div class="flex items-center gap-2 w-full md:w-auto">
+            <select id="roleFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                <option value="">All Roles</option>
+                <option value="User">Buyer</option>
+                <option value="Agent">Seller</option>
+            </select>
+
+            <select id="verificationFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                <option value="">All Users</option>
+                <option value="verified">Verified</option>
+                <option value="unverified">Unverified</option>
+            </select>
+
+            <button id="resetFilters" class="text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2.5 focus:outline-none transition-all duration-300">
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Users Table with Animation -->
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg animate-fade-in" style="animation-delay: 0.3s;">
         <table class="w-full text-sm text-left text-gray-500">
-            <thead class="text-xs text-white uppercase bg-blue-600">
+            <thead class="text-xs text-white uppercase bg-gradient-to-r from-blue-600 to-blue-800">
                 <tr>
                     <th scope="col" class="px-6 py-3">ID</th>
                     <th scope="col" class="px-6 py-3">Full Name</th>
                     <th scope="col" class="px-6 py-3">Email</th>
                     <th scope="col" class="px-6 py-3">Role</th>
-                    <th scope="col" class="px-6 py-3">
-                        <span class="sr-only">Actions</span>
-                    </th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3 text-right">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var user in Model)
+                @if (Model.Any())
                 {
-                    <tr class="bg-white border-b hover:bg-gray-50">
-                        <td class="px-6 py-4">@user.Id</td>
-                        <td class="px-6 py-4 font-medium text-gray-900">@user.FullName</td>
-                        <td class="px-6 py-4">@user.Email</td>
-                        <td class="px-6 py-4">
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">@user.Role</span>
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                            <a href="@Url.Action("ViewUserDetails", "Admin", new { id = user.Id })" class="font-medium text-blue-600 hover:underline mr-3">View</a>
-                            <button data-modal-target="deleteModal-@user.Id" data-modal-toggle="deleteModal-@user.Id"
-                                    class="font-medium text-red-600 hover:underline" type="button">
-                                Delete
-                            </button>
-                        </td>
-                    </tr>
+                    @foreach (var user in Model)
+                    {
+                        <tr class="bg-white border-b hover:bg-gray-50 transition-all duration-300 user-row"
+                            data-name="@user.FullName.ToLower()"
+                            data-email="@user.Email.ToLower()"
+                            data-role="@user.Role"
+                            data-verification="@(user.IsEmailVerified ? "verified" : "unverified")">
+                            <td class="px-6 py-4 font-medium text-gray-900">@user.Id</td>
+                            <td class="px-6 py-4 font-medium text-gray-900">@user.FullName</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <span>@user.Email</span>
+                                    @if (user.IsEmailVerified)
+                                    {
+                                        <span class="ml-2 text-blue-600" title="Email Verified">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                            </svg>
+                                        </span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="@(user.Role == "Buyer" ? "bg-purple-100 text-purple-800" :
+                                              user.Role == "Seller" ? "bg-amber-100 text-amber-800" :
+                                              "bg-blue-100 text-blue-800")
+                                       text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                    @user.Role
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                @if (user.IsEmailVerified)
+                                {
+                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center w-fit">
+                                        <span class="w-2 h-2 mr-1 rounded-full bg-green-500"></span>
+                                        Verified
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full flex items-center w-fit">
+                                        <span class="w-2 h-2 mr-1 rounded-full bg-yellow-500"></span>
+                                        Unverified
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex flex-col sm:flex-row gap-2 justify-end">
+                                    <a href="@Url.Action("ViewUserDetails", "Admin", new { id = user.Id })"
+                                       class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center inline-flex items-center">
+                                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        View
+                                    </a>
 
-                    <!-- Delete Modal -->
-                    <div id="deleteModal-@user.Id" tabindex="-1" class="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
-                        <div class="relative w-full max-w-md max-h-full">
-                            <div class="relative bg-white rounded-lg shadow">
-                                <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center" data-modal-hide="deleteModal-@user.Id">
-                                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                                    </svg>
-                                    <span class="sr-only">Close modal</span>
-                                </button>
-                                <div class="p-6 text-center">
-                                    <svg class="mx-auto mb-4 text-gray-400 w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                    </svg>
-                                    <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to delete @user.FullName?</h3>
-                                    <form action="@Url.Action("DeleteUser", "Admin")" method="post">
-                                        <input type="hidden" name="id" value="@user.Id" />
-                                        <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2">
-                                            Yes, I'm sure
-                                        </button>
-                                        <button data-modal-hide="deleteModal-@user.Id" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">
-                                            No, cancel
-                                        </button>
-                                    </form>
+                                    @if (!user.IsEmailVerified)
+                                    {
+                                        <form action="@Url.Action("SendVerificationEmail", "Admin")" method="post" class="inline">
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button type="submit"
+                                                    class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center inline-flex items-center">
+                                                <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                                </svg>
+                                                Send Verification
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <button data-modal-target="deleteModal-@user.Id" data-modal-toggle="deleteModal-@user.Id"
+                                            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center inline-flex items-center">
+                                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Delete Modal -->
+                        <div id="deleteModal-@user.Id" tabindex="-1" class="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                            <div class="relative w-full max-w-md max-h-full">
+                                <div class="relative bg-white rounded-lg shadow-lg animate-modal-open">
+                                    <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center transition-colors duration-300" data-modal-hide="deleteModal-@user.Id">
+                                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                                        </svg>
+                                        <span class="sr-only">Close modal</span>
+                                    </button>
+                                    <div class="p-6 text-center">
+                                        <svg class="mx-auto mb-4 text-gray-400 w-12 h-12" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                        <h3 class="mb-5 text-lg font-normal text-gray-500">Are you sure you want to delete @user.FullName?</h3>
+                                        <p class="mb-5 text-sm text-gray-500">This action cannot be undone. All data associated with this user will be permanently removed.</p>
+                                        <form action="@Url.Action("DeleteUser", "Admin")" method="post">
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button type="submit" class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2 transition-colors duration-300">
+                                                Yes, delete user
+                                            </button>
+                                            <button data-modal-hide="deleteModal-@user.Id" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 transition-colors duration-300">
+                                                No, cancel
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    }
                 }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="px-6 py-10 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                                <p class="text-gray-500 text-lg font-medium mb-2">No users found</p>
+                                <p class="text-gray-400 text-sm">There are no non-admin users in the system</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+                <!-- Empty State for Search Results -->
+                <tr id="noResults" class="hidden">
+                    <td colspan="6" class="px-6 py-10 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <p class="text-gray-500 text-lg font-medium mb-2">No matching users found</p>
+                            <p class="text-gray-400 text-sm">Try adjusting your search or filter criteria</p>
+                            <button id="clearSearchBtn" class="mt-4 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all duration-300">
+                                Clear Search
+                            </button>
+                        </div>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="p-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50" role="alert">
-            <span class="font-medium">Info!</span> No users found in the system.
+    <!-- Pagination -->
+    <div class="flex items-center justify-between mt-6 animate-slide-up" style="animation-delay: 0.4s;">
+        <div class="flex items-center">
+            <span class="text-sm text-gray-700">
+                Showing <span class="font-medium">1</span> to <span class="font-medium">@Model.Count</span> of <span class="font-medium">@Model.Count</span> entries
+            </span>
         </div>
-    }
+        <div class="inline-flex mt-2 xs:mt-0">
+            <button class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-blue-600 rounded-l hover:bg-blue-700 transition-colors duration-300">
+                Prev
+            </button>
+            <button class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-blue-700 border-0 border-l border-blue-600 rounded-r hover:bg-blue-800 transition-colors duration-300">
+                Next
+            </button>
+        </div>
+    </div>
 </div>
 
-@section Scripts {
-    <script>
+<!-- Add custom CSS for animations -->
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-in-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-in-out forwards;
+    }
+
+    .animate-modal-open {
+        animation: modalOpen 0.3s ease-out forwards;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+
+    }
+
+    @@keyframes slideUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    @@keyframes modalOpen {
+        from
+
+    {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    }
+</style>
+
+<!-- Add JavaScript for functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
         // Initialize Flowbite
-        document.addEventListener('DOMContentLoaded', function () {
-            if (typeof initFlowbite === 'function') {
-                initFlowbite();
+        if (typeof initFlowbite === 'function') {
+            initFlowbite();
+        }
+
+        // Search and filter functionality
+        const searchInput = document.getElementById('searchInput');
+        const roleFilter = document.getElementById('roleFilter');
+        const verificationFilter = document.getElementById('verificationFilter');
+        const resetFiltersBtn = document.getElementById('resetFilters');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const userRows = document.querySelectorAll('.user-row');
+        const noResults = document.getElementById('noResults');
+
+        // Function to filter users
+        function filterUsers() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const roleValue = roleFilter.value;
+            const verificationValue = verificationFilter.value;
+
+            let visibleCount = 0;
+
+            userRows.forEach(row => {
+                const name = row.getAttribute('data-name');
+                const email = row.getAttribute('data-email');
+                const role = row.getAttribute('data-role');
+                const verification = row.getAttribute('data-verification');
+
+                const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
+                const matchesRole = roleValue === '' || role === roleValue;
+                const matchesVerification = verificationValue === '' || verification === verificationValue;
+
+                if (matchesSearch && matchesRole && matchesVerification) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            // Show or hide the "No results" message
+            if (visibleCount === 0 && userRows.length > 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
             }
+        }
+
+        // Add event listeners
+        searchInput.addEventListener('keyup', filterUsers);
+        roleFilter.addEventListener('change', filterUsers);
+        verificationFilter.addEventListener('change', filterUsers);
+
+        // Reset filters
+        resetFiltersBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            roleFilter.value = '';
+            verificationFilter.value = '';
+            filterUsers();
         });
-    </script>
-}
+
+        // Clear search button in "No results" section
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            roleFilter.value = '';
+            verificationFilter.value = '';
+            filterUsers();
+        });
+
+        // Add hover animation to action buttons
+        const actionButtons = document.querySelectorAll('td:last-child a, td:last-child button');
+        actionButtons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.classList.add('scale-105');
+            });
+
+            button.addEventListener('mouseleave', function() {
+                this.classList.remove('scale-105');
+            });
+        });
+    });
+</script>

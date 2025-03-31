@@ -1,140 +1,459 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Estate Listings</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
-</head>
-<body class="bg-gray-50 p-8">
-    <div class="container mx-auto max-w-7xl">
-        <!-- Search and Sort Section -->
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div class="relative w-full md:w-96">
-                <input type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Search by name or address">
-            </div>
-            <select class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full md:w-48 p-2.5">
-                <option>Sort by: Latest</option>
-                <option>Price: Low to High</option>
-                <option>Price: High to Low</option>
-            </select>
-        </div>
+﻿@model IEnumerable<Properties>
 
-        <!-- Price Range Slider -->
-        <div class="mb-8">
-            <label class="block mb-2 text-sm font-medium text-gray-900">Price Range</label>
-            <div class="relative mb-2">
-                <input type="range" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" min="0" max="1000000" value="0">
-            </div>
-            <div class="flex justify-between">
-                <span class="text-sm text-gray-500">$0</span>
-                <span class="text-sm text-gray-500">$1,000,000</span>
-            </div>
-        </div>
+@{
+    ViewData["Title"] = "Land & Plots";
+}
 
-        <!-- Property Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <!-- Property Card 1 -->
-            <div class="bg-white rounded-lg shadow">
-                <img src="/api/placeholder/400/300" alt="Modern Downtown Apartment" class="w-full h-48 object-cover rounded-t-lg" />
-                <div class="p-4">
-                    <h3 class="text-xl font-semibold mb-2">Modern Downtown Apartment</h3>
-                    <p class="text-gray-600 mb-2">123 Main St, New York</p>
-                    <p class="text-2xl font-bold text-blue-600 mb-4">$450,000</p>
-                    <button class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">View Details</button>
-                </div>
-            </div>
+<!-- Add Flowbite CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.css" rel="stylesheet">
+<!-- Add Font Awesome for additional icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Add noUiSlider for range slider -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/nouislider@15.6.1/dist/nouislider.min.css">
+<!-- Add custom CSS -->
+<link rel="stylesheet" href="~/css/lands.css">
 
-            <!-- Property Card 2 -->
-            <div class="bg-white rounded-lg shadow">
-                <img src="/api/placeholder/400/300" alt="Luxury Villa with Pool" class="w-full h-48 object-cover rounded-t-lg" />
-                <div class="p-4">
-                    <h3 class="text-xl font-semibold mb-2">Luxury Villa with Pool</h3>
-                    <p class="text-gray-600 mb-2">456 Park Ave, Miami</p>
-                    <p class="text-2xl font-bold text-blue-600 mb-4">$875,000</p>
-                    <button class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">View Details</button>
-                </div>
-            </div>
-
-            <!-- Property Card 3 -->
-            <div class="bg-white rounded-lg shadow">
-                <img src="/api/placeholder/400/300" alt="Cozy Suburban Home" class="w-full h-48 object-cover rounded-t-lg" />
-                <div class="p-4">
-                    <h3 class="text-xl font-semibold mb-2">Cozy Suburban Home</h3>
-                    <p class="text-gray-600 mb-2">789 Oak Dr, Los Angeles</p>
-                    <p class="text-2xl font-bold text-blue-600 mb-4">$650,000</p>
-                    <button class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">View Details</button>
-                </div>
-            </div>
-
-            <!-- Property Card 4 -->
-            <div class="bg-white rounded-lg shadow">
-                <img src="/api/placeholder/400/300" alt="Waterfront Condo" class="w-full h-48 object-cover rounded-t-lg" />
-                <div class="p-4">
-                    <h3 class="text-xl font-semibold mb-2">Waterfront Condo</h3>
-                    <p class="text-gray-600 mb-2">321 Beach Blvd, San Diego</p>
-                    <p class="text-2xl font-bold text-blue-600 mb-4">$725,000</p>
-                    <button class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">View Details</button>
-                </div>
-            </div>
-
-            <!-- Property Card 5 -->
-            <div class="bg-white rounded-lg shadow">
-                <img src="/api/placeholder/400/300" alt="Mountain View Estate" class="w-full h-48 object-cover rounded-t-lg" />
-                <div class="p-4">
-                    <h3 class="text-xl font-semibold mb-2">Mountain View Estate</h3>
-                    <p class="text-gray-600 mb-2">567 Highland Rd, Denver</p>
-                    <p class="text-2xl font-bold text-blue-600 mb-4">$925,000</p>
-                    <button class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">View Details</button>
-                </div>
-            </div>
-
-            <!-- Property Card 6 -->
-            <div class="bg-white rounded-lg shadow">
-                <img src="/api/placeholder/400/300" alt="Urban Loft" class="w-full h-48 object-cover rounded-t-lg" />
-                <div class="p-4">
-                    <h3 class="text-xl font-semibold mb-2">Urban Loft</h3>
-                    <p class="text-gray-600 mb-2">890 City Center, Chicago</p>
-                    <p class="text-2xl font-bold text-blue-600 mb-4">$550,000</p>
-                    <button class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">View Details</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="flex justify-center">
-            <nav aria-label="Page navigation">
-                <ul class="flex items-center -space-x-px h-8 text-sm">
-                    <li>
-                        <a href="#" class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-gray-100 hover:text-gray-700">
-                            <span class="sr-only">Previous</span>
-                            <svg class="w-2.5 h-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 1 1 5l4 4" />
-                            </svg>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-blue-600 border border-blue-300 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">1</a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">2</a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700">3</a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-gray-100 hover:text-gray-700">
-                            <span class="sr-only">Next</span>
-                            <svg class="w-2.5 h-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4" />
-                            </svg>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+<!-- Hero Section -->
+<section class="relative hero-gradient py-16 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute right-0 top-0 -mr-40 -mt-40 w-96 h-96 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 opacity-70"></div>
+        <div class="absolute left-0 bottom-0 -ml-40 -mb-40 w-96 h-96 rounded-full bg-gradient-to-r from-green-100 to-emerald-100 opacity-70"></div>
+    </div>
+    <div class="max-w-screen-xl mx-auto px-4 relative z-10">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 leading-tight">Land & <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-700">Plots</span></h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">Invest in premium land plots for development or future investment opportunities</p>
         </div>
     </div>
+</section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
-</body>
-</html>
+<!-- Filter Section -->
+<section class="py-8 bg-white">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="filter-card">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                <h2 class="filter-title">Filter Land Plots</h2>
+                <div class="flex items-center">
+                    <span class="text-gray-500 mr-2">@Model.Count() Properties Found</span>
+                    <button id="resetFilters" class="btn-reset">
+                        <i class="fa-solid fa-rotate-left"></i> Reset
+                    </button>
+                </div>
+            </div>
+
+            <form id="filterForm" class="filter-form">
+                <!-- Price Range Filter -->
+                <div class="md:col-span-3">
+                    <label for="price-range" class="filter-label">Price Range (Rs.)</label>
+                    <div id="price-range" class="mb-4"></div>
+                    <div class="price-range-labels">
+                        <span id="price-min">Rs. 0</span>
+                        <span id="price-max">Rs. 10,000,000</span>
+                    </div>
+                    <input type="hidden" id="min-price" name="minPrice" value="0">
+                    <input type="hidden" id="max-price" name="maxPrice" value="10000000">
+                </div>
+
+                <!-- Location Filter -->
+                <div class="md:col-span-2">
+                    <label for="location" class="filter-label">Location</label>
+                    <select id="location" name="location" class="filter-select">
+                        <option value="">All Locations</option>
+                        @{
+                            var locations = Model.Select(p => p.City).Distinct().OrderBy(c => c);
+                            foreach (var location in locations)
+                            {
+                                <option value="@location">@location</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Land Size Filter -->
+                <div class="md:col-span-2">
+                    <label for="size" class="filter-label">Land Size (Perches)</label>
+                    <select id="size" name="size" class="filter-select">
+                        <option value="">Any Size</option>
+                        <option value="1-10">1-10 Perches</option>
+                        <option value="11-20">11-20 Perches</option>
+                        <option value="21-40">21-40 Perches</option>
+                        <option value="41+">41+ Perches</option>
+                    </select>
+                </div>
+
+                <!-- Zoning Filter (Land-specific) -->
+                <div class="md:col-span-2">
+                    <label for="zoning" class="filter-label">Zoning Type</label>
+                    <select id="zoning" name="zoning" class="filter-select">
+                        <option value="">Any Zoning</option>
+                        <option value="residential">Residential</option>
+                        <option value="commercial">Commercial</option>
+                        <option value="agricultural">Agricultural</option>
+                        <option value="mixed">Mixed Use</option>
+                    </select>
+                </div>
+
+                <!-- Sort By Filter -->
+                <div class="md:col-span-2">
+                    <label for="sort" class="filter-label">Sort By</label>
+                    <select id="sort" name="sort" class="filter-select">
+                        <option value="newest">Newest First</option>
+                        <option value="price_low">Price: Low to High</option>
+                        <option value="price_high">Price: High to Low</option>
+                        <option value="size_low">Size: Small to Large</option>
+                        <option value="size_high">Size: Large to Small</option>
+                    </select>
+                </div>
+
+                <!-- Apply Filters Button -->
+                <div class="md:col-span-1 flex items-end">
+                    <button type="submit" class="btn-filter">
+                        <i class="fa-solid fa-filter"></i> Apply
+                    </button>
+                </div>
+            </form>
+
+            <!-- Active Filters -->
+            <div id="activeFilters" class="mt-4 hidden">
+                <div class="flex flex-wrap items-center">
+                    <span class="text-sm font-medium text-gray-700 mr-2">Active Filters:</span>
+                    <div id="filterBadges" class="flex flex-wrap"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Properties Grid -->
+<section class="py-12 bg-gray-50">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div id="propertiesContainer" class="grid md:grid-cols-3 gap-8">
+            @foreach (var property in Model)
+            {
+                <div class="property-card"
+                     data-price="@property.Price"
+                     data-location="@property.City"
+                     data-size="20"
+                     data-zoning="residential">
+                    <div class="image-container">
+                        @if (property.PropertyImages != null && property.PropertyImages.Any())
+                        {
+                            <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="image-hover">
+                        }
+                        else
+                        {
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-500">No Image Available</span>
+                            </div>
+                        }
+                        @if (property.CreatedAt.HasValue && (DateTime.Now - property.CreatedAt.Value).TotalDays < 7)
+                        {
+                            <div class="badge badge-new">
+                                <i class="fa-solid fa-bolt"></i> New
+                            </div>
+                        }
+
+                        <div class="badge badge-photos">
+                            <i class="fa-solid fa-camera mr-1"></i> @(property.PropertyImages?.Count() ?? 0) Photos
+                        </div>
+                    </div>
+
+                    <div class="property-info">
+                        <div class="flex items-center mb-3">
+                            <span class="badge badge-property-type">@property.PropertyType</span>
+                            <span class="badge badge-status">For Sale</span>
+                        </div>
+
+                        <h3 class="property-title">@property.Title</h3>
+
+                        <div class="property-location">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>@property.District, @property.City</span>
+                        </div>
+
+                        <div class="land-size">
+                            <i class="fa-solid fa-ruler-combined"></i>
+                            <span>Land Size: <span class="land-size-value">20 Perches</span></span>
+                            <span class="badge badge-zoning ml-2">Residential</span>
+                        </div>
+
+                        <!-- Land-specific features -->
+                        <div class="land-features">
+                            <span class="land-feature"><i class="fa-solid fa-road"></i> Road Access</span>
+                            <span class="land-feature"><i class="fa-solid fa-bolt"></i> Electricity</span>
+                            <span class="land-feature"><i class="fa-solid fa-faucet"></i> Water Supply</span>
+                            <span class="land-feature"><i class="fa-solid fa-mountain"></i> Flat Terrain</span>
+                        </div>
+
+                        <div class="property-footer">
+                            <span class="property-price">Rs. @property.Price.ToString("N0")</span>
+                            <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="btn-view-details">
+                                View Details <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Empty State (Hidden by default) -->
+        <div id="emptyState" class="empty-state hidden">
+            <div class="empty-state-icon">
+                <i class="fa-solid fa-mountain-sun"></i>
+            </div>
+            <h3 class="empty-state-title">No land plots found</h3>
+            <p class="empty-state-text">Try adjusting your filters to find land plots that match your criteria.</p>
+            <button id="clearFilters" class="btn-filter">
+                <i class="fa-solid fa-filter-circle-xmark mr-2"></i> Clear All Filters
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Flowbite JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+<!-- Font Awesome JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<!-- noUiSlider JS -->
+<script src="https://cdn.jsdelivr.net/npm/nouislider@15.6.1/dist/nouislider.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize price range slider
+        const priceRange = document.getElementById('price-range');
+        const minPriceInput = document.getElementById('min-price');
+        const maxPriceInput = document.getElementById('max-price');
+        const priceMin = document.getElementById('price-min');
+        const priceMax = document.getElementById('price-max');
+
+        noUiSlider.create(priceRange, {
+            start: [0, 10000000],
+            connect: true,
+            step: 100000,
+            range: {
+                'min': 0,
+                'max': 10000000
+            },
+            format: {
+                to: function (value) {
+                    return Math.round(value);
+                },
+                from: function (value) {
+                    return Number(value);
+                }
+            }
+        });
+
+        priceRange.noUiSlider.on('update', function (values, handle) {
+            const value = values[handle];
+            if (handle === 0) {
+                minPriceInput.value = value;
+                priceMin.textContent = 'Rs. ' + formatNumber(value);
+            } else {
+                maxPriceInput.value = value;
+                priceMax.textContent = 'Rs. ' + formatNumber(value);
+            }
+        });
+
+        // Format number with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        // Filter form submission
+        const filterForm = document.getElementById('filterForm');
+        const propertiesContainer = document.getElementById('propertiesContainer');
+        const emptyState = document.getElementById('emptyState');
+        const activeFilters = document.getElementById('activeFilters');
+        const filterBadges = document.getElementById('filterBadges');
+        const resetFiltersBtn = document.getElementById('resetFilters');
+        const clearFiltersBtn = document.getElementById('clearFilters');
+
+        filterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            applyFilters();
+        });
+
+        resetFiltersBtn.addEventListener('click', function() {
+            resetFilters();
+        });
+
+        clearFiltersBtn.addEventListener('click', function() {
+            resetFilters();
+        });
+
+        function applyFilters() {
+            const minPrice = parseInt(minPriceInput.value);
+            const maxPrice = parseInt(maxPriceInput.value);
+            const location = document.getElementById('location').value;
+            const size = document.getElementById('size').value;
+            const zoning = document.getElementById('zoning').value;
+            const sort = document.getElementById('sort').value;
+
+            // Clear filter badges
+            filterBadges.innerHTML = '';
+
+            // Add filter badges if filters are active
+            let hasActiveFilters = false;
+
+            if (minPrice > 0 || maxPrice < 10000000) {
+                addFilterBadge(`Price: Rs. ${formatNumber(minPrice)} - Rs. ${formatNumber(maxPrice)}`, 'price');
+                hasActiveFilters = true;
+            }
+
+            if (location) {
+                addFilterBadge(`Location: ${location}`, 'location');
+                hasActiveFilters = true;
+            }
+
+            if (size) {
+                addFilterBadge(`Size: ${size} Perches`, 'size');
+                hasActiveFilters = true;
+            }
+
+            if (zoning) {
+                addFilterBadge(`Zoning: ${zoning.charAt(0).toUpperCase() + zoning.slice(1)}`, 'zoning');
+                hasActiveFilters = true;
+            }
+
+            // Show/hide active filters section
+            if (hasActiveFilters) {
+                activeFilters.classList.remove('hidden');
+            } else {
+                activeFilters.classList.add('hidden');
+            }
+
+            // Filter properties
+            const properties = document.querySelectorAll('.property-card');
+            let visibleCount = 0;
+
+            properties.forEach(property => {
+                const propertyPrice = parseInt(property.dataset.price);
+                const propertyLocation = property.dataset.location;
+                const propertySize = parseInt(property.dataset.size);
+                const propertyZoning = property.dataset.zoning;
+
+                let isVisible = true;
+
+                // Apply price filter
+                if (propertyPrice < minPrice || propertyPrice > maxPrice) {
+                    isVisible = false;
+                }
+
+                // Apply location filter
+                if (location && propertyLocation !== location) {
+                    isVisible = false;
+                }
+
+                // Apply size filter (land-specific)
+                if (size) {
+                    // Handle different size ranges
+                    if (size === '1-10' && (propertySize < 1 || propertySize > 10)) {
+                        isVisible = false;
+                    } else if (size === '11-20' && (propertySize < 11 || propertySize > 20)) {
+                        isVisible = false;
+                    } else if (size === '21-40' && (propertySize < 21 || propertySize > 40)) {
+                        isVisible = false;
+                    } else if (size === '41+' && propertySize < 41) {
+                        isVisible = false;
+                    }
+                }
+
+                // Apply zoning filter
+                if (zoning && propertyZoning !== zoning) {
+                    isVisible = false;
+                }
+
+                if (isVisible) {
+                    property.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    property.classList.add('hidden');
+                }
+            });
+
+            // Show empty state if no properties match filters
+            if (visibleCount === 0) {
+                propertiesContainer.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+            } else {
+                propertiesContainer.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+
+                // Apply sorting
+                sortProperties(sort);
+            }
+        }
+
+        function addFilterBadge(text, type) {
+            const badge = document.createElement('div');
+            badge.className = 'filter-badge';
+            badge.innerHTML = `${text} <i class="fa-solid fa-xmark"></i>`;
+            badge.dataset.type = type;
+
+            badge.addEventListener('click', function() {
+                removeFilter(type);
+            });
+
+            filterBadges.appendChild(badge);
+        }
+
+        function removeFilter(type) {
+            if (type === 'price') {
+                priceRange.noUiSlider.set([0, 10000000]);
+            } else if (type === 'location') {
+                document.getElementById('location').value = '';
+            } else if (type === 'size') {
+                document.getElementById('size').value = '';
+            } else if (type === 'zoning') {
+                document.getElementById('zoning').value = '';
+            }
+
+            applyFilters();
+        }
+
+        function resetFilters() {
+            // Reset price range
+            priceRange.noUiSlider.set([0, 10000000]);
+
+            // Reset select inputs
+            document.getElementById('location').value = '';
+            document.getElementById('size').value = '';
+            document.getElementById('zoning').value = '';
+            document.getElementById('sort').value = 'newest';
+
+            // Apply filters (which will now show all properties)
+            applyFilters();
+        }
+
+        function sortProperties(sortType) {
+            const properties = Array.from(document.querySelectorAll('.property-card:not(.hidden)'));
+            const container = document.getElementById('propertiesContainer');
+
+            properties.sort((a, b) => {
+                const priceA = parseInt(a.dataset.price);
+                const priceB = parseInt(b.dataset.price);
+                const sizeA = parseInt(a.dataset.size);
+                const sizeB = parseInt(b.dataset.size);
+
+                if (sortType === 'price_low') {
+                    return priceA - priceB;
+                } else if (sortType === 'price_high') {
+                    return priceB - priceA;
+                } else if (sortType === 'size_low') {
+                    return sizeA - sizeB;
+                } else if (sortType === 'size_high') {
+                    return sizeB - sizeA;
+                } else {
+                    // Default to newest (already sorted from server)
+                    return 0;
+                }
+            });
+
+            // Remove all properties and re-add them in sorted order
+            properties.forEach(property => {
+                container.appendChild(property);
+            });
+        }
+    });
+</script>

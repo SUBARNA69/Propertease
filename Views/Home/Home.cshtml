@@ -1,370 +1,910 @@
 ﻿@{
     ViewData["Title"] = "Home";
     var boostedPropertyIds = ViewBag.BoostedPropertyIds as List<int> ?? new List<int>();
-
 }
-@model IEnumerable<Properties>
+@model IEnumerable<PropertyDetailsViewModel>
 
 <!-- Add Flowbite CSS -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.css" rel="stylesheet">
+<!-- Add Font Awesome for additional icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Add Mapbox CSS -->
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
+<!-- Custom styles -->
+<style>
+    .hero-gradient {
+        background: linear-gradient(135deg, #e0f7fa 0%, #bbdefb 100%);
+    }
 
-    <!-- Hero Section with Search -->
-    <section class="relative bg-white py-20 overflow-hidden z-10 ">
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-cyan-50 opacity-70"></div>
-        <div class="absolute right-0 top-0 -mr-40 -mt-40 w-96 h-96 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100"></div>
-        <div class="absolute left-0 bottom-0 -ml-40 -mb-40 w-96 h-96 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100"></div>
-        <div class="max-w-screen-xl mx-auto px-4 relative z-10">
-            <div class="text-center mb-10 max-w-3xl mx-auto">
-                <h1 class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900">Find Your Dream Property</h1>
-                <p class="text-xl text-gray-600 mb-8">Discover the perfect place to call home with our curated collection</p>
+    .property-card {
+        transition: all 0.4s ease;
+        border: 1px solid #e5e7eb;
+        margin-bottom: 10px; /* Added margin-bottom */
+    }
 
-                <form class="max-w-2xl mx-auto">
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <div class="relative w-full">
+        .property-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #93c5fd;
+        }
+
+    .category-card {
+        transition: all 0.3s ease;
+        overflow: hidden;
+        margin-bottom: 10px; /* Added margin-bottom */
+    }
+
+        .category-card:hover {
+            transform: translateY(-5px);
+        }
+
+            .category-card:hover .category-icon {
+                transform: scale(1.15);
+            }
+
+    .category-icon {
+        transition: transform 0.5s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #0ea5e9 0%, #1e40af 100%);
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #1e3a8a 100%);
+            transform: translateY(-2px);
+        }
+
+    .btn-outline {
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline:hover {
+            transform: translateY(-2px);
+        }
+
+    .testimonial-card {
+        transition: all 0.3s ease;
+        margin-bottom: 10px; /* Added margin-bottom */
+    }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+    .image-hover {
+        transition: transform 0.6s ease;
+    }
+
+    .property-card:hover .image-hover {
+        transform: scale(1.08);
+    }
+
+    .badge-boosted {
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(14, 165, 233, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(14, 165, 233, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(14, 165, 233, 0);
+        }
+    }
+
+    .pulse-effect {
+        animation: pulse 1.5s infinite;
+    }
+
+    .search-bar {
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.3s ease;
+        margin-bottom: 10px; /* Added margin-bottom */
+    }
+
+        .search-bar:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+    .property-features {
+        display: flex;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .property-feature {
+        display: flex;
+        align-items: center;
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
+
+        .property-feature i {
+            margin-right: 0.25rem;
+        }
+
+    .newsletter-form {
+        position: relative;
+        z-index: 10;
+        margin-bottom: 10px; /* Added margin-bottom */
+    }
+
+    .newsletter-bg {
+        background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 50%, #f0f9ff 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+        .newsletter-bg::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(14, 165, 233, 0.1);
+            z-index: 1;
+        }
+
+        .newsletter-bg::after {
+            content: "";
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.1);
+            z-index: 1;
+        }
+    /* New styles for better button visibility */
+    .btn-view-details {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+        .btn-view-details:hover {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+            transform: translateY(-2px);
+        }
+    /* Added spacing between sections */
+    section {
+        margin-bottom: 10px;
+    }
+
+    /* Map styles */
+    #map {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        border-radius: 0.75rem;
+    }
+
+    .map-container {
+        height: 100%;
+        min-height: 300px;
+    }
+
+    /* Custom marker styles */
+    .custom-marker {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .price-label {
+        background-color: #0ea5e9;
+        color: white;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-bottom: 4px;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transform: translateY(-5px);
+        z-index: 1;
+    }
+
+    .marker-icon {
+        width: 30px;
+        height: 30px;
+        background-color: #0ea5e9;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+        .marker-icon::after {
+            content: '';
+            width: 14px;
+            height: 14px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+    .mapboxgl-popup {
+        max-width: 200px;
+    }
+</style>
+
+<!-- Hero Section with Search -->
+<section class="relative hero-gradient py-24 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute right-0 top-0 -mr-40 -mt-40 w-96 h-96 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 opacity-70"></div>
+        <div class="absolute left-0 bottom-0 -ml-40 -mb-40 w-96 h-96 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 opacity-70"></div>
+    </div>
+    <div class="max-w-screen-xl mx-auto px-4 relative z-10">
+        <div class="text-center mb-12 max-w-3xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-6 text-gray-900 leading-tight">Find Your <span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-700">Dream Property</span></h1>
+            <p class="text-xl text-gray-600 mb-10">Discover the perfect place to call home with our exclusive collection of premium properties</p>
+
+            <div class="search-bar bg-white rounded-xl p-2 md:p-4 max-w-3xl mx-auto">
+                <form class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <label for="location" class="block mb-2 text-sm font-medium text-gray-700">Location</label>
+                        <div class="relative">
                             <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
-                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                                </svg>
+                                <i class="fa-solid fa-location-dot text-gray-400"></i>
                             </div>
-                            <input type="search" class="block p-4 pl-10 w-full text-sm text-gray-900 rounded-lg border border-gray-200 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300" placeholder="Search by location, property type..." required>
+                            <input type="text" id="location" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3" placeholder="City, neighborhood...">
                         </div>
-                        <button type="submit" class="text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-6 py-4 transition-all duration-300">Search</button>
+                    </div>
+                    <div class="w-full md:w-1/4">
+                        <label for="property-type" class="block mb-2 text-sm font-medium text-gray-700">Property Type</label>
+                        <select id="property-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
+                            <option selected>All Types</option>
+                            <option value="house">House</option>
+                            <option value="apartment">Apartment</option>
+                            <option value="land">Land</option>
+                        </select>
+                    </div>
+                    <div class="w-full md:w-1/4 flex items-end">
+                        <button type="submit" class="w-full btn-primary text-white font-medium rounded-lg text-base px-6 py-3 flex items-center justify-center">
+                            <i class="fa-solid fa-magnifying-glass mr-2"></i> Search
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Categories Section -->
-    <section class="py-16 bg-white">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-2 text-gray-900">Browse by Category</h2>
-                <p class="text-gray-600">Explore our diverse range of properties</p>
+<!-- Stats Section -->
+<section class="py-8 bg-white">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div class="p-4">
+                <h3 class="text-3xl font-bold text-sky-600 mb-2">@Model.Count()</h3>
+                <p class="text-gray-600">Properties Listed</p>
             </div>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Homes Category -->
-                <a asp-action="Homes" asp-controller="Home" class="group">
-                    <div class="bg-gray-50 p-8 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300 text-center">
-                        <div class="flex justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                            <div class="p-4 bg-cyan-100 rounded-full text-cyan-600">
-                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-cyan-700 transition-colors duration-300">Homes</h3>
-                        <p class="text-gray-600">Find your perfect home from our collection</p>
-                    </div>
-                </a>
-
-                <!-- Land Category -->
-                <a asp-action="Lands" asp-controller="Home" class="group">
-                    <div class="bg-gray-50 p-8 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300 text-center">
-                        <div class="flex justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                            <div class="p-4 bg-blue-100 rounded-full text-blue-600">
-                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-blue-700 transition-colors duration-300">Land</h3>
-                        <p class="text-gray-600">Explore available plots for your future projects</p>
-                    </div>
-                </a>
-
-                <!-- Apartments Category -->
-                <a asp-action="Apartments" asp-controller="Home" class="group">
-                    <div class="bg-gray-50 p-8 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-300 text-center">
-                        <div class="flex justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                            <div class="p-4 bg-teal-100 rounded-full text-teal-600">
-                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
-                                </svg>
-                            </div>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-teal-700 transition-colors duration-300">Apartments</h3>
-                        <p class="text-gray-600">Discover modern apartments in prime locations</p>
-                    </div>
-                </a>
+            <div class="p-4">
+                <h3 class="text-3xl font-bold text-sky-600 mb-2">850+</h3>
+                <p class="text-gray-600">Happy Clients</p>
+            </div>
+            <div class="p-4">
+                <h3 class="text-3xl font-bold text-sky-600 mb-2">99%</h3>
+                <p class="text-gray-600">Client Satisfaction</p>
+            </div>
+            <div class="p-4">
+                <h3 class="text-3xl font-bold text-sky-600 mb-2">15+</h3>
+                <p class="text-gray-600">Years Experience</p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Boosted Properties -->
-    <section class="py-16 bg-gradient-to-r from-blue-50 to-cyan-50">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="flex justify-between items-end mb-10">
-                <div>
-                    <h2 class="text-3xl font-bold mb-2 text-gray-900">🚀 Boosted Properties</h2>
-                    <p class="text-gray-600">Premium properties promoted by our sellers</p>
+<!-- Categories Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl font-bold mb-3 text-gray-900">Explore Property Types</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Find the perfect property that suits your needs from our diverse collection</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            <!-- Homes Category -->
+            <a asp-action="Homes" asp-controller="Home" class="category-card bg-white rounded-xl overflow-hidden shadow-sm group">
+                <div class="h-48 bg-gradient-to-r from-sky-50 to-blue-50 flex items-center justify-center">
+                    <div class="category-icon p-6 bg-sky-100 rounded-full text-sky-600">
+                        <i class="fa-solid fa-house text-4xl"></i>
+                    </div>
                 </div>
-            </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-sky-600 transition-colors duration-300">Residential Homes</h3>
+                    <p class="text-gray-600 mb-4">Discover comfortable and stylish homes for you and your family</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Starting from Rs. @Model.Where(p => p.PropertyType == "House").OrderBy(p => p.Price).FirstOrDefault()?.Price.ToString("N0") ?? "5,000,000"</span>
+                        <span class="text-sky-600 group-hover:translate-x-2 transition-transform duration-300 flex items-center">
+                            View All <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
 
-            <div class="grid md:grid-cols-3 gap-6">
-                @foreach (var property in Model.Where(p => boostedPropertyIds.Contains(p.Id)).Take(3))
-                {
-                    <div class="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 group h-full border-2 border-blue-200">
-                        <div class="relative overflow-hidden h-64">
-                            @if (property.PropertyImages != null && property.PropertyImages.Any())
+            <!-- Land Category -->
+            <a asp-action="Lands" asp-controller="Home" class="category-card bg-white rounded-xl overflow-hidden shadow-sm group">
+                <div class="h-48 bg-gradient-to-r from-emerald-50 to-green-50 flex items-center justify-center">
+                    <div class="category-icon p-6 bg-emerald-100 rounded-full text-emerald-600">
+                        <i class="fa-solid fa-mountain-sun text-4xl"></i>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-emerald-600 transition-colors duration-300">Land & Plots</h3>
+                    <p class="text-gray-600 mb-4">Invest in premium land plots for development or future investment</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Starting from Rs. @Model.Where(p => p.PropertyType == "Land").OrderBy(p => p.Price).FirstOrDefault()?.Price.ToString("N0") ?? "2,000,000"</span>
+                        <span class="text-emerald-600 group-hover:translate-x-2 transition-transform duration-300 flex items-center">
+                            View All <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Apartments Category -->
+            <a asp-action="Apartments" asp-controller="Home" class="category-card bg-white rounded-xl overflow-hidden shadow-sm group">
+                <div class="h-48 bg-gradient-to-r from-indigo-50 to-purple-50 flex items-center justify-center">
+                    <div class="category-icon p-6 bg-indigo-100 rounded-full text-indigo-600">
+                        <i class="fa-solid fa-building text-4xl"></i>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-gray-800 group-hover:text-indigo-600 transition-colors duration-300">Apartments & Flats</h3>
+                    <p class="text-gray-600 mb-4">Modern apartments with amenities in prime urban locations</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm font-medium text-gray-500">Starting from Rs. @Model.Where(p => p.PropertyType == "Apartment").OrderBy(p => p.Price).FirstOrDefault()?.Price.ToString("N0") ?? "3,500,000"</span>
+                        <span class="text-indigo-600 group-hover:translate-x-2 transition-transform duration-300 flex items-center">
+                            View All <i class="fa-solid fa-arrow-right ml-2"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Boosted Properties -->
+<section class="py-16 bg-white">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
+            <div>
+                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-3">Premium Selection</span>
+                <h2 class="text-3xl font-bold mb-2 text-gray-900">🚀 Boosted Properties</h2>
+                <p class="text-gray-600 max-w-2xl">Exclusive properties with premium features and prime locations</p>
+            </div>
+            <a href="#" class="btn-outline text-sky-600 hover:text-sky-800 font-medium flex items-center mt-4 md:mt-0 border border-sky-200 hover:border-sky-600 px-4 py-2 rounded-lg">
+                View all boosted properties
+                <i class="fa-solid fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            @foreach (var property in Model.Where(p => boostedPropertyIds.Contains(p.Id)).Take(3))
+            {
+                <div class="property-card bg-white rounded-xl overflow-hidden h-full"
+                     data-latitude="@property.Latitude"
+                     data-longitude="@property.Longitude">
+                    <div class="relative overflow-hidden h-64">
+                        @if (property.ImageUrl != null && property.ImageUrl.Any())
+                        {
+                            <img src="@property.ImageUrl.First()" alt="@property.Title" class="w-full h-full object-cover image-hover">
+                        }
+                        else
+                        {
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-500">No Image Available</span>
+                            </div>
+                        }
+                        <div class="absolute top-4 right-4 badge-boosted bg-gradient-to-r from-sky-600 to-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium flex items-center">
+                            <i class="fa-solid fa-rocket mr-1"></i> Boosted
+                        </div>
+                        <div class="absolute bottom-4 left-4 flex gap-2">
+                            <span class="bg-black bg-opacity-60 text-white text-xs font-medium px-2.5 py-1 rounded-lg">
+                                <i class="fa-solid fa-camera mr-1"></i> @(property.ImageUrl?.Count() ?? 0) Photos
+                            </span>
+                            @if (!string.IsNullOrEmpty(property.ThreeDModel))
                             {
-                                <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <span class="bg-purple-600 bg-opacity-80 text-white text-xs font-medium px-2.5 py-1 rounded-lg">
+                                    <i class="fa-solid fa-cube mr-1"></i> 3D Tour
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <span class="bg-sky-100 text-sky-800 text-xs font-medium px-2.5 py-0.5 rounded-full">@property.PropertyType</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full ml-2">For Sale</span>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-800 mb-2 hover:text-sky-600 transition-colors duration-300">@property.Title</h3>
+
+                        <div class="flex items-center text-gray-500 mb-3">
+                            <i class="fa-solid fa-location-dot mr-2"></i>
+                            <span>@property.District, @property.City</span>
+                        </div>
+
+                        <div class="property-features">
+                            @if (property.PropertyType == "House")
+                            {
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bed"></i>
+                                    <span>@(property.Bedrooms ?? 0) Beds</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bath"></i>
+                                    <span>@(property.Bathrooms ?? 0) Baths</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-ruler-combined"></i>
+                                    <span>@(property.BuildupArea ?? 0) sq.ft</span>
+                                </div>
+                            }
+                            else if (property.PropertyType == "Apartment")
+                            {
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bed"></i>
+                                    <span>@(property.Rooms ?? 0) Rooms</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bath"></i>
+                                    <span>@(property.Bathrooms ?? 0) Baths</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-ruler-combined"></i>
+                                    <span>@(property.RoomSize ?? 0) sq.ft</span>
+                                </div>
+                            }
+                            else if (property.PropertyType == "Land")
+                            {
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-mountain-sun"></i>
+                                    <span>@(property.LandType ?? "Land")</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-ruler-combined"></i>
+                                    <span>@(property.LandArea ?? 0) sq.ft</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-road"></i>
+                                    <span>@property.RoadAccess</span>
+                                </div>
                             }
                             else
                             {
-                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                                    <span class="text-gray-500">No Image Available</span>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    <span>@property.City</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-tag"></i>
+                                    <span>@property.PropertyType</span>
                                 </div>
                             }
-                            <div class="absolute top-4 right-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-3 py-1 rounded-full text-sm font-medium animate-pulse">
-                                🚀 Boosted
-                            </div>
                         </div>
 
-                        <div class="p-6 flex flex-col h-[calc(100%-16rem)]">
-                            <div class="flex items-center mb-2">
-                                <span class="bg-cyan-100 text-cyan-800 text-xs font-medium px-2.5 py-0.5 rounded-full">@property.PropertyType</span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full ml-2">For Sale</span>
-                            </div>
-
-                            <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-cyan-700 transition-colors duration-300">@property.Title</h3>
-
-                            <div class="flex items-center text-gray-500 mb-4">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span>@property.District, @property.City</span>
-                            </div>
-
-                            <div class="mt-auto flex justify-between items-center">
-                                <span class="text-2xl font-bold text-cyan-700">Rs. @property.Price.ToString("N0")</span>
-                                <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 font-medium rounded-lg text-sm px-4 py-2 transition-all duration-300">
-                                    View Details
-                                </a>
-                            </div>
+                        <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
+                            <span class="text-2xl font-bold text-sky-600">Rs. @property.Price.ToString("N0")</span>
+                            <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="btn-view-details font-medium rounded-lg text-sm px-4 py-2 flex items-center">
+                                View Details <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </a>
                         </div>
                     </div>
-                }
-            </div>
-        </div>
-    </section>
-    <!-- Featured Properties Section -->
-    <section class="py-16 bg-gray-50">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="flex justify-between items-end mb-10">
-                <div>
-                    <h2 class="text-3xl font-bold mb-2 text-gray-900">Featured Properties</h2>
-                    <p class="text-gray-600">Handpicked properties that might be perfect for you</p>
                 </div>
-                <a href="#" class="text-cyan-600 hover:text-cyan-800 font-medium flex items-center transition-colors duration-300">
-                    View all
-                    <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-            </div>
+            }
+        </div>
+    </div>
+</section>
 
-            <div class="grid md:grid-cols-3 gap-6">
-                @foreach (var property in Model.Take(3))
-                {
-                    <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group h-full">
-                        <div class="relative overflow-hidden h-64">
-                            @if (property.PropertyImages != null && property.PropertyImages.Any())
+<!-- Featured Properties Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
+            <div>
+                <span class="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-sm font-medium mb-3">Handpicked</span>
+                <h2 class="text-3xl font-bold mb-2 text-gray-900">Featured Properties</h2>
+                <p class="text-gray-600 max-w-2xl">Explore our selection of high-quality properties in prime locations</p>
+            </div>
+            <a href="#" class="btn-outline text-emerald-600 hover:text-emerald-800 font-medium flex items-center mt-4 md:mt-0 border border-emerald-200 hover:border-emerald-600 px-4 py-2 rounded-lg">
+                View all properties
+                <i class="fa-solid fa-arrow-right ml-2"></i>
+            </a>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+            @foreach (var property in Model.Take(3))
+            {
+                <div class="property-card bg-white rounded-xl overflow-hidden h-full"
+                     data-latitude="@property.Latitude"
+                     data-longitude="@property.Longitude">
+                    <div class="relative overflow-hidden h-64">
+                        @if (property.ImageUrl != null && property.ImageUrl.Any())
+                        {
+                            <img src="@property.ImageUrl.First()" alt="@property.Title" class="w-full h-full object-cover image-hover">
+                        }
+                        else
+                        {
+                            <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                <span class="text-gray-500">No Image Available</span>
+                            </div>
+                        }
+                        <div class="absolute top-4 right-4 bg-emerald-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                            Featured
+                        </div>
+                        <div class="absolute bottom-4 left-4 flex gap-2">
+                            <span class="bg-black bg-opacity-60 text-white text-xs font-medium px-2.5 py-1 rounded-lg">
+                                <i class="fa-solid fa-camera mr-1"></i> @(property.ImageUrl?.Count() ?? 0) Photos
+                            </span>
+                            @if (!string.IsNullOrEmpty(property.ThreeDModel))
                             {
-                                <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <span class="bg-purple-600 bg-opacity-80 text-white text-xs font-medium px-2.5 py-1 rounded-lg">
+                                    <i class="fa-solid fa-cube mr-1"></i> 3D Tour
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="p-6">
+                        <div class="flex items-center mb-3">
+                            <span class="bg-sky-100 text-sky-800 text-xs font-medium px-2.5 py-0.5 rounded-full">@property.PropertyType</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full ml-2">For Sale</span>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-800 mb-2 hover:text-emerald-600 transition-colors duration-300">@property.Title</h3>
+
+                        <div class="flex items-center text-gray-500 mb-3">
+                            <i class="fa-solid fa-location-dot mr-2"></i>
+                            <span>@property.District, @property.City</span>
+                        </div>
+
+                        <div class="property-features">
+                            @if (property.PropertyType == "House")
+                            {
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bed"></i>
+                                    <span>@(property.Bedrooms ?? 0) Beds</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bath"></i>
+                                    <span>@(property.Bathrooms ?? 0) Baths</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-ruler-combined"></i>
+                                    <span>@(property.BuildupArea ?? 0) sq.ft</span>
+                                </div>
+                            }
+                            else if (property.PropertyType == "Apartment")
+                            {
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bed"></i>
+                                    <span>@(property.Rooms ?? 0) Rooms</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-bath"></i>
+                                    <span>@(property.Bathrooms ?? 0) Baths</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-ruler-combined"></i>
+                                    <span>@(property.RoomSize ?? 0) sq.ft</span>
+                                </div>
+                            }
+                            else if (property.PropertyType == "Land")
+                            {
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-mountain-sun"></i>
+                                    <span>@(property.LandType ?? "Land")</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-ruler-combined"></i>
+                                    <span>@(property.LandArea ?? 0) sq.ft</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-road"></i>
+                                    <span>@property.RoadAccess</span>
+                                </div>
                             }
                             else
                             {
-                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                                    <span class="text-gray-500">No Image Available</span>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    <span>@property.City</span>
+                                </div>
+                                <div class="property-feature">
+                                    <i class="fa-solid fa-tag"></i>
+                                    <span>@property.PropertyType</span>
                                 </div>
                             }
-                            <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                                Featured
-                            </div>
                         </div>
 
-                        <div class="p-6 flex flex-col h-[calc(100%-16rem)]">
-                            <div class="flex items-center mb-2">
-                                <span class="bg-cyan-100 text-cyan-800 text-xs font-medium px-2.5 py-0.5 rounded-full">@property.PropertyType</span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full ml-2">For Sale</span>
-                            </div>
-
-                            <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-cyan-700 transition-colors duration-300">@property.Title</h3>
-
-                            <div class="flex items-center text-gray-500 mb-4">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span>@property.District, @property.City</span>
-                            </div>
-
-                            <div class="mt-auto flex justify-between items-center">
-                                <span class="text-2xl font-bold text-cyan-700">Rs. @property.Price.ToString("N0")</span>
-                                <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 font-medium rounded-lg text-sm px-4 py-2 transition-all duration-300">
-                                    View Details
-                                </a>
-                            </div>
+                        <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
+                            <span class="text-2xl font-bold text-emerald-600">Rs. @property.Price.ToString("N0")</span>
+                            <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="btn-view-details font-medium rounded-lg text-sm px-4 py-2 flex items-center">
+                                View Details <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </a>
                         </div>
                     </div>
-                }
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="py-16 bg-white">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium mb-3">Our Advantages</span>
+            <h2 class="text-3xl font-bold mb-3 text-gray-900">Why Choose Us</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">We provide the best property solutions with a focus on client satisfaction</p>
+        </div>
+
+        <div class="grid md:grid-cols-4 gap-8">
+            <div class="text-center p-6 hover:bg-gray-50 rounded-xl transition-colors duration-300">
+                <div class="w-16 h-16 bg-sky-100 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-medal text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">Trusted Agency</h3>
+                <p class="text-gray-600">With years of experience and hundreds of satisfied clients</p>
+            </div>
+
+            <div class="text-center p-6 hover:bg-gray-50 rounded-xl transition-colors duration-300">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-hand-holding-dollar text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">Best Deals</h3>
+                <p class="text-gray-600">We negotiate the best prices for our clients</p>
+            </div>
+
+            <div class="text-center p-6 hover:bg-gray-50 rounded-xl transition-colors duration-300">
+                <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-headset text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">24/7 Support</h3>
+                <p class="text-gray-600">Our team is always available to assist you</p>
+            </div>
+
+            <div class="text-center p-6 hover:bg-gray-50 rounded-xl transition-colors duration-300">
+                <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-file-contract text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">Legal Assistance</h3>
+                <p class="text-gray-600">Complete legal support for all transactions</p>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Featured Properties Section -->
-    <section class="py-16 bg-gray-50">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="flex justify-between items-end mb-10">
-                <div>
-                    <h2 class="text-3xl font-bold mb-2 text-gray-900">Best For You</h2>
-                    <p class="text-gray-600">Handpicked properties that might be perfect for you</p>
-                </div>
-                <a href="#" class="text-cyan-600 hover:text-cyan-800 font-medium flex items-center transition-colors duration-300">
-                    View all
-                    <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-6">
-                @foreach (var property in Model.Take(3))
-                {
-                    <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group h-full">
-                        <div class="relative overflow-hidden h-64">
-                            @if (property.PropertyImages != null && property.PropertyImages.Any())
-                            {
-                                <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                            }
-                            else
-                            {
-                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                                    <span class="text-gray-500">No Image Available</span>
-                                </div>
-                            }
-                            <div class="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                                Featured
-                            </div>
-                        </div>
-
-                        <div class="p-6 flex flex-col h-[calc(100%-16rem)]">
-                            <div class="flex items-center mb-2">
-                                <span class="bg-cyan-100 text-cyan-800 text-xs font-medium px-2.5 py-0.5 rounded-full">@property.PropertyType</span>
-                                <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full ml-2">For Sale</span>
-                            </div>
-
-                            <h3 class="text-xl font-bold text-gray-800 mb-2 group-hover:text-cyan-700 transition-colors duration-300">@property.Title</h3>
-
-                            <div class="flex items-center text-gray-500 mb-4">
-                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                </svg>
-                                <span>@property.District, @property.City</span>
-                            </div>
-
-                            <div class="mt-auto flex justify-between items-center">
-                                <span class="text-2xl font-bold text-cyan-700">Rs. @property.Price.ToString("N0")</span>
-                                <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 font-medium rounded-lg text-sm px-4 py-2 transition-all duration-300">
-                                    View Details
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
+<!-- Testimonials Section -->
+<section class="py-16 bg-gray-50">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium mb-3">Testimonials</span>
+            <h2 class="text-3xl font-bold mb-3 text-gray-900">What Our Clients Say</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Hear from our satisfied customers about their experience with us</p>
         </div>
-    </section>
 
-    <!-- Testimonials Section -->
-    <section class="py-16 bg-gray-50">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-2 text-gray-900">What Our Clients Say</h2>
-                <p class="text-gray-600">Hear from our satisfied customers</p>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="testimonial-card bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="text-yellow-400 flex">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+                <p class="text-gray-600 mb-6 italic">"The team was incredibly helpful throughout the entire process. They found us the perfect home within our budget and made the buying process smooth."</p>
+                <div class="flex items-center">
+                    <img class="w-12 h-12 rounded-full mr-4 object-cover" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Sarah Johnson">
+                    <div>
+                        <h4 class="font-semibold text-gray-800">Sarah Johnson</h4>
+                        <p class="text-gray-500 text-sm">Home Buyer</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center mb-4">
-                        <div class="text-yellow-400 flex">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4">"The team was incredibly helpful throughout the entire process. They found us the perfect home within our budget."</p>
-                    <div class="flex items-center">
-                        <img class="w-10 h-10 rounded-full mr-4" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Avatar">
-                        <div>
-                            <h4 class="font-semibold text-gray-800">Sarah Johnson</h4>
-                            <p class="text-gray-500 text-sm">Home Buyer</p>
-                        </div>
+            <div class="testimonial-card bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="text-yellow-400 flex">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
                     </div>
                 </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center mb-4">
-                        <div class="text-yellow-400 flex">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        </div>
-                    </div>
-                    <p class="text-gray-600 mb-4">"I sold my apartment through this agency and was impressed by their professionalism. They got me a great price."</p>
-                    <div class="flex items-center">
-                        <img class="w-10 h-10 rounded-full mr-4" src="https://flowbite.com/docs/images/people/profile-picture-2.jpg" alt="Avatar">
-                        <div>
-                            <h4 class="font-semibold text-gray-800">Michael Chen</h4>
-                            <p class="text-gray-500 text-sm">Property Seller</p>
-                        </div>
+                <p class="text-gray-600 mb-6 italic">"I sold my apartment through this agency and was impressed by their professionalism. They got me a great price and handled all the paperwork efficiently."</p>
+                <div class="flex items-center">
+                    <img class="w-12 h-12 rounded-full mr-4 object-cover" src="https://flowbite.com/docs/images/people/profile-picture-2.jpg" alt="Michael Chen">
+                    <div>
+                        <h4 class="font-semibold text-gray-800">Michael Chen</h4>
+                        <p class="text-gray-500 text-sm">Property Seller</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center mb-4">
-                        <div class="text-yellow-400 flex">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
-                        </div>
+            <div class="testimonial-card bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+                <div class="flex items-center mb-6">
+                    <div class="text-yellow-400 flex">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
                     </div>
-                    <p class="text-gray-600 mb-4">"As a first-time buyer, I was nervous about the process. The team guided me every step of the way. Highly recommend!"</p>
-                    <div class="flex items-center">
-                        <img class="w-10 h-10 rounded-full mr-4" src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="Avatar">
-                        <div>
-                            <h4 class="font-semibold text-gray-800">Emily Rodriguez</h4>
-                            <p class="text-gray-500 text-sm">First-time Buyer</p>
-                        </div>
+                </div>
+                <p class="text-gray-600 mb-6 italic">"As a first-time buyer, I was nervous about the process. The team guided me every step of the way and found me a beautiful apartment. Highly recommend!"</p>
+                <div class="flex items-center">
+                    <img class="w-12 h-12 rounded-full mr-4 object-cover" src="https://flowbite.com/docs/images/people/profile-picture-3.jpg" alt="Emily Rodriguez">
+                    <div>
+                        <h4 class="font-semibold text-gray-800">Emily Rodriguez</h4>
+                        <p class="text-gray-500 text-sm">First-time Buyer</p>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Newsletter Section -->
-    <section class="py-16 bg-white">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="bg-gradient-to-r from-cyan-50 to-blue-50 rounded-2xl p-8 md:p-12 shadow-sm border border-gray-100">
-                <div class="max-w-2xl mx-auto text-center">
-                    <h2 class="text-3xl font-bold mb-4 text-gray-900">Stay Updated</h2>
-                    <p class="text-gray-600 mb-6">Subscribe to our newsletter for the latest property listings and real estate news</p>
+<!-- Newsletter Section with Map -->
+<section class="py-16 bg-white">
+    <div class="max-w-screen-xl mx-auto px-4">
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Newsletter Form -->
+            <div class="newsletter-bg rounded-2xl p-8 md:p-12 shadow-sm border border-gray-100">
+                <div class="max-w-md mx-auto text-center relative z-10">
+                    <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-3">Stay Updated</span>
+                    <h2 class="text-3xl font-bold mb-4 text-gray-900">Get Property Updates</h2>
+                    <p class="text-gray-600 mb-8">Subscribe to our newsletter for the latest property listings, market insights, and exclusive offers</p>
 
-                    <form class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
-                        <input type="email" class="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3" placeholder="Enter your email" required>
-                        <button type="submit" class="text-white bg-gradient-to-r from-cyan-600 to-blue-700 hover:from-cyan-700 hover:to-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center transition-all duration-300">Subscribe</button>
+                    <form class="newsletter-form flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+                        <input type="email" class="bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3 shadow-sm" placeholder="Enter your email" required>
+                        <button type="submit" class="btn-primary text-white font-medium rounded-lg text-sm px-5 py-3 text-center">
+                            <i class="fa-solid fa-paper-plane mr-2"></i> Subscribe
+                        </button>
                     </form>
                     <p class="text-gray-500 text-sm mt-4">We respect your privacy. Unsubscribe at any time.</p>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Flowbite JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+            <!-- Map -->
+            <div class="rounded-2xl shadow-sm border border-gray-100 overflow-hidden map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-16 bg-gradient-to-r from-sky-500 to-blue-700 text-white">
+    <div class="max-w-screen-xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to Find Your Dream Property?</h2>
+        <p class="text-white text-opacity-90 mb-8 max-w-2xl mx-auto">Let our experts help you find the perfect property that meets all your requirements</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="#" class="bg-white text-blue-700 hover:bg-gray-100 font-medium rounded-lg text-base px-6 py-3.5 transition-all duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-house-user mr-2"></i> Browse Properties
+            </a>
+            <a href="#" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-700 font-medium rounded-lg text-base px-6 py-3.5 transition-all duration-300 flex items-center justify-center">
+                <i class="fa-solid fa-phone mr-2"></i> Contact Us
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Flowbite JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js"></script>
+<!-- Font Awesome JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<!-- Mapbox JS -->
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize Mapbox
+        mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: [80.7718, 7.8731], // Center on Sri Lanka
+            zoom: 7
+        });
+
+        // Add navigation controls
+        map.addControl(new mapboxgl.NavigationControl());
+
+        // Add property markers to the map
+        map.on('load', function() {
+            // Get all property cards
+            const properties = document.querySelectorAll('.property-card');
+
+            // Add markers for each property
+            properties.forEach(property => {
+                // Get the actual coordinates from the data attributes
+                const lat = parseFloat(property.dataset.latitude);
+                const lng = parseFloat(property.dataset.longitude);
+
+                // Only add markers for properties with valid coordinates
+                if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+                    const title = property.querySelector('.text-xl.font-bold').textContent;
+                    const price = property.querySelector('.text-2xl.font-bold').textContent;
+                    const location = property.querySelector('.flex.items-center.text-gray-500 span').textContent;
+
+                    // Create custom HTML element for the marker
+                    const el = document.createElement('div');
+                    el.className = 'custom-marker';
+
+                    // Create price label that appears above the marker
+                    const priceLabel = document.createElement('div');
+                    priceLabel.className = 'price-label';
+                    priceLabel.textContent = price;
+
+                    // Create marker icon
+                    const markerIcon = document.createElement('div');
+                    markerIcon.className = 'marker-icon';
+
+                    // Append elements
+                    el.appendChild(priceLabel);
+                    el.appendChild(markerIcon);
+
+                    // Create a marker with the custom HTML element
+                    const marker = new mapboxgl.Marker(el)
+                        .setLngLat([lng, lat])
+                        .setPopup(new mapboxgl.Popup({ offset: 25 })
+                            .setHTML(`
+                                <h3 class="font-bold text-sm">${title}</h3>
+                                <p class="text-sm">${location}</p>
+                                <p class="text-sm font-semibold text-sky-600">${price}</p>
+                            `))
+                        .addTo(map);
+                }
+            });
+
+            // Adjust the map bounds to fit all markers if there are valid properties
+            const validProperties = Array.from(properties).filter(p => {
+                const lat = parseFloat(p.dataset.latitude);
+                const lng = parseFloat(p.dataset.longitude);
+                return lat && lng && !isNaN(lat) && !isNaN(lng);
+            });
+
+            if (validProperties.length > 0) {
+                const bounds = new mapboxgl.LngLatBounds();
+                validProperties.forEach(p => {
+                    bounds.extend([
+                        parseFloat(p.dataset.longitude),
+                        parseFloat(p.dataset.latitude)
+                    ]);
+                });
+                map.fitBounds(bounds, { padding: 50 });
+            }
+        });
+
+        // Handle property type selection for search
+        const propertyTypeSelect = document.getElementById('property-type');
+        propertyTypeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            if (selectedType === 'house') {
+                window.location.href = '/Home/Homes';
+            } else if (selectedType === 'apartment') {
+                window.location.href = '/Home/Apartments';
+            } else if (selectedType === 'land') {
+                window.location.href = '/Home/Lands';
+            }
+        });
+    });
+</script>

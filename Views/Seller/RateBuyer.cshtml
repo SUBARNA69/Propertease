@@ -1,0 +1,121 @@
+﻿@model Propertease.Models.BuyerRatingViewModel
+
+@{
+    ViewData["Title"] = "Rate Buyer";
+}
+
+<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden p-6 my-8">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Rate Your Experience</h1>
+
+    <div class="mb-6">
+        <p class="text-gray-600">You're rating <span class="font-semibold">@Model.BuyerName</span> for property:</p>
+        <p class="text-lg font-medium text-gray-800">@Model.PropertyTitle</p>
+    </div>
+
+    <form asp-action="RateBuyer" method="post">
+        <input type="hidden" asp-for="PropertyId" />
+        <input type="hidden" asp-for="BuyerId" />
+        <input type="hidden" asp-for="PropertyTitle" />
+        <input type="hidden" asp-for="BuyerName" />
+        <input type="hidden" asp-for="ViewingRequestId" />
+
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-3">
+                How would you rate your experience with this buyer?
+            </label>
+
+            <div class="flex items-center space-x-1" id="star-rating">
+                <input type="hidden" asp-for="Rating" id="rating-value" />
+
+                <button type="button" class="star-btn text-gray-300 hover:text-yellow-400 focus:outline-none" data-value="1">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                </button>
+                <button type="button" class="star-btn text-gray-300 hover:text-yellow-400 focus:outline-none" data-value="2">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                </button>
+                <button type="button" class="star-btn text-gray-300 hover:text-yellow-400 focus:outline-none" data-value="3">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                </button>
+                <button type="button" class="star-btn text-gray-300 hover:text-yellow-400 focus:outline-none" data-value="4">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                </button>
+                <button type="button" class="star-btn text-gray-300 hover:text-yellow-400 focus:outline-none" data-value="5">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                </button>
+            </div>
+            <span asp-validation-for="Rating" class="text-red-500 text-sm"></span>
+            <p class="mt-2 text-sm text-gray-500" id="rating-text">Select a rating</p>
+        </div>
+
+        <div class="mb-6">
+            <label asp-for="Review" class="block text-gray-700 text-sm font-bold mb-2">
+                Write a review (optional)
+            </label>
+            <textarea asp-for="Review" rows="4"
+                      class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                      placeholder="Share your experience with this buyer..."></textarea>
+            <span asp-validation-for="Review" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <a asp-action="SoldProperties" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Cancel
+            </a>
+            <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Submit Rating
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.star-btn');
+        const ratingValue = document.getElementById('rating-value');
+        const ratingText = document.getElementById('rating-text');
+
+        const ratingDescriptions = [
+            '',
+            'Poor - Very dissatisfied',
+            'Fair - Somewhat dissatisfied',
+            'Average - Neither satisfied nor dissatisfied',
+            'Good - Satisfied',
+            'Excellent - Very satisfied'
+        ];
+
+        // Function to update stars
+        function updateStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('text-yellow-400');
+                    star.classList.remove('text-gray-300');
+                } else {
+                    star.classList.add('text-gray-300');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+
+            // Update hidden input and text
+            ratingValue.value = rating;
+            ratingText.textContent = ratingDescriptions[rating];
+        }
+
+        // Add click event to stars
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                updateStars(value);
+            });
+        });
+    });
+</script>

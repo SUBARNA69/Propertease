@@ -1,77 +1,131 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Threading.Tasks;
-using Propertease.Models;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 using Propertease.Services;
-using Propertease.Repos;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace Propertease.Repos
+namespace Propertease.Hubs
 {
+    [Authorize]
     public class NotificationHub : Hub
     {
         private readonly INotificationService _notificationService;
+        private readonly ILogger<NotificationHub> _logger;
 
-        public NotificationHub(INotificationService notificationService)
+        public NotificationHub(
+            INotificationService notificationService,
+            ILogger<NotificationHub> logger)
         {
-            _notificationService = notificationService;
+            _notificationService = notificationService ?? throw new ArgumentNullException(nameof(notificationService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // Add user to their own group when they connect
         public override async Task OnConnectedAsync()
         {
-            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            if (!string.IsNullOrEmpty(userId))
+            try
             {
-                await Groups.AddToGroupAsync(Context.ConnectionId, $"User_{userId}");
+                var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                // Get unread notifications count for the user
-                var unreadCount = await _notificationService.GetUnreadNotificationCountAsync(int.Parse(userId));
-                await Clients.Caller.SendAsync("ReceiveUnreadCount", unreadCount);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    int userIdInt = int.Parse(userId);
+
+                    // Add user to their own group
+                    await Groups.AddToGroupAsync(Context.ConnectionId, $"User_{userId}");
+                    _logger.LogInformation($"User {userId} connected with connection ID {Context.ConnectionId}");
+
+                    // Send unread count to the user
+                    var unreadCount = await _notificationService.GetUnreadNotificationCountAsync(userIdInt);
+                    await Clients.Caller.SendAsync("ReceiveUnreadCount", unreadCount);
+
+                    // Send recent unread notifications
+                    var notifications = await _notificationService.GetUnreadNotificationsForUserAsync(userIdInt);
+                    foreach (var notification in notifications)
+                    {
+                        await Clients.Caller.SendAsync("ReceiveNotification", new
+                        {
+                            id = notification.Id,
+                            title = notification.Title,
+                            message = notification.Message,
+                            type = notification.Type,
+                            isRead = notification.IsRead,
+                            createdAt = notification.CreatedAt,
+                            relatedPropertyId = notification.RelatedPropertyId
+                        });
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"User ID not found in claims for connection {Context.ConnectionId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in OnConnectedAsync for connection {Context.ConnectionId}");
             }
 
             await base.OnConnectedAsync();
         }
 
-        // Remove user from their group when they disconnect
         public override async Task OnDisconnectedAsync(Exception exception)
         {
-            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            if (!string.IsNullOrEmpty(userId))
+            try
             {
-                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"User_{userId}");
+                var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    // Remove user from their group
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"User_{userId}");
+                    _logger.LogInformation($"User {userId} disconnected with connection ID {Context.ConnectionId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error in OnDisconnectedAsync for connection {Context.ConnectionId}");
             }
 
             await base.OnDisconnectedAsync(exception);
         }
 
-        // Mark notification as read
         public async Task MarkAsRead(int notificationId)
         {
-            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            if (!string.IsNullOrEmpty(userId))
+            try
             {
-                await _notificationService.MarkAsReadAsync(notificationId, int.Parse(userId));
+                var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                // Get updated unread count
-                var unreadCount = await _notificationService.GetUnreadNotificationCountAsync(int.Parse(userId));
-                await Clients.Caller.SendAsync("ReceiveUnreadCount", unreadCount);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    int userIdInt = int.Parse(userId);
+                    await _notificationService.MarkAsReadAsync(notificationId, userIdInt);
+                    _logger.LogInformation($"User {userId} marked notification {notificationId} as read");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error marking notification as read: {ex.Message}");
             }
         }
 
-        // Mark all notifications as read
         public async Task MarkAllAsRead()
         {
-            var userId = Context.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            if (!string.IsNullOrEmpty(userId))
+            try
             {
-                await _notificationService.MarkAllAsReadAsync(int.Parse(userId));
-                await Clients.Caller.SendAsync("ReceiveUnreadCount", 0);
+                var userId = Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    int userIdInt = int.Parse(userId);
+                    await _notificationService.MarkAllAsReadAsync(userIdInt);
+                    _logger.LogInformation($"User {userId} marked all notifications as read");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error marking all notifications as read: {ex.Message}");
             }
         }
     }
 }
-

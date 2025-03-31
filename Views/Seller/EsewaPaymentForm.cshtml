@@ -1,34 +1,35 @@
 ﻿@model EsewaPaymentViewModel
 
-<div class="container">
-    <div class="card">
-        <div class="card-header">
-            <h3>eSewa Payment</h3>
+<div class="max-w-lg mx-auto mt-10">
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="text-center mb-4">
+            <h3 class="text-2xl font-semibold text-gray-700">eSewa Payment</h3>
         </div>
-        <div class="card-body">
-            <form action="@Model.PaymentUrl" method="POST">
-                <input type="hidden" name="amount" value="@Model.Amount">
-                <input type="hidden" name="tax_amount" value="0.00">
-                <input type="hidden" name="total_amount" value="@Model.TotalAmount">
-                <input type="hidden" name="transaction_uuid" value="@Model.TransactionUuid">
-                <input type="hidden" name="product_code" value="@Model.ProductCode">
-                <input type="hidden" name="product_service_charge" value="@Model.ProductServiceCharge">
-                <input type="hidden" name="product_delivery_charge" value="0.00">
-                <input type="hidden" name="success_url" value="@Model.SuccessUrl">
-                <input type="hidden" name="failure_url" value="@Model.FailureUrl">
-                <input type="hidden" name="signed_field_names" value="@Model.SignedFieldNames">
-                <input type="hidden" name="signature" value="@Model.Signature">
+        <form action="@Model.PaymentUrl" method="POST" class="space-y-4">
+            <input type="hidden" name="amount" value="@Model.Amount">
+            <input type="hidden" name="tax_amount" value="0.00">
+            <input type="hidden" name="total_amount" value="@Model.TotalAmount">
+            <input type="hidden" name="transaction_uuid" value="@Model.TransactionUuid">
+            <input type="hidden" name="product_code" value="@Model.ProductCode">
+            <input type="hidden" name="product_service_charge" value="@Model.ProductServiceCharge">
+            <input type="hidden" name="product_delivery_charge" value="0.00">
+            <input type="hidden" name="success_url" value="@Model.SuccessUrl">
+            <input type="hidden" name="failure_url" value="@Model.FailureUrl">
+            <input type="hidden" name="signed_field_names" value="@Model.SignedFieldNames">
+            <input type="hidden" name="signature" value="@Model.Signature">
 
-                <button type="submit" class="btn btn-primary">Pay with eSewa</button>
-            </form>
-        </div>
+            <div class="flex justify-center">
+                <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-all">
+                    Pay with eSewa
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
 <script>
-    // Auto-submit the form for better UX
     document.addEventListener('DOMContentLoaded', function() {
-        // Uncomment to auto-submit
-        // document.getElementById('esewaForm').submit();
+        // Uncomment to enable auto-submit
+        // document.querySelector('form').submit();
     });
 </script>

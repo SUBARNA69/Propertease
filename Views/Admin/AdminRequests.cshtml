@@ -1,49 +1,273 @@
 ﻿@model IEnumerable<Properties>
 
-<table class="table-auto w-full">
-    <thead>
-        <tr>
-            <th class="text-left px-4 py-2">Image</th>
-            <th class="text-left px-4 py-2">Title</th>
-            <th class="text-left px-4 py-2">Price</th>
-            <th class="text-left px-4 py-2">Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var property in Model)
-        {
-            <tr>
-                <td class="px-4 py-2">
-                    @if (property.PropertyImages != null && property.PropertyImages.Any())
-                    {
-                        <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-full h-48 object-cover rounded-lg">
-                    }
-                    else
-                    {
-                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center rounded-lg">
-                            <span class="text-gray-500">No Image Available</span>
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Property Approval Requests</h1>
+        <p class="text-gray-600">Review and manage pending property listings</p>
+    </div>
+
+    <!-- Stats Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-12 h-12 mr-3 text-blue-500 bg-blue-100 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Pending Requests</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count()</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-12 h-12 mr-3 text-green-500 bg-green-100 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Approved Today</p>
+                    <h3 class="text-2xl font-bold text-gray-900">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-12 h-12 mr-3 text-red-500 bg-red-100 rounded-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Rejected Today</p>
+                    <h3 class="text-2xl font-bold text-gray-900">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <div class="relative w-full md:w-64">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                </svg>
+            </div>
+            <input type="text" id="searchInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Search properties...">
+        </div>
+
+        <div class="flex items-center gap-2">
+            <button id="approveAllBtn" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all duration-300 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                Approve All
+            </button>
+            <button id="rejectAllBtn" class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all duration-300 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+                Reject All
+            </button>
+        </div>
+    </div>
+
+    <!-- Properties Table -->
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="p-4">
+                        <div class="flex items-center">
+                            <input id="checkbox-all" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                            <label for="checkbox-all" class="sr-only">checkbox</label>
                         </div>
+                    </th>
+                    <th scope="col" class="px-6 py-3">Image</th>
+                    <th scope="col" class="px-6 py-3">Property Details</th>
+                    <th scope="col" class="px-6 py-3">Price</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var property in Model)
+                    {
+                        <tr class="bg-white border-b hover:bg-gray-50 transition-colors duration-200">
+                            <td class="w-4 p-4">
+                                <div class="flex items-center">
+                                    <input id="checkbox-@property.Id" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 property-checkbox">
+                                    <label for="checkbox-@property.Id" class="sr-only">checkbox</label>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="w-24 h-24 overflow-hidden rounded-lg">
+                                    @if (property.PropertyImages != null && property.PropertyImages.Any())
+                                    {
+                                        <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title"
+                                             class="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                             onerror="this.onerror=null; this.src='/images/placeholder-property.jpg';">
+                                    }
+                                    else
+                                    {
+                                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                            <span class="text-gray-500 text-xs">No Image</span>
+                                        </div>
+                                    }
+                                </div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="font-medium text-gray-900 mb-1">@property.Title</div>
+                                <div class="text-xs text-gray-500 mb-1">@property.PropertyType in @property.District, @property.City</div>
+                                <div class="text-xs text-gray-500 line-clamp-2">@property.Description</div>
+                            </td>
+                            <td class="px-6 py-4 font-medium">
+                                <div class="text-lg font-bold text-gray-900">@property.Price.ToString("C0")</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Pending</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col sm:flex-row gap-2">
+                                    <a href="/Admin/ViewPropertyDetails/@property.Id"
+                                       class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center">
+                                        View Details
+                                    </a>
+
+                                    <form action="/Admin/ApproveProperty" method="post" class="inline">
+                                        <input type="hidden" name="id" value="@property.Id" />
+                                        <button type="submit"
+                                                class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center">
+                                            Approve
+                                        </button>
+                                    </form>
+
+                                    <form action="/Admin/RejectProperty" method="post" class="inline">
+                                        <input type="hidden" name="id" value="@property.Id" />
+                                        <button type="submit"
+                                                class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center">
+                                            Reject
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
                     }
-                </td>
-                <td class="px-4 py-2">@property.Title</td>
-                <td class="px-4 py-2">@property.Price</td>
-                <td class="px-4 py-2">
-                    <!-- View Details Button -->
-                    <a href="/Admin/ViewPropertyDetails/@property.Id" class="bg-blue-500 text-white px-2 py-1 rounded">View Details</a>
+                }
+                else
+                {
+                    <tr class="bg-white border-b">
+                        <td colspan="6" class="px-6 py-10 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <p class="text-gray-500 text-lg font-medium mb-2">No pending properties</p>
+                                <p class="text-gray-400 text-sm">All property requests have been processed</p>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-                    <!-- Approve Button -->
-                    <form action="/Admin/ApproveProperty" method="post" style="display:inline;">
-                        <input type="hidden" name="id" value="@property.Id" />
-                        <button type="submit" class="bg-green-500 text-white px-2 py-1 rounded">Approve</button>
-                    </form>
+    <!-- Pagination -->
+    <div class="flex items-center justify-between mt-6">
+        <div class="flex items-center">
+            <span class="text-sm text-gray-700">
+                Showing <span class="font-medium">1</span> to <span class="font-medium">@Model.Count()</span> of <span class="font-medium">@Model.Count()</span> entries
+            </span>
+        </div>
+        <div class="inline-flex mt-2 xs:mt-0">
+            <button class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900">
+                Prev
+            </button>
+            <button class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900">
+                Next
+            </button>
+        </div>
+    </div>
+</div>
 
-                    <!-- Reject Button -->
-                    <form action="/Admin/RejectProperty" method="post" style="display:inline;">
-                        <input type="hidden" name="id" value="@property.Id" />
-                        <button type="submit" class="bg-red-500 text-white px-2 py-1 rounded">Reject</button>
-                    </form>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<!-- Add a fallback image and JavaScript for functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const title = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                if (title.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Select all checkbox functionality
+        const selectAllCheckbox = document.getElementById('checkbox-all');
+        const propertyCheckboxes = document.querySelectorAll('.property-checkbox');
+
+        selectAllCheckbox.addEventListener('change', function() {
+            propertyCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // Bulk action buttons
+        document.getElementById('approveAllBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to approve all selected properties?')) {
+                // Get all selected property IDs and submit
+                const selectedIds = Array.from(propertyCheckboxes)
+                    .filter(checkbox => checkbox.checked)
+                    .map(checkbox => checkbox.id.replace('checkbox-', ''));
+
+                if (selectedIds.length === 0) {
+                    alert('Please select at least one property to approve');
+                    return;
+                }
+
+                // Here you would submit the IDs to a bulk approval endpoint
+                console.log('Approving properties with IDs:', selectedIds);
+            }
+        });
+
+        document.getElementById('rejectAllBtn').addEventListener('click', function() {
+            if (confirm('Are you sure you want to reject all selected properties?')) {
+                // Get all selected property IDs and submit
+                const selectedIds = Array.from(propertyCheckboxes)
+                    .filter(checkbox => checkbox.checked)
+                    .map(checkbox => checkbox.id.replace('checkbox-', ''));
+
+                if (selectedIds.length === 0) {
+                    alert('Please select at least one property to reject');
+                    return;
+                }
+
+                // Here you would submit the IDs to a bulk rejection endpoint
+                console.log('Rejecting properties with IDs:', selectedIds);
+            }
+        });
+
+        // Fix for images that fail to load
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('error', function() {
+                this.src = '/images/placeholder-property.jpg';
+            });
+        });
+    });
+</script>

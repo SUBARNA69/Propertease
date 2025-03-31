@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.104" />
+    <PackageReference Include="EPPlus" Version="7.7.0" />
     <PackageReference Include="Esri.ArcGISRuntime" Version="200.6.0" />
     <PackageReference Include="Infobip.Api.Client" Version="4.0.0" />
     <PackageReference Include="MailKit" Version="4.10.0" />
@@ -30,6 +31,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.21.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
     <PackageReference Include="plugin.web.eSewa.and.Khalti" Version="1.0.11" />
     <PackageReference Include="THREE" Version="1.0.0" />
@@ -40,6 +42,7 @@
     <Folder Include="Migrations\" />
     <Folder Include="wwwroot\html\" />
     <Folder Include="wwwroot\Images\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
 </Project>

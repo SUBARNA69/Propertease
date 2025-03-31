@@ -13,6 +13,7 @@ namespace Propertease.Models
 
         [Required]
         public string Content { get; set; }
+        public string? AudioFile { get; set; } // Store Base64 or file path
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

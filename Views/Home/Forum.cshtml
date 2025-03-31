@@ -8,7 +8,7 @@
         <div class="md:col-span-1">
             <div class="bg-white shadow rounded-lg p-4">
                 <h1 class="text-2xl font-bold mb-6">Create a New Post</h1>
-                <form asp-action="Forum" method="post" class="space-y-4">
+                <form asp-action="Forum" method="post" enctype="multipart/form-data" class="space-y-4">
                     <!-- Display validation summary -->
                     <div asp-validation-summary="ModelOnly" class="text-red-500"></div>
 
@@ -24,6 +24,19 @@
                         <label asp-for="ForumPost.Content" class="block text-sm font-medium text-gray-700">Content</label>
                         <textarea asp-for="ForumPost.Content" rows="4" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your content"></textarea>
                         <span asp-validation-for="ForumPost.Content" class="text-red-500 text-sm"></span>
+                    </div>
+
+                    <!-- Audio Recording Section -->
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700">Record Audio</label>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" id="startRecording" class="bg-green-500 text-white px-4 py-2 rounded shadow">🎤 Record</button>
+                            <button type="button" id="stopRecording" class="bg-red-500 text-white px-4 py-2 rounded shadow hidden">⏹ Stop</button>
+                        </div>
+                        <div id="recordingStatus" class="mt-2 text-sm hidden">Recording...</div>
+                        <audio id="audioPlayback" class="hidden mt-2" controls></audio>
+                        <!-- This hidden input will store the Base64 string of the recorded audio -->
+                        <input type="hidden" asp-for="ForumPost.AudioFile" id="audioData" />
                     </div>
 
                     <!-- Submit Button -->
@@ -45,31 +58,38 @@
                     @foreach (var post in Model.Posts)
                     {
                         <div class="bg-white shadow rounded-lg p-4">
-                            <!-- Existing post content -->
+                            <!-- Post header -->
                             <div class="flex justify-between items-start">
                                 <h3 class="text-xl font-semibold">
                                     <strong>@(post.User?.FullName ?? "Unknown")</strong>
                                 </h3>
                                 <span class="text-sm text-gray-500">@post.CreatedAt.ToString("MMM dd, yyyy")</span>
                             </div>
-                            <div class="text-sm text-gray-600">
-                                Title: @post.Title
-                            </div>
+                            <!-- Post content -->
+                            <div class="text-sm text-gray-600">Title: @post.Title</div>
                             <p class="text-gray-700 mt-2">@post.Content</p>
 
-                            <!-- Post metadata (e.g., number of comments) -->
+                            <!-- Audio Playback (if audio exists) -->
+                            @if (!string.IsNullOrEmpty(post.AudioFile))
+                            {
+                                <div class="mt-2">
+                                    <audio controls class="w-full">
+                                        <source src="@Url.Content($"~/uploads/{post.AudioFile}")" type="audio/wav">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                </div>
+                            }
+
+                            <!-- Button to toggle comments -->
                             <div class="mt-4 flex justify-between items-center">
-                              
                                 <button onclick="toggleComments('@post.Id')" class="text-sm text-indigo-600 hover:text-indigo-500">
                                     Show/Hide Comments (@post.Comments?.Count ?? 0)
                                 </button>
                             </div>
 
-
                             <!-- Comments Section -->
                             <div id="comments-@post.Id" class="mt-4 border-t pt-4 hidden">
                                 <h4 class="text-lg font-semibold mb-2">Comments</h4>
-
                                 <!-- Display existing comments -->
                                 @if (post.Comments != null && post.Comments.Any())
                                 {
@@ -84,7 +104,6 @@
                                         </div>
                                     }
                                 }
-
                                 <!-- Comment Form -->
                                 <form asp-action="AddForumComment" method="post" class="mt-4">
                                     <input type="hidden" name="postId" value="@post.Id" />
@@ -116,14 +135,65 @@
 </div>
 
 <script>
+    // Toggle comments visibility
     function toggleComments(postId) {
         const commentsContainer = document.getElementById(`comments-${postId}`);
         if (commentsContainer) {
-            if (commentsContainer.classList.contains('hidden')) {
-                commentsContainer.classList.remove('hidden');
-            } else {
-                commentsContainer.classList.add('hidden');
-            }
+            commentsContainer.classList.toggle('hidden');
         }
     }
+
+    // Audio recording logic
+    let mediaRecorder;
+    let audioChunks = [];
+
+    document.getElementById("startRecording").addEventListener("click", async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+
+            document.getElementById("startRecording").classList.add("hidden");
+            document.getElementById("stopRecording").classList.remove("hidden");
+            document.getElementById("recordingStatus").classList.remove("hidden");
+
+            audioChunks = []; // Clear any previous recording chunks
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                const audioURL = URL.createObjectURL(audioBlob);
+                const audioPlayback = document.getElementById("audioPlayback");
+                audioPlayback.src = audioURL;
+                audioPlayback.classList.remove("hidden");
+                document.getElementById("recordingStatus").classList.add("hidden");
+
+                // Convert to base64 and store in hidden input
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                reader.onloadend = () => {
+                    const base64data = reader.result;
+                    document.getElementById("audioData").value = base64data;
+                    console.log("Audio data captured and stored in form");
+                };
+            };
+        } catch (err) {
+            console.error("Error accessing microphone:", err);
+            alert("Could not access microphone. Please check your browser permissions.");
+            document.getElementById("startRecording").classList.remove("hidden");
+            document.getElementById("stopRecording").classList.add("hidden");
+        }
+    });
+
+    document.getElementById("stopRecording").addEventListener("click", () => {
+        if (mediaRecorder && mediaRecorder.state !== "inactive") {
+            mediaRecorder.stop();
+            document.getElementById("stopRecording").classList.add("hidden");
+            document.getElementById("startRecording").classList.remove("hidden");
+        }
+    });
 </script>
+

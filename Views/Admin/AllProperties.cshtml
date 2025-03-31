@@ -1,79 +1,361 @@
 ﻿@{
-    ViewData["Title"] = "AllProperties";
+    ViewData["Title"] = "All Properties";
 }
 @model IEnumerable<Propertease.Models.Properties>
 
-<h2 class="text-2xl font-bold mb-4">All Properties</h2>
+<div class="container mx-auto px-4 py-8">
+    <!-- Page Header with Animation -->
+    <div class="mb-8 animate-fade-in">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Property Management</h1>
+        <p class="text-gray-600">View and manage all property listings in the system</p>
+    </div>
 
-<div class="overflow-x-auto">
-    <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow">
-        <thead class="bg-gray-50">
-            <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property Name</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property Type</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-            @foreach (var property in Model)
-            {
-                <tr class="hover:bg-gray-50 transition-colors">
-                    <!-- Property Image -->
-                    <td class="px-6 py-4">
-                        <div class="flex items-center">
-                            @if (property.PropertyImages != null && property.PropertyImages.Any())
-                            {
-                                <img src="~/Images/@property.PropertyImages.First().Photo" alt="@property.Title" class="w-16 h-16 object-cover rounded-lg shadow-sm" />
-                            }
-                            else
-                            {
-                                <div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">
-                                    No Image
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 animate-slide-up">
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Properties</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count()</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Approved</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count(p => p.Status == "Approved")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Pending</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count(p => p.Status == "Pending")</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-6 hover:shadow-md transition-all duration-300">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-red-100 text-red-600 mr-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Rejected</p>
+                    <h3 class="text-2xl font-bold text-gray-900">@Model.Count(p => p.Status == "Rejected")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 animate-slide-up" style="animation-delay: 0.2s;">
+        <div class="relative w-full md:w-64">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg class="w-4 h-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
+                </svg>
+            </div>
+            <input type="text" id="searchInput" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" placeholder="Search properties...">
+        </div>
+
+        <div class="flex items-center gap-2 w-full md:w-auto">
+            <select id="statusFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                <option value="">All Statuses</option>
+                <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+
+            <select id="typeFilter" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                <option value="">All Types</option>
+                <option value="Apartment">Apartment</option>
+                <option value="House">House</option>
+                <option value="Land">Land</option>
+            </select>
+
+            <button id="resetFilters" class="text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-4 py-2.5 focus:outline-none transition-all duration-300">
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Properties Table with Animation -->
+    <div class="relative overflow-x-auto shadow-md sm:rounded-lg animate-fade-in" style="animation-delay: 0.3s;">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3">Image</th>
+                    <th scope="col" class="px-6 py-3">Property Details</th>
+                    <th scope="col" class="px-6 py-3">Type</th>
+                    <th scope="col" class="px-6 py-3">Status</th>
+                    <th scope="col" class="px-6 py-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var property in Model)
+                {
+                    <tr class="bg-white border-b hover:bg-gray-50 transition-all duration-300 property-row"
+                        data-name="@property.Title.ToLower()"
+                        data-type="@property.PropertyType"
+                        data-status="@property.Status">
+                        <!-- Property Image -->
+                        <td class="px-6 py-4 w-24">
+                            <div class="relative w-20 h-20 overflow-hidden rounded-lg shadow-sm group">
+                                @if (property.PropertyImages != null && property.PropertyImages.Any())
+                                {
+                                    <img src="~/Images/@property.PropertyImages.First().Photo"
+                                         alt="@property.Title"
+                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                         onerror="this.onerror=null; this.src='/images/property-placeholder.jpg';">
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-xs">
+                                        No Image
+                                    </div>
+                                }
+                                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                    <a href="@Url.Action("ViewPropertyDetails", new { id = property.Id })" class="text-white">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </a>
                                 </div>
-                            }
-                        </div>
-                    </td>
-                    <!-- Property Name -->
-                    <td class="px-6 py-4">
-                        <div class="text-sm font-medium text-gray-900">@property.Title</div>
-                    </td>
-                    <!-- Property Type -->
-                    <td class="px-6 py-4">
-                        <div class="text-sm text-gray-500">@property.PropertyType</div>
-                    </td>
-                    <!-- Status -->
-                    <td class="px-6 py-4">
-                        <span class="px-2 py-1 text-sm font-semibold rounded-full
-                            @(property.Status == "Approved" ? "bg-green-100 text-green-800" :
-                              property.Status == "Pending" ? "bg-yellow-100 text-yellow-800" :
-                              "bg-red-100 text-red-800")">
-                            @property.Status
-                        </span>
-                    </td>
-                    <!-- Actions -->
-                    <td class="px-6 py-4">
-                        <div class="flex space-x-2">
-                            <a href="@Url.Action("ViewPropertyDetails", new { id = property.Id })" class="btn btn-info">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 17l6 6 12-12"></path>
-                                </svg>
-                                <span>View</span>
-                            </a>
-                            <form action="@Url.Action("DeleteProperty", new { id = property.Id })" method="post" class="inline">
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this property?')">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </div>
+                        </td>
+
+                        <!-- Property Details -->
+                        <td class="px-6 py-4">
+                            <div class="font-medium text-gray-900 mb-1 hover:text-blue-600 transition-colors">
+                                <a href="@Url.Action("ViewPropertyDetails", new { id = property.Id })">@property.Title</a>
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                @if (!string.IsNullOrEmpty(property.City) && !string.IsNullOrEmpty(property.District))
+                                {
+                                    <span>@property.City, @property.District</span>
+                                }
+                                else
+                                {
+                                    <span>Location not specified</span>
+                                }
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                Price: <span class="font-semibold">@property.Price.ToString("C0")</span>
+                            </div>
+                        </td>
+
+                        <!-- Property Type -->
+                        <td class="px-6 py-4">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                @property.PropertyType
+                            </span>
+                        </td>
+
+                        <!-- Status -->
+                        <td class="px-6 py-4">
+                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full inline-flex items-center
+                                @(property.Status == "Approved" ? "bg-green-100 text-green-800" :
+                                  property.Status == "Pending" ? "bg-yellow-100 text-yellow-800" :
+                                  "bg-red-100 text-red-800")">
+                                <span class="w-2 h-2 mr-1 rounded-full
+                                    @(property.Status == "Approved" ? "bg-green-500" :
+                                      property.Status == "Pending" ? "bg-yellow-500" :
+                                      "bg-red-500")"></span>
+                                @property.Status
+                            </span>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <a href="@Url.Action("ViewPropertyDetails", new { id = property.Id })"
+                                   class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center inline-flex items-center">
+                                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                     </svg>
-                                    <span>Delete</span>
-                                </button>
-                            </form>
+                                    View
+                                </a>
+
+                                <a href="@Url.Action("EditProperty", new { id = property.Id })"
+                                   class="text-white bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:ring-yellow-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center inline-flex items-center">
+                                    <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    Edit
+                                </a>
+
+                                <form action="@Url.Action("DeleteProperty", new { id = property.Id })" method="post" class="inline">
+                                    <button type="submit"
+                                            class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-xs px-3 py-1.5 focus:outline-none transition-all duration-300 text-center inline-flex items-center"
+                                            onclick="return confirm('Are you sure you want to delete this property? This action cannot be undone.')">
+                                        <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+
+                <!-- Empty State -->
+                <tr id="noResults" class="hidden">
+                    <td colspan="5" class="px-6 py-10 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <p class="text-gray-500 text-lg font-medium mb-2">No properties found</p>
+                            <p class="text-gray-400 text-sm">Try adjusting your search or filter criteria</p>
+                            <button id="clearSearchBtn" class="mt-4 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none transition-all duration-300">
+                                Clear Search
+                            </button>
                         </div>
                     </td>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between mt-6 animate-slide-up" style="animation-delay: 0.4s;">
+        <div class="flex items-center">
+            <span class="text-sm text-gray-700">
+                Showing <span class="font-medium">1</span> to <span class="font-medium">@Model.Count()</span> of <span class="font-medium">@Model.Count()</span> entries
+            </span>
+        </div>
+        <div class="inline-flex mt-2 xs:mt-0">
+            <button class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 rounded-l hover:bg-gray-900 transition-colors duration-300">
+                Prev
+            </button>
+            <button class="flex items-center justify-center px-4 h-10 text-base font-medium text-white bg-gray-800 border-0 border-l border-gray-700 rounded-r hover:bg-gray-900 transition-colors duration-300">
+                Next
+            </button>
+        </div>
+    </div>
 </div>
+
+<!-- Add custom CSS for animations -->
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-in-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-in-out forwards;
+    }
+
+    
+</style>
+
+<!-- Add JavaScript for functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const typeFilter = document.getElementById('typeFilter');
+        const resetFiltersBtn = document.getElementById('resetFilters');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const propertyRows = document.querySelectorAll('.property-row');
+        const noResults = document.getElementById('noResults');
+
+        // Function to filter properties
+        function filterProperties() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const statusValue = statusFilter.value;
+            const typeValue = typeFilter.value;
+
+            let visibleCount = 0;
+
+            propertyRows.forEach(row => {
+                const name = row.getAttribute('data-name');
+                const type = row.getAttribute('data-type');
+                const status = row.getAttribute('data-status');
+
+                const matchesSearch = name.includes(searchTerm);
+                const matchesStatus = statusValue === '' || status === statusValue;
+                const matchesType = typeValue === '' || type === typeValue;
+
+                if (matchesSearch && matchesStatus && matchesType) {
+                    row.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    row.classList.add('hidden');
+                }
+            });
+
+            // Show or hide the "No results" message
+            if (visibleCount === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+
+        // Add event listeners
+        searchInput.addEventListener('keyup', filterProperties);
+        statusFilter.addEventListener('change', filterProperties);
+        typeFilter.addEventListener('change', filterProperties);
+
+        // Reset filters
+        resetFiltersBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            statusFilter.value = '';
+            typeFilter.value = '';
+            filterProperties();
+        });
+
+        // Clear search button in "No results" section
+        clearSearchBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            statusFilter.value = '';
+            typeFilter.value = '';
+            filterProperties();
+        });
+
+        // Fix for images that fail to load
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('error', function() {
+                this.onerror = null;
+                this.src = '/images/property-placeholder.jpg';
+            });
+        });
+
+        // Add hover animation to action buttons
+        const actionButtons = document.querySelectorAll('td:last-child a, td:last-child button');
+        actionButtons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.classList.add('scale-105');
+            });
+
+            button.addEventListener('mouseleave', function() {
+                this.classList.remove('scale-105');
+            });
+        });
+    });
+</script>

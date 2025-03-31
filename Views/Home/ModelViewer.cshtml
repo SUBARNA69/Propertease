@@ -1,24 +1,186 @@
 ﻿@model Propertease.Models.PropertyDetailsViewModel
 @{
-    ViewData["Title"] = "3D Model Viewer - " + Model.Title;
+    ViewData["Title"] = "3D Model Viewer";
 }
 
-<div class="container mt-4">
-    <h2>@Model.Title - 3D Model Viewer</h2>
+<!-- Add Flowbite CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
 
-    <div id="model-container"
-         data-property-id="@Model.Id"
-         data-model-filename="@Model.ThreeDModel"
-         style="width: 100%; height: 600px; position: relative;">
+<div class="container max-w-7xl mx-auto px-4 py-6">
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-3 md:mb-0">@Model.Title</h2>
+        <a href="@Url.Action("Details", new { id = Model.Id })" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 transition-all duration-300 inline-flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Property Details
+        </a>
     </div>
 
-    <div class="mt-3">
-        <a href="@Url.Action("Details", new { id = Model.Id })" class="btn btn-primary">
-            Back to Property Details
-        </a>
+    <div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden">
+        <div class="p-0">
+            <!-- 3D Model Container -->
+            <div id="model-container"
+                 data-property-id="@Model.Id"
+                 data-model-filename="@Model.ThreeDModel"
+                 class="w-full h-[600px] relative bg-gray-100">
+
+                <!-- Loading Indicator -->
+                
+
+                <!-- Controls Help -->
+                <div id="controls-help"
+                     class="absolute bottom-5 left-5 bg-gray-900/80 text-white p-4 rounded-lg shadow-lg z-5 transition-opacity duration-300 opacity-0 hidden">
+                    <p class="mb-2 font-bold text-blue-300">Controls:</p>
+                    <ul class="space-y-1 text-sm">
+                        <li class="flex items-center"><span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span> Left click + drag: Rotate</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span> Right click + drag: Pan</li>
+                        <li class="flex items-center"><span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span> Scroll: Zoom</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Panel -->
+        <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex flex-wrap justify-between items-center gap-2">
+            <div class="flex space-x-2">
+                <button id="reset-view-btn" class="text-gray-700 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 border border-gray-300 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center transition-all duration-300">
+                    <i class="fas fa-sync-alt mr-2"></i> Reset View
+                </button>
+                <button id="fullscreen-btn" class="text-gray-700 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 border border-gray-300 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center transition-all duration-300">
+                    <i class="fas fa-expand mr-2"></i> Fullscreen
+                </button>
+            </div>
+            <div>
+                <button id="toggle-help-btn" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 inline-flex items-center transition-all duration-300">
+                    <i class="fas fa-question-circle mr-2"></i> Show Controls
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
-@section Scripts {
-    <script type="module" src="/js/3d-model-viewer.js"></script>
-}
+<!-- Add Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+<!-- Include the 3D model viewer script -->
+<script type="module" src="/js/3d-model-viewer.js"></script>
+
+<!-- Add Flowbite JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+
+<!-- Add script to handle UI controls with improved animations -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const controlsHelp = document.getElementById('controls-help');
+        const toggleHelpBtn = document.getElementById('toggle-help-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const modelContainer = document.getElementById('model-container');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // Toggle controls help with fade animation
+        toggleHelpBtn.addEventListener('click', function() {
+            if (controlsHelp.classList.contains('hidden')) {
+                // Show controls
+                controlsHelp.classList.remove('hidden');
+                setTimeout(() => {
+                    controlsHelp.classList.remove('opacity-0');
+                    controlsHelp.classList.add('opacity-100');
+                }, 10);
+                toggleHelpBtn.innerHTML = '<i class="fas fa-times-circle mr-2"></i> Hide Controls';
+                toggleHelpBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                toggleHelpBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
+            } else {
+                // Hide controls
+                controlsHelp.classList.remove('opacity-100');
+                controlsHelp.classList.add('opacity-0');
+                setTimeout(() => {
+                    controlsHelp.classList.add('hidden');
+                }, 300);
+                toggleHelpBtn.innerHTML = '<i class="fas fa-question-circle mr-2"></i> Show Controls';
+                toggleHelpBtn.classList.remove('bg-red-600', 'hover:bg-red-700', 'focus:ring-red-300');
+                toggleHelpBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'focus:ring-blue-300');
+            }
+        });
+
+        // Fullscreen functionality with visual feedback
+        fullscreenBtn.addEventListener('click', function() {
+            fullscreenBtn.classList.add('animate-pulse');
+
+            if (!document.fullscreenElement) {
+                modelContainer.requestFullscreen().catch(err => {
+                    showToast(`Error enabling fullscreen: ${err.message}`, 'error');
+                });
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress mr-2"></i> Exit Fullscreen';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand mr-2"></i> Fullscreen';
+            }
+
+            setTimeout(() => {
+                fullscreenBtn.classList.remove('animate-pulse');
+            }, 500);
+        });
+
+        // Create a toast notification function
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-4 right-4 ${type === 'error' ? 'bg-red-600' : 'bg-blue-600'} text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in-up`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('animate-fade-out');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 500);
+            }, 3000);
+        }
+
+        // The reset-view-btn will be handled by the 3D viewer script
+        document.getElementById('reset-view-btn').addEventListener('click', function() {
+            // Add visual feedback
+            this.classList.add('animate-ping');
+            setTimeout(() => {
+                this.classList.remove('animate-ping');
+            }, 300);
+
+            // Dispatch a custom event for the 3D viewer script to catch
+            document.dispatchEvent(new CustomEvent('resetView'));
+        });
+
+        // Custom event listener for when the model is loaded
+        document.addEventListener('modelLoaded', function() {
+            // Hide loading indicator with fade effect
+            loadingIndicator.classList.add('opacity-0');
+            setTimeout(() => {
+                loadingIndicator.classList.add('hidden');
+            }, 500);
+
+            // Show controls help when model is loaded with fade in
+            controlsHelp.classList.remove('hidden');
+            setTimeout(() => {
+                controlsHelp.classList.remove('opacity-0');
+                controlsHelp.classList.add('opacity-100');
+            }, 10);
+
+            // Show a success toast
+            showToast('3D model loaded successfully!');
+
+            // Hide controls help after 5 seconds
+            setTimeout(function() {
+                controlsHelp.classList.remove('opacity-100');
+                controlsHelp.classList.add('opacity-0');
+                setTimeout(() => {
+                    controlsHelp.classList.add('hidden');
+                }, 300);
+            }, 5000);
+        });
+
+        // Add event listener for fullscreen change
+        document.addEventListener('fullscreenchange', function() {
+            if (!document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '<i class="fas fa-expand mr-2"></i> Fullscreen';
+            } else {
+                fullscreenBtn.innerHTML = '<i class="fas fa-compress mr-2"></i> Exit Fullscreen';
+            }
+        });
+    });
+</script>

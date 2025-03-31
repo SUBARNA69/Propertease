@@ -6,6 +6,9 @@ using Propertease.Models;
 using Propertease.Repos;
 using System.Threading.Tasks;
 using Propertease.Services;
+using OfficeOpenXml.Style;
+using OfficeOpenXml;
+using System.Drawing;
 namespace Propertease.Controllers
 {
     [Authorize(Roles = "Admin")]
@@ -156,6 +159,7 @@ namespace Propertease.Controllers
         {
             var pendingProperties = _context.properties
                 .Where(p => p.Status == "Pending")
+                .Include(p => p.PropertyImages) // Include the related images
                 .ToList();
 
             return View(pendingProperties);
@@ -190,7 +194,38 @@ namespace Propertease.Controllers
                 if (seller != null)
                 {
                     var subject = "Your Property Has Been Approved";
-                    var body = $"Dear {seller.FullName},<br><br>Your property '{property.Title}' has been approved.<br><br>Thank you!";
+                    var body = $@"
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 5px; }}
+        .header {{ background-color: #4a6fdc; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ padding: 20px; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+        .footer {{ margin-top: 20px; font-size: 12px; color: #777; text-align: center; }}
+        .button-container {{ text-align: center; margin-top: 20px; }}
+        .button {{ display: inline-block; background-color: #4a6fdc; color: white; text-decoration: none; 
+                   padding: 12px 20px; border-radius: 5px; font-weight: bold; font-size: 16px; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h2>Property Approval Notification</h2>
+        </div>
+        <div class='content'>
+            <p>Dear {seller.FullName},</p>
+            <p>We are pleased to inform you that your property listing <strong>'{property.Title}'</strong> has been successfully approved and is now live on <strong>ProperTease</strong>.</p>
+            <p>Potential buyers can now view your listing and get in touch with you. Make sure to check your dashboard for any inquiries and manage your listing as needed.</p>
+            <p>We wish you the best in finding the right buyer for your property!</p>
+            <p>Thank you,<br><strong>The ProperTease Team</strong></p>
+        </div>
+        <div class='footer'>
+            <p>If you have any questions or need assistance, feel free to contact our support team.</p>
+        </div>
+    </div>
+</body>
+</html>";
                     await _emailService.SendEmailAsync(seller.Email, subject, body);
                 }
                 await _notificationService.CreateNotificationAsync(
@@ -219,7 +254,41 @@ namespace Propertease.Controllers
                 if (seller != null)
                 {
                     var subject = "Your Property Has Been Rejected";
-                    var body = $"Dear {seller.FullName},<br><br>Your property '{property.Title}' has been rejected.<br><br>Thank you!";
+                    var body = $@"
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 5px; }}
+        .header {{ background-color: #dc4a4a; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ padding: 20px; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+        .footer {{ margin-top: 20px; font-size: 12px; color: #777; text-align: center; }}
+        .button-container {{ text-align: center; margin-top: 20px; }}
+        .button {{ display: inline-block; background-color: #4a6fdc; color: white; text-decoration: none; 
+                   padding: 12px 20px; border-radius: 5px; font-weight: bold; font-size: 16px; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h2>Property Listing Rejected</h2>
+        </div>
+        <div class='content'>
+            <p>Dear {seller.FullName},</p>
+            <p>We regret to inform you that your property listing <strong>'{property.Title}'</strong> has been rejected: </p>
+            <p>If you believe this was an error or need assistance in modifying your listing, please review our guidelines and make the necessary adjustments.</p>
+            <div class='button-container'>
+            </div>
+            <p>We encourage you to update your listing and resubmit it for approval.</p>
+            <p>Thank you for using <strong>ProperTease</strong>. We appreciate your efforts in maintaining high-quality listings on our platform.</p>
+            <p>Best regards,<br><strong>The ProperTease Team</strong></p>
+        </div>
+        <div class='footer'>
+            <p>If you have any questions, feel free to contact our support team.</p>
+        </div>
+    </div>
+</body>
+</html>";
                     await _emailService.SendEmailAsync(seller.Email, subject, body);
                 }
                 await _notificationService.CreateNotificationAsync(
@@ -267,8 +336,172 @@ namespace Propertease.Controllers
         // Action to display the user list in the UsersManagement view
         public IActionResult UsersManagement()
         {
-            var users = _context.Users.ToList();
+            var users = _context.Users
+                .Where(u => u.Role != "Admin") // Exclude admin users
+                .ToList();
             return View(users);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendVerificationEmail(int id)
+        {
+            // Find the user by ID
+            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+
+            if (user == null)
+            {
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("UsersManagement");
+            }
+
+            // Check if the user's email is already verified
+            if (user.IsEmailVerified)
+            {
+                TempData["Info"] = "This user's email is already verified.";
+                return RedirectToAction("UsersManagement");
+            }
+
+            // Generate a new verification token
+            var verificationToken = Guid.NewGuid().ToString();
+
+            // Update the user's verification token
+            user.EmailVerificationToken = verificationToken;
+
+            // Save changes to the database
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            // Generate the verification link
+            var verificationLink = Url.Action("VerifyEmail", "User", new { token = verificationToken }, Request.Scheme);
+
+            try
+            {
+                // Create a more professional email body with HTML formatting
+                var emailBody = $@"
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #4a6fdc; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+                .content {{ padding: 20px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+                .button {{ display: inline-block; background-color: #4a6fdc; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; margin-top: 20px; }}
+                .footer {{ margin-top: 20px; font-size: 12px; color: #777; text-align: center; }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h2>Email Verification</h2>
+                </div>
+                <div class='content'>
+                    <p>Dear {user.FullName},</p>
+                    <p>Your account has been created, but you need to verify your email address to activate your account.</p>
+                    <p>Please click the button below to verify your email address:</p>
+                    <p style='text-align: center;'>
+                        <a href='{verificationLink}' class='button'>Verify Email Address</a>
+                    </p>
+                    <p>If the button above doesn't work, you can also copy and paste the following link into your browser:</p>
+                    <p>{verificationLink}</p>
+                    <p>This link will expire in 24 hours.</p>
+                    <p>Thank you,<br>The Property Management Team</p>
+                </div>
+                <div class='footer'>
+                    <p>If you did not create an account, please ignore this email or contact support.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+
+                // Send the email with the verification link
+                await _emailService.SendEmailAsync(user.Email, "Email Verification", emailBody);
+
+                // Set success message
+                TempData["Success"] = $"Verification email sent to {user.Email} successfully.";
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                // Set error message
+                TempData["Error"] = $"Failed to send verification email: {ex.Message}";
+            }
+
+            // Redirect back to the users management page
+            return RedirectToAction("UsersManagement");
+        }
+        public IActionResult ExportUsers()
+        {
+            // Get only Buyer and Seller users (not Admin)
+            var users = _context.Users
+                .Where(u => u.Role == "Buyer" || u.Role == "Seller")
+                .ToList();
+
+            // Create a new Excel package
+            using (var package = new ExcelPackage())
+            {
+                // Add a new worksheet to the package
+                var worksheet = package.Workbook.Worksheets.Add("Users");
+
+                // Add headers
+                worksheet.Cells[1, 1].Value = "Full Name";
+                worksheet.Cells[1, 2].Value = "Email";
+                worksheet.Cells[1, 3].Value = "Contact Number";
+                worksheet.Cells[1, 4].Value = "Role";
+                worksheet.Cells[1, 5].Value = "Address";
+                worksheet.Cells[1, 6].Value = "Created At";
+
+                // Style the header row
+                using (var range = worksheet.Cells[1, 1, 1, 6])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(0, 120, 215));
+                    range.Style.Font.Color.SetColor(Color.White);
+                }
+
+                // Add data rows
+                int row = 2;
+                foreach (var user in users)
+                {
+                    worksheet.Cells[row, 1].Value = user.FullName;
+                    worksheet.Cells[row, 2].Value = user.Email;
+                    worksheet.Cells[row, 3].Value = user.ContactNumber;
+                    worksheet.Cells[row, 4].Value = user.Role;
+                    worksheet.Cells[row, 5].Value = user.Address;
+
+                    // Format the date
+                    if (user.CreatedAt.HasValue)
+                    {
+                        worksheet.Cells[row, 6].Value = user.CreatedAt.Value;
+                        worksheet.Cells[row, 6].Style.Numberformat.Format = "yyyy-mm-dd hh:mm:ss";
+                    }
+
+                    // Alternate row coloring for better readability
+                    if (row % 2 == 0)
+                    {
+                        using (var range = worksheet.Cells[row, 1, row, 6])
+                        {
+                            range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                            range.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(240, 240, 240));
+                        }
+                    }
+
+                    row++;
+                }
+
+                // Auto-fit columns
+                worksheet.Cells.AutoFitColumns();
+
+                // Set content type and filename for the file
+                var contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                var fileName = $"Users_Export_{DateTime.Now:yyyy-MM-dd}.xlsx";
+
+                // Convert the package to a byte array
+                var fileBytes = package.GetAsByteArray();
+
+                // Return the file
+                return File(fileBytes, contentType, fileName);
+            }
         }
 
         // Action to view user details

@@ -88,7 +88,43 @@ namespace Propertease.Controllers
                 var verificationLink = Url.Action("VerifyEmail", "User", new { token = verificationToken }, Request.Scheme);
 
                 // Send the email with the verification link
-                var emailBody = $"Please click the following link to verify your email: <a href='{verificationLink}'>Verify Email</a>";
+                var emailBody = $@"
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 5px; }}
+        .header {{ background-color: #4a6fdc; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }}
+        .content {{ padding: 20px; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 5px 5px; }}
+        .footer {{ margin-top: 20px; font-size: 12px; color: #777; text-align: center; }}
+        .button-container {{ text-align: center; margin-top: 20px; }}
+        .button {{ display: inline-block; background-color: #4a6fdc; color: white; text-decoration: none; 
+                   padding: 12px 20px; border-radius: 5px; font-weight: bold; font-size: 16px; }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h2>Email Verification</h2>
+        </div>
+        <div class='content'>
+            <p>Dear {user.FullName},</p>
+            <p>Thank you for signing up with <strong>ProperTease</strong>! To complete your registration, please verify your email address by clicking the button below:</p>
+            <div class='button-container'>
+                <a href='{verificationLink}' class='button'>Verify Email</a>
+            </div>
+            <p>If the button above doesn't work, you can also copy and paste the following link into your browser:</p>
+            <p><a href='{verificationLink}'>{verificationLink}</a></p>
+            <p>This link will expire in 24 hours for security reasons.</p>
+            <p>We appreciate your trust in <strong>ProperTease</strong> and look forward to serving you.</p>
+            <p>Best regards,<br><strong>The ProperTease Team</strong></p>
+        </div>
+        <div class='footer'>
+            <p>If you did not sign up for an account, please ignore this email or contact support.</p>
+        </div>
+    </div>
+</body>
+</html>";
                 await emailService.SendEmailAsync(user.Email, "Email Verification", emailBody);
 
                 // Redirect to a confirmation page (you can create a new view for this)
@@ -405,16 +441,26 @@ namespace Propertease.Controllers
                 ViewBag.AverageRating = averageRating;
                 ViewBag.TotalRatings = ratings.Count;
             }
-            else
+            if (user.Role == "Buyer")
             {
-                // For non-sellers, set default values
-                ViewBag.AverageRating = 0;
-                ViewBag.TotalRatings = 0;
-                ViewBag.Rating5Count = 0;
-                ViewBag.Rating4Count = 0;
-                ViewBag.Rating3Count = 0;
-                ViewBag.Rating2Count = 0;
-                ViewBag.Rating1Count = 0;
+                var ratings = await UserDbContext.BuyerRatings
+                  .Where(r => r.BuyerId == userId)
+                  .ToListAsync();
+                double averageRating = 0;
+                if (ratings.Any())
+                {
+                    averageRating = ratings.Average(r => r.Rating);
+                }
+
+                // Count ratings by star value
+                ViewBag.Rating5Count = ratings.Count(r => r.Rating == 5);
+                ViewBag.Rating4Count = ratings.Count(r => r.Rating == 4);
+                ViewBag.Rating3Count = ratings.Count(r => r.Rating == 3);
+                ViewBag.Rating2Count = ratings.Count(r => r.Rating == 2);
+                ViewBag.Rating1Count = ratings.Count(r => r.Rating == 1);
+
+                ViewBag.AverageRating = averageRating;
+                ViewBag.TotalRatings = ratings.Count;
             }
 
             return View(user);
@@ -529,8 +575,6 @@ namespace Propertease.Controllers
             return RedirectToAction(nameof(Profile));
         }
 
-
-
         // In UserController.cs
         [Authorize]
         [HttpGet]
@@ -616,7 +660,6 @@ namespace Propertease.Controllers
 
             return View(groupedViews);
         }
-
 
     }
 }

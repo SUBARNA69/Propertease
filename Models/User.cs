@@ -13,7 +13,6 @@ namespace Propertease.Models
 
         [Required]
         [EmailAddress]
-        [RegularExpression(@"^[a-zA-Z0-9._%+-]+@gmail\.com$", ErrorMessage = "Email must be a gmail.com address.")]
 
         public string? Email { get; set; }
 
@@ -41,9 +40,8 @@ namespace Propertease.Models
         public ICollection<Properties>? Properties { get; set; } // Properties owned by the seller
         public ICollection<ForumPost>? ForumPosts { get; set; }
         public ICollection<ForumComment>? ForumComments { get; set; }
-        public ICollection<UserRating>? RatingsReceived { get; set; }
         public ICollection<PropertyComment>? PropertyComments { get; set; }
-        public ICollection<UserRating>? RatingsGiven { get; set; }
         public ICollection<PropertyViewingRequest>? PropertyViewingRequests { get; set; }
+        public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
     }
 }
