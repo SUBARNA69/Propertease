@@ -45,7 +45,9 @@
         public double? Longitude { get; set; }
         public string? ThreeDModel { get; set; }
         // Add these properties to PropertyDetailsViewMode
-
+        // Add this property to your existing PropertyDetailsViewModel class
+        public bool IsFavorite { get; set; }
+        public DateTime DateAdded { get; set; } // For showing when a property was added to favorites
         public double SellerAverageRating { get; set; }
         public int SellerTotalRatings { get; set; }
         public List<SellerReview> SellerReviews { get; set; }

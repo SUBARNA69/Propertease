@@ -35,6 +35,8 @@ namespace Propertease.Models
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the property was first listed
+        //public DateTime? SoldDate { get; set; } 
+
         public ICollection<Apartment> Apartments { get; set; }
         public ICollection<House> Houses { get; set; }
         public ICollection<Land> Lands { get; set; }
@@ -42,6 +44,7 @@ namespace Propertease.Models
         public ICollection<PropertyComment> PropertyComments { get; set; }
         public ICollection<PropertyViewingRequest>? PropertyViewingRequests { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
 
     }
 }

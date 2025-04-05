@@ -9,6 +9,7 @@ using Propertease.Services;
 using OfficeOpenXml.Style;
 using OfficeOpenXml;
 using System.Drawing;
+using ClosedXML.Excel;
 namespace Propertease.Controllers
 {
     [Authorize(Roles = "Admin")]
@@ -19,13 +20,16 @@ namespace Propertease.Controllers
         private readonly INotificationService _notificationService;
         private readonly PropertyRepository _propertyService;
         private readonly EmailService _emailService;
+        private readonly ILogger<AdminController> _logger;
 
-        public AdminController(ProperteaseDbContext context, PropertyRepository propertyService, EmailService emailService, INotificationService notificationService)
+
+        public AdminController(ILogger<AdminController> logger, ProperteaseDbContext context, PropertyRepository propertyService, EmailService emailService, INotificationService notificationService)
         {
             _context = context;
             _propertyService = propertyService;
             _emailService = emailService;
             _notificationService = notificationService;
+            _logger = logger;
         }
 
         [Authorize]
@@ -141,6 +145,29 @@ namespace Propertease.Controllers
                     Price = p.Price
                 })
                 .ToList();
+            decimal totalEarnings = _context.BoostedProperties
+        .Where(bp => bp.PaymentStatus == "Paid")
+        .Sum(bp => bp.Price);
+
+            // Get monthly earnings data for the chart
+            var monthlyEarnings = new List<object>();
+            foreach (var month in lastSixMonths)
+            {
+                var startDate = new DateTime(month.Year, month.MonthNumber, 1);
+                var endDate = startDate.AddMonths(1);
+
+                var monthlyAmount = _context.BoostedProperties
+                    .Where(bp => bp.PaymentStatus == "Paid" &&
+                           bp.StartTime >= startDate &&
+                           bp.StartTime < endDate)
+                    .Sum(bp => bp.Price);
+
+                monthlyEarnings.Add(new
+                {
+                    month = month.Month,
+                    earnings = monthlyAmount
+                });
+            }
             // Pass the data to the view
             ViewBag.TotalUsers = totalUsers;
             ViewBag.ActiveProperties = activeProperties;
@@ -150,6 +177,9 @@ namespace Propertease.Controllers
             ViewBag.PropertyTypesData = Newtonsoft.Json.JsonConvert.SerializeObject(propertyTypesData);
             ViewBag.PropertyGrowthData = Newtonsoft.Json.JsonConvert.SerializeObject(propertyGrowthData);
             ViewBag.RecentApprovedProperties = recentApprovedProperties;
+            ViewBag.TotalEarnings = totalEarnings;
+            ViewBag.MonthlyEarnings = Newtonsoft.Json.JsonConvert.SerializeObject(monthlyEarnings);
+
 
             return View();
         }
@@ -527,5 +557,130 @@ namespace Propertease.Controllers
             }
             return RedirectToAction("UsersManagement");
         }
+
+        [HttpGet]
+        public async Task<IActionResult> BoostEarnings()
+        {
+            // Get total earnings from all paid boosts
+            decimal totalEarnings = await _context.BoostedProperties
+                .Where(bp => bp.PaymentStatus == "Paid")
+                .SumAsync(bp => bp.Price);
+
+            // Get count of successful boosts
+            int totalBoosts = await _context.BoostedProperties
+                .Where(bp => bp.PaymentStatus == "Paid")
+                .CountAsync();
+
+            // Create a simple view model
+            var viewModel = new BoostEarningsViewModel
+            {
+                TotalEarnings = totalEarnings,
+                BoostCount = totalBoosts
+            };
+
+            return View(viewModel);
+        }
+        [HttpGet]
+        public async Task<IActionResult> ExportBoostEarningsReport()
+        {
+            try
+            {
+                // Get all paid boosts with required data
+                var boostData = await _context.BoostedProperties
+                    .Where(bp => bp.PaymentStatus == "Paid")
+                    .Select(bp => new
+                    {
+                        bp.Id,
+                        PropertyId = bp.PropertyId,
+                        PropertyTitle = bp.Property.Title,
+                        SellerName = bp.Property.Seller.FullName,
+                        bp.Hours,
+                        bp.Price,
+                        StartTime = bp.StartTime,
+                        EndTime = bp.EndTime,
+                        BoostPeriod = $"{bp.StartTime.ToString("yyyy-MM-dd HH:mm")} to {bp.EndTime.ToString("yyyy-MM-dd HH:mm")}"
+                    })
+                    .OrderByDescending(b => b.StartTime)
+                    .ToListAsync();
+
+                // Create a new Excel workbook
+                using (var workbook = new XLWorkbook())
+                {
+                    // Add a worksheet
+                    var worksheet = workbook.Worksheets.Add("Boost Earnings");
+
+                    // Add headers
+                    worksheet.Cell(1, 1).Value = "ID";
+                    worksheet.Cell(1, 2).Value = "Property";
+                    worksheet.Cell(1, 3).Value = "Seller";
+                    worksheet.Cell(1, 4).Value = "Boost Period";
+                    worksheet.Cell(1, 5).Value = "Hours";
+                    worksheet.Cell(1, 6).Value = "Amount (Rs.)";
+                    worksheet.Cell(1, 7).Value = "Date";
+
+                    // Style the header row
+                    var headerRow = worksheet.Row(1);
+                    headerRow.Style.Font.Bold = true;
+                    headerRow.Style.Fill.BackgroundColor = XLColor.LightBlue;
+                    headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                    // Add data rows
+                    int row = 2;
+                    foreach (var boost in boostData)
+                    {
+                        worksheet.Cell(row, 1).Value = boost.Id;
+                        worksheet.Cell(row, 2).Value = boost.PropertyTitle;
+                        worksheet.Cell(row, 3).Value = boost.SellerName;
+                        worksheet.Cell(row, 4).Value = boost.BoostPeriod;
+                        worksheet.Cell(row, 5).Value = boost.Hours;
+                        worksheet.Cell(row, 6).Value = boost.Price;
+                        worksheet.Cell(row, 7).Value = boost.StartTime.ToString("yyyy-MM-dd HH:mm:ss");
+
+                        // Style amount column as currency
+                        worksheet.Cell(row, 6).Style.NumberFormat.Format = "₹#,##0.00";
+
+                        row++;
+                    }
+
+                    // Add a total row
+                    worksheet.Cell(row, 5).Value = "Total:";
+                    worksheet.Cell(row, 5).Style.Font.Bold = true;
+                    worksheet.Cell(row, 5).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Right;
+
+                    worksheet.Cell(row, 6).FormulaA1 = $"SUM(F2:F{row - 1})";
+                    worksheet.Cell(row, 6).Style.Font.Bold = true;
+                    worksheet.Cell(row, 6).Style.NumberFormat.Format = "₹#,##0.00";
+                    worksheet.Cell(row, 6).Style.Fill.BackgroundColor = XLColor.LightGreen;
+
+                    // Auto-fit columns
+                    worksheet.Columns().AdjustToContents();
+
+                    // Create a border for the data
+                    var dataRange = worksheet.Range(1, 1, row, 7);
+                    dataRange.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    dataRange.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+
+                    // Convert the Excel workbook to a byte array
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        stream.Flush();
+                        stream.Position = 0;
+
+                        // Return the Excel file
+                        return File(
+                            stream.ToArray(),
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            $"BoostEarningsReport_{DateTime.Now:yyyyMMdd}.xlsx");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error exporting boost earnings report");
+                return RedirectToAction("BoostEarnings", new { error = "Failed to export report. Please try again." });
+            }
+        }
+
     }
 }

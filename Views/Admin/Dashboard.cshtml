@@ -3,8 +3,7 @@
 }
 
 <!-- Include Flowbite CSS and JS in your _Layout.cshtml or add here -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
-
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.css" rel="stylesheet" />
 
 <div class="p-4 sm:ml-64">
     <div class="p-4 border-gray-200 rounded-lg">
@@ -15,9 +14,9 @@
         </div>
 
         <!-- Stats Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <!-- Total Users -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <a href="@Url.Action("UsersManagement", "Admin")" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">@ViewBag.TotalUsers</span>
@@ -30,10 +29,10 @@
                         </svg>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Active Properties -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <a href="@Url.Action("AllProperties", "Admin")" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">@ViewBag.ActiveProperties</span>
@@ -46,10 +45,10 @@
                         </svg>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Pending Approvals -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <a href="@Url.Action("AdminRequests", "Admin")" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
                 <div class="flex items-center">
                     <div class="flex-shrink-0">
                         <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">@ViewBag.PendingApprovals</span>
@@ -59,13 +58,30 @@
                         23 new today
                     </div>
                 </div>
-            </div>
+            </a>
+
+            <!-- Total Earnings -->
+            <a href="@Url.Action("BoostEarnings", "Admin")" class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl sm:text-3xl leading-none font-bold text-gray-900 dark:text-white">Rs. @ViewBag.TotalEarnings.ToString("N0")</span>
+                        <h3 class="text-base font-normal text-gray-500 dark:text-gray-400">Total Earnings</h3>
+                    </div>
+                    <div class="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+                        <div class="p-2 rounded-full bg-green-100">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </a>
         </div>
 
-        <!-- Charts Grid -->
+        <!-- Charts Grid - 2x2 layout -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <!-- Monthly User Registrations (Bar Chart) -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-shadow duration-300">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Monthly User Registrations</h3>
@@ -78,7 +94,7 @@
             </div>
 
             <!-- Monthly Property Listings (Bar Chart) -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-shadow duration-300">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Monthly Property Listings</h3>
@@ -89,12 +105,22 @@
                     <canvas id="propertyListingsChart"></canvas>
                 </div>
             </div>
-        </div>
 
-        <!-- Additional Charts Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Property Growth Line Chart (NEW) -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+            <!-- Monthly Earnings Line Chart -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-shadow duration-300">
+                <div class="mb-4 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Monthly Earnings</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Revenue from property boosts</p>
+                    </div>
+                </div>
+                <div class="h-72">
+                    <canvas id="monthlyEarningsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Property Growth Line Chart -->
+            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-shadow duration-300">
                 <div class="mb-4 flex items-center justify-between">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white">Property Growth</h3>
@@ -105,23 +131,10 @@
                     <canvas id="propertyGrowthChart"></canvas>
                 </div>
             </div>
-
-            <!-- Property Types Distribution (Bar Chart) -->
-            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
-                <div class="mb-4 flex items-center justify-between">
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white">Property Types</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Distribution by type</p>
-                    </div>
-                </div>
-                <div class="h-72">
-                    <canvas id="propertyTypesChart"></canvas>
-                </div>
-            </div>
         </div>
 
         <!-- Recent Activity Section -->
-        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8">
+        <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-4 sm:p-6 xl:p-8 hover:shadow-lg transition-shadow duration-300">
             <div class="mb-4">
                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">Recent Activity</h3>
             </div>
@@ -132,7 +145,7 @@
                         {
                             @foreach (var property in ViewBag.RecentApprovedProperties)
                             {
-                                <li class="py-3 sm:py-4">
+                                <li class="py-3 sm:py-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 rounded-lg px-2">
                                     <div class="flex items-center space-x-4">
                                         <div class="flex-shrink-0">
                                             <div class="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center">
@@ -146,7 +159,7 @@
                                                 New Property Listed
                                             </p>
                                             <p class="text-sm text-gray-500 truncate dark:text-gray-400">
-                                                @property.Title in @property.Location - $@property.Price.ToString("N0")
+                                                @property.Title in @property.Location - Rs. @property.Price.ToString("N0")
                                             </p>
                                         </div>
                                         <div class="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
@@ -182,231 +195,266 @@
     </div>
 </div>
 
-    <!-- Include Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Include Flowbite JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include Flowbite JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/flowbite.min.js"></script>
 
-    <script>
-        // Parse the JSON data from ViewBag
-        const monthlyUserRegistrations = @Html.Raw(ViewBag.MonthlyUserRegistrations);
-        const monthlyPropertyListings = @Html.Raw(ViewBag.MonthlyPropertyListings);
-        const propertyTypesData = @Html.Raw(ViewBag.PropertyTypesData);
-        const propertyGrowthData = @Html.Raw(ViewBag.PropertyGrowthData);
+<script>
+    // Parse the JSON data from ViewBag
+    const monthlyUserRegistrations = @Html.Raw(ViewBag.MonthlyUserRegistrations);
+    const monthlyPropertyListings = @Html.Raw(ViewBag.MonthlyPropertyListings);
+    const propertyGrowthData = @Html.Raw(ViewBag.PropertyGrowthData);
+    const monthlyEarnings = @Html.Raw(ViewBag.MonthlyEarnings);
 
-        // Extract data for charts
-        const months = monthlyUserRegistrations.map(item => item.month);
-        const buyerCounts = monthlyUserRegistrations.map(item => item.buyers);
-        const sellerCounts = monthlyUserRegistrations.map(item => item.sellers);
+    // Extract data for charts
+    const months = monthlyUserRegistrations.map(item => item.month);
+    const buyerCounts = monthlyUserRegistrations.map(item => item.buyers);
+    const sellerCounts = monthlyUserRegistrations.map(item => item.sellers);
 
-        const approvedCounts = monthlyPropertyListings.map(item => item.approved);
-        const pendingCounts = monthlyPropertyListings.map(item => item.pending);
+    const approvedCounts = monthlyPropertyListings.map(item => item.approved);
+    const pendingCounts = monthlyPropertyListings.map(item => item.pending);
 
-        const propertyTypes = propertyTypesData.map(item => item.type);
-        const propertyCounts = propertyTypesData.map(item => item.count);
+    // Extract data for the line chart
+    const growthMonths = propertyGrowthData.map(item => item.month);
+    const propertyTotals = propertyGrowthData.map(item => item.total);
 
-        // Extract data for the line chart
-        const growthMonths = propertyGrowthData.map(item => item.month);
-        const propertyTotals = propertyGrowthData.map(item => item.total);
+    // Extract data for the earnings chart
+    const earningsMonths = monthlyEarnings.map(item => item.month);
+    const earningsValues = monthlyEarnings.map(item => item.earnings);
 
-        // Set up color scheme
-        const colors = {
-            blue: {
-                primary: '#1A56DB',
-                light: 'rgba(26, 86, 219, 0.1)'
-            },
-            green: {
-                primary: '#16BDCA',
-                light: 'rgba(22, 189, 202, 0.1)'
-            },
-            orange: {
-                primary: '#F59E0B',
-                light: 'rgba(245, 158, 11, 0.1)'
-            },
-            red: {
-                primary: '#EF4444',
-                light: 'rgba(239, 68, 68, 0.1)'
-            },
-            purple: {
-                primary: '#8B5CF6',
-                light: 'rgba(139, 92, 246, 0.1)'
-            }
-        };
+    // Set up color scheme
+    const colors = {
+        blue: {
+            primary: '#1A56DB',
+            light: 'rgba(26, 86, 219, 0.1)'
+        },
+        green: {
+            primary: '#16BDCA',
+            light: 'rgba(22, 189, 202, 0.1)'
+        },
+        orange: {
+            primary: '#F59E0B',
+            light: 'rgba(245, 158, 11, 0.1)'
+        },
+        red: {
+            primary: '#EF4444',
+            light: 'rgba(239, 68, 68, 0.1)'
+        },
+        purple: {
+            primary: '#8B5CF6',
+            light: 'rgba(139, 92, 246, 0.1)'
+        },
+        teal: {
+            primary: '#14B8A6',
+            light: 'rgba(20, 184, 166, 0.1)'
+        }
+    };
 
-        // Monthly User Registrations Chart
-        const userRegistrationsCtx = document.getElementById('userRegistrationsChart').getContext('2d');
-        new Chart(userRegistrationsCtx, {
-            type: 'bar',
-            data: {
-                labels: months,
-                datasets: [
-                    {
-                        label: 'Buyers',
-                        data: buyerCounts,
-                        backgroundColor: colors.blue.primary,
-                        borderColor: colors.blue.primary,
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Sellers',
-                        data: sellerCounts,
-                        backgroundColor: colors.green.primary,
-                        borderColor: colors.green.primary,
-                        borderWidth: 1
+    // Monthly User Registrations Chart
+    const userRegistrationsCtx = document.getElementById('userRegistrationsChart').getContext('2d');
+    new Chart(userRegistrationsCtx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Buyers',
+                    data: buyerCounts,
+                    backgroundColor: colors.blue.primary,
+                    borderColor: colors.blue.primary,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Sellers',
+                    data: sellerCounts,
+                    backgroundColor: colors.green.primary,
+                    borderColor: colors.green.primary,
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: true,
+                        drawBorder: false
                     }
-                ]
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    }
+                }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            display: true,
-                            drawBorder: false
-                        }
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    // Monthly Property Listings Chart
+    const propertyListingsCtx = document.getElementById('propertyListingsChart').getContext('2d');
+    new Chart(propertyListingsCtx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [
+                {
+                    label: 'Approved',
+                    data: approvedCounts,
+                    backgroundColor: colors.green.primary,
+                    borderColor: colors.green.primary,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Pending',
+                    data: pendingCounts,
+                    backgroundColor: colors.orange.primary,
+                    borderColor: colors.orange.primary,
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: true,
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    // Property Growth Line Chart
+    const propertyGrowthCtx = document.getElementById('propertyGrowthChart').getContext('2d');
+    new Chart(propertyGrowthCtx, {
+        type: 'line',
+        data: {
+            labels: growthMonths,
+            datasets: [
+                {
+                    label: 'Total Properties',
+                    data: propertyTotals,
+                    backgroundColor: colors.purple.light,
+                    borderColor: colors.purple.primary,
+                    borderWidth: 2,
+                    pointBackgroundColor: colors.purple.primary,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: colors.purple.primary,
+                    tension: 0.3,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: true,
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
+    });
+
+    // Monthly Earnings Line Chart
+    const monthlyEarningsCtx = document.getElementById('monthlyEarningsChart').getContext('2d');
+    new Chart(monthlyEarningsCtx, {
+        type: 'line',
+        data: {
+            labels: earningsMonths,
+            datasets: [
+                {
+                    label: 'Earnings (Rs.)',
+                    data: earningsValues,
+                    backgroundColor: colors.teal.light,
+                    borderColor: colors.teal.primary,
+                    borderWidth: 2,
+                    pointBackgroundColor: colors.teal.primary,
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: colors.teal.primary,
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        display: true,
+                        drawBorder: false
                     },
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
+                    ticks: {
+                        // Include Rs. prefix in the ticks
+                        callback: function(value) {
+                            return 'Rs. ' + value.toLocaleString();
                         }
                     }
                 },
-                plugins: {
-                    legend: {
-                        position: 'top',
+                x: {
+                    grid: {
+                        display: false,
+                        drawBorder: false
                     }
                 }
-            }
-        });
-
-        // Monthly Property Listings Chart
-        const propertyListingsCtx = document.getElementById('propertyListingsChart').getContext('2d');
-        new Chart(propertyListingsCtx, {
-            type: 'bar',
-            data: {
-                labels: months,
-                datasets: [
-                    {
-                        label: 'Approved',
-                        data: approvedCounts,
-                        backgroundColor: colors.green.primary,
-                        borderColor: colors.green.primary,
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Pending',
-                        data: pendingCounts,
-                        backgroundColor: colors.orange.primary,
-                        borderColor: colors.orange.primary,
-                        borderWidth: 1
-                    }
-                ]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            display: true,
-                            drawBorder: false
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
-                        }
-                    }
+            plugins: {
+                legend: {
+                    position: 'top',
                 },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                }
-            }
-        });
-
-        // Property Types Chart
-        const propertyTypesCtx = document.getElementById('propertyTypesChart').getContext('2d');
-        new Chart(propertyTypesCtx, {
-            type: 'doughnut',
-            data: {
-                labels: propertyTypes,
-                datasets: [
-                    {
-                        data: propertyCounts,
-                        backgroundColor: [
-                            colors.blue.primary,
-                            colors.green.primary,
-                            colors.orange.primary,
-                            colors.red.primary,
-                            colors.purple.primary
-                        ],
-                        borderWidth: 1
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'right',
-                    }
-                }
-            }
-        });
-
-        // Property Growth Line Chart
-        const propertyGrowthCtx = document.getElementById('propertyGrowthChart').getContext('2d');
-        new Chart(propertyGrowthCtx, {
-            type: 'line',
-            data: {
-                labels: growthMonths,
-                datasets: [
-                    {
-                        label: 'Total Properties',
-                        data: propertyTotals,
-                        backgroundColor: colors.purple.light,
-                        borderColor: colors.purple.primary,
-                        borderWidth: 2,
-                        pointBackgroundColor: colors.purple.primary,
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: colors.purple.primary,
-                        tension: 0.3,
-                        fill: true
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            display: true,
-                            drawBorder: false
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false,
-                            drawBorder: false
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rs. ' + context.raw.toLocaleString();
                         }
                     }
-                },
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
                 }
             }
-        });
-    </script>
+        }
+    });
+</script>

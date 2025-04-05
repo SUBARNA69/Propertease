@@ -1,11 +1,14 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Tls;
 using Propertease.Hubs;
 using Propertease.Models;
 using Propertease.Repos;
@@ -40,15 +43,265 @@ namespace Propertease.Controllers
             this.propertyRepository = propertyRepository;
         }
 
-        public IActionResult Properties()
+        public async Task<IActionResult> Properties(string propertyType = null, string district = null, string priceRange = null, List<string> amenities = null)
         {
-            // Retrieve only approved and not sold properties from the database
-            var availableProperties = _context.properties
-                                              .Include(p => p.PropertyImages)
-                                              .Where(p => p.Status == "Approved" && p.Status != "Sold")
-                                              .ToList();
-            return View(availableProperties);
+            // Start with a query for approved and not sold properties
+            var query = _context.properties
+                .Include(p => p.PropertyImages)
+                .Include(p => p.Seller)
+                .Where(p => p.Status == "Approved" && p.Status != "Sold");
+
+            // Apply server-side filters if provided
+            if (!string.IsNullOrEmpty(propertyType))
+            {
+                query = query.Where(p => p.PropertyType == propertyType);
+            }
+
+            if (!string.IsNullOrEmpty(district))
+            {
+                query = query.Where(p => p.District.Contains(district));
+            }
+
+            if (!string.IsNullOrEmpty(priceRange))
+            {
+                var parts = priceRange.Split('-');
+                if (parts.Length == 2)
+                {
+                    if (decimal.TryParse(parts[0], out decimal minPrice))
+                    {
+                        query = query.Where(p => p.Price >= minPrice);
+                    }
+
+                    if (decimal.TryParse(parts[1], out decimal maxPrice))
+                    {
+                        query = query.Where(p => p.Price <= maxPrice);
+                    }
+                }
+                else if (priceRange.EndsWith("+"))
+                {
+                    var minPriceStr = priceRange.TrimEnd('+');
+                    if (decimal.TryParse(minPriceStr, out decimal minPrice))
+                    {
+                        query = query.Where(p => p.Price >= minPrice);
+                    }
+                }
+            }
+
+            // Execute the query to get the filtered properties
+            var properties = await query.ToListAsync();
+
+            // Create a list to hold our view models
+            var propertyViewModels = new List<PropertyDetailsViewModel>();
+
+            // Convert each property to a PropertyDetailsViewModel
+            foreach (var property in properties)
+            {
+                var viewModel = new PropertyDetailsViewModel
+                {
+                    Id = property.Id,
+                    Title = property.Title,
+                    Price = property.Price,
+                    Description = property.Description,
+                    District = property.District,
+                    City = property.City,
+                    Province = property.Province,
+                    ImageUrl = property.PropertyImages?.Select(img => "/Images/" + img.Photo).ToList() ?? new List<string>(),
+                    SellerName = property.Seller?.FullName,
+                    SellerContact = property.Seller?.ContactNumber,
+                    SellerEmail = property.Seller?.Email,
+                    SellerImage = property.Seller?.Image,
+                    PropertyType = property.PropertyType,
+                    Latitude = property.Latitude,
+                    Longitude = property.Longitude,
+                    RoadAccess = property.RoadAccess,
+                    ThreeDModel = property.ThreeDModel
+                };
+
+                // Add property-specific details based on property type
+                if (property.PropertyType == "House")
+                {
+                    var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+                    if (house != null)
+                    {
+                        viewModel.Bedrooms = house.Bedrooms;
+                        viewModel.Kitchens = house.Kitchens;
+                        viewModel.SittingRooms = house.SittingRooms;
+                        viewModel.Bathrooms = house.Bathrooms;
+                        viewModel.Floors = house.Floors;
+                        viewModel.LandArea = house.LandArea;
+                        viewModel.BuildupArea = house.BuildupArea;
+                        viewModel.BuiltYear = house.BuiltYear;
+                        viewModel.FacingDirection = house.FacingDirection;
+                    }
+                }
+                else if (property.PropertyType == "Apartment")
+                {
+                    var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == property.Id);
+                    if (apartment != null)
+                    {
+                        viewModel.Rooms = apartment.Rooms;
+                        viewModel.Kitchens = apartment.Kitchens;
+                        viewModel.Bathrooms = apartment.Bathrooms;
+                        viewModel.SittingRooms = apartment.SittingRooms;
+                        viewModel.RoomSize = apartment.RoomSize;
+                        viewModel.BuiltYear = apartment.BuiltYear;
+                    }
+                }
+                else if (property.PropertyType == "Land")
+                {
+                    var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == property.Id);
+                    if (land != null)
+                    {
+                        viewModel.LandArea = land.LandArea;
+                        viewModel.LandType = land.LandType;
+                        viewModel.SoilQuality = land.SoilQuality;
+                    }
+                }
+
+                propertyViewModels.Add(viewModel);
+            }
+            // Get user's favorite property IDs and pass to the view
+            List<int> favoritePropertyIds = new List<int>();
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                favoritePropertyIds = await _context.Favorites
+                    .Where(f => f.UserId == userId)
+                    .Select(f => f.PropertyId)
+                    .ToListAsync();
+            }
+            ViewBag.FavoritePropertyIds = favoritePropertyIds;
+
+            // Get property type counts for statistics
+            ViewBag.TotalProperties = propertyViewModels.Count;
+            ViewBag.HouseCount = propertyViewModels.Count(p => p.PropertyType == "House");
+            ViewBag.ApartmentCount = propertyViewModels.Count(p => p.PropertyType == "Apartment");
+            ViewBag.LandCount = propertyViewModels.Count(p => p.PropertyType == "Land");
+
+            // Get all districts for filter options
+            ViewBag.Districts = await _context.properties
+                .Where(p => p.Status == "Approved" && p.Status != "Sold")
+                .Select(p => p.District)
+                .Distinct()
+                .ToListAsync();
+
+            return View(propertyViewModels);
         }
+
+        public async Task<IActionResult> BoostedProperties()
+        {
+            // Get the list of boosted property IDs
+            var boostedPropertyIds = await _context.BoostedProperties
+                .Where(bp => bp.IsActive)
+                .Select(bp => bp.PropertyId)
+                .ToListAsync();
+
+            // Get all properties that are boosted, approved, and not sold
+            var query = _context.properties
+                .Include(p => p.PropertyImages)
+                .Include(p => p.Seller)
+                .Where(p => boostedPropertyIds.Contains(p.Id) && p.Status == "Approved" && p.Status != "Sold");
+
+            // Execute the query to get the boosted properties
+            var boostedProperties = await query.ToListAsync();
+
+            // Create a list to hold our view models
+            var propertyViewModels = new List<PropertyDetailsViewModel>();
+
+            // Convert each property to a PropertyDetailsViewModel
+            foreach (var property in boostedProperties)
+            {
+                var viewModel = new PropertyDetailsViewModel
+                {
+                    Id = property.Id,
+                    Title = property.Title,
+                    Price = property.Price,
+                    Description = property.Description,
+                    District = property.District,
+                    City = property.City,
+                    Province = property.Province,
+                    ImageUrl = property.PropertyImages?.Select(img => "/Images/" + img.Photo).ToList() ?? new List<string>(),
+                    SellerName = property.Seller?.FullName,
+                    SellerContact = property.Seller?.ContactNumber,
+                    SellerEmail = property.Seller?.Email,
+                    SellerImage = property.Seller?.Image,
+                    PropertyType = property.PropertyType,
+                    Latitude = property.Latitude,
+                    Longitude = property.Longitude,
+                    RoadAccess = property.RoadAccess,
+                    ThreeDModel = property.ThreeDModel
+                };
+                // Add property-specific details based on property type
+                if (property.PropertyType == "House")
+                {
+                    var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+                    if (house != null)
+                    {
+                        viewModel.Bedrooms = house.Bedrooms;
+                        viewModel.Kitchens = house.Kitchens;
+                        viewModel.SittingRooms = house.SittingRooms;
+                        viewModel.Bathrooms = house.Bathrooms;
+                        viewModel.Floors = house.Floors;
+                        viewModel.LandArea = house.LandArea;
+                        viewModel.BuildupArea = house.BuildupArea;
+                        viewModel.BuiltYear = house.BuiltYear;
+                        viewModel.FacingDirection = house.FacingDirection;
+                    }
+                }
+                else if (property.PropertyType == "Apartment")
+                {
+                    var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == property.Id);
+                    if (apartment != null)
+                    {
+                        viewModel.Rooms = apartment.Rooms;
+                        viewModel.Kitchens = apartment.Kitchens;
+                        viewModel.Bathrooms = apartment.Bathrooms;
+                        viewModel.SittingRooms = apartment.SittingRooms;
+                        viewModel.RoomSize = apartment.RoomSize;
+                        viewModel.BuiltYear = apartment.BuiltYear;
+                    }
+                }
+                else if (property.PropertyType == "Land")
+                {
+                    var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == property.Id);
+                    if (land != null)
+                    {
+                        viewModel.LandArea = land.LandArea;
+                        viewModel.LandType = land.LandType;
+                        viewModel.SoilQuality = land.SoilQuality;
+                    }
+                }
+
+                propertyViewModels.Add(viewModel);
+            }
+            // Get user's favorite property IDs and pass to the view
+            List<int> favoritePropertyIds = new List<int>();
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                favoritePropertyIds = await _context.Favorites
+                    .Where(f => f.UserId == userId)
+                    .Select(f => f.PropertyId)
+                    .ToListAsync();
+            }
+            ViewBag.FavoritePropertyIds = favoritePropertyIds;
+            ViewBag.BoostedPropertyIds = boostedPropertyIds;
+
+            // Get property type counts for statistics
+            ViewBag.TotalBoostedProperties = propertyViewModels.Count;
+            ViewBag.BoostedHouseCount = propertyViewModels.Count(p => p.PropertyType == "House");
+            ViewBag.BoostedApartmentCount = propertyViewModels.Count(p => p.PropertyType == "Apartment");
+            ViewBag.BoostedLandCount = propertyViewModels.Count(p => p.PropertyType == "Land");
+
+            // Get all districts for filter options
+            ViewBag.Districts = propertyViewModels
+                .Select(p => p.District)
+                .Distinct()
+                .ToList();
+
+            return View(propertyViewModels);
+        }
+
         [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(int id)
         {
@@ -381,8 +634,20 @@ namespace Propertease.Controllers
             // Pass the boosted property IDs to the view
             ViewBag.BoostedPropertyIds = boostedPropertyIds;
 
+            // Get user's favorite property IDs and pass to the view
+            List<int> favoritePropertyIds = new List<int>();
+            if (User.Identity.IsAuthenticated)
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                favoritePropertyIds = await _context.Favorites
+                    .Where(f => f.UserId == userId)
+                    .Select(f => f.PropertyId)
+                    .ToListAsync();
+            }
+            ViewBag.FavoritePropertyIds = favoritePropertyIds;
+
             return View(orderedViewModels);
-        }        // GET: Property/ModelViewer/5
+        }
         [HttpGet]
         // GET: Property/ModelViewer/5
         // Controllers/HomeController.cs - Add these methods to your existing controller
@@ -673,11 +938,6 @@ namespace Propertease.Controllers
                 return RedirectToAction("Details", new { id = request.PropertyId });
             }
         }
-        // Add this method to your existing HomeController.cs
-        // This assumes you already have a Details action for property details
-
-        // Add this method to your existing HomeController.cs
-        // This assumes you already have a Details action for property details
 
        
         [HttpGet]
@@ -980,6 +1240,164 @@ namespace Propertease.Controllers
                 await _context.SaveChangesAsync();
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleFavorite(int propertyId)
+        {
+            try
+            {
+                if (!User.Identity.IsAuthenticated)
+                {
+                    return Json(new { success = false, message = "Please login to add favorites" });
+                }
+
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var existingFavorite = await _context.Favorites
+                    .FirstOrDefaultAsync(f => f.UserId == userId && f.PropertyId == propertyId);
+
+                if (existingFavorite != null)
+                {
+                    _context.Favorites.Remove(existingFavorite);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, isFavorite = false });
+                }
+                else
+                {
+                    var favorite = new Favorite
+                    {
+                        UserId = userId,
+                        PropertyId = propertyId,
+                        DateAdded = DateTime.UtcNow
+                    };
+                    _context.Favorites.Add(favorite);
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, isFavorite = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling favorite for property {PropertyId}", propertyId);
+                return Json(new { success = false, message = "Error updating favorites. Please try again." });
+            }
+        }
+
+
+        [AllowAnonymous]
+        public async Task<IActionResult> GetFavorites()
+        {
+            // Check if user is authenticated
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Json(new { success = false, message = "User not authenticated" });
+            }
+
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Get user's favorite property IDs
+            var favoriteIds = await _context.Favorites
+                .Where(f => f.UserId == userId)
+                .Select(f => f.PropertyId)
+                .ToListAsync();
+
+            return Json(new { success = true, favorites = favoriteIds });
+        }
+
+        [Authorize(Roles = "Buyer")]
+        public async Task<IActionResult> Favorites()
+        {
+            // Get the current user's ID
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+            // Get user's favorite properties
+            var favoriteProperties = await _context.Favorites
+                .Where(f => f.UserId == userId)
+                .Join(_context.properties,
+                    f => f.PropertyId,
+                    p => p.Id,
+                    (f, p) => p)
+                .Include(p => p.PropertyImages)
+                .Include(p => p.Seller)
+                .Where(p => p.Status == "Approved" && p.Status != "Sold")
+                .ToListAsync();
+
+            // Create a list to hold our view models
+            var propertyViewModels = new List<PropertyDetailsViewModel>();
+
+            // Convert each property to a PropertyDetailsViewModel
+            foreach (var property in favoriteProperties)
+            {
+                var viewModel = new PropertyDetailsViewModel
+                {
+                    Id = property.Id,
+                    Title = property.Title,
+                    Price = property.Price,
+                    Description = property.Description,
+                    District = property.District,
+                    City = property.City,
+                    Province = property.Province,
+                    ImageUrl = property.PropertyImages?.Select(img => "/Images/" + img.Photo).ToList() ?? new List<string>(),
+                    SellerName = property.Seller?.FullName,
+                    SellerContact = property.Seller?.ContactNumber,
+                    SellerEmail = property.Seller?.Email,
+                    SellerImage = property.Seller?.Image,
+                    PropertyType = property.PropertyType,
+                    Latitude = property.Latitude,
+                    Longitude = property.Longitude,
+                    RoadAccess = property.RoadAccess,
+                    ThreeDModel = property.ThreeDModel
+                };
+
+                // Add property-specific details based on property type
+                if (property.PropertyType == "House")
+                {
+                    var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+                    if (house != null)
+                    {
+                        viewModel.Bedrooms = house.Bedrooms;
+                        viewModel.Kitchens = house.Kitchens;
+                        viewModel.SittingRooms = house.SittingRooms;
+                        viewModel.Bathrooms = house.Bathrooms;
+                        viewModel.Floors = house.Floors;
+                        viewModel.LandArea = house.LandArea;
+                        viewModel.BuildupArea = house.BuildupArea;
+                        viewModel.BuiltYear = house.BuiltYear;
+                        viewModel.FacingDirection = house.FacingDirection;
+                    }
+                }
+                else if (property.PropertyType == "Apartment")
+                {
+                    var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == property.Id);
+                    if (apartment != null)
+                    {
+                        viewModel.Rooms = apartment.Rooms;
+                        viewModel.Kitchens = apartment.Kitchens;
+                        viewModel.Bathrooms = apartment.Bathrooms;
+                        viewModel.SittingRooms = apartment.SittingRooms;
+                        viewModel.RoomSize = apartment.RoomSize;
+                        viewModel.BuiltYear = apartment.BuiltYear;
+                    }
+                }
+                else if (property.PropertyType == "Land")
+                {
+                    var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == property.Id);
+                    if (land != null)
+                    {
+                        viewModel.LandArea = land.LandArea;
+                        viewModel.LandType = land.LandType;
+                        viewModel.SoilQuality = land.SoilQuality;
+                    }
+                }
+
+                propertyViewModels.Add(viewModel);
+            }
+
+            // Set all properties as favorites for the view
+            ViewBag.FavoritePropertyIds = favoriteProperties.Select(p => p.Id).ToList();
+
+            return View(propertyViewModels);
+        }
+
 
     }
 

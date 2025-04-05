@@ -43,5 +43,7 @@ namespace Propertease.Models
         public ICollection<PropertyComment>? PropertyComments { get; set; }
         public ICollection<PropertyViewingRequest>? PropertyViewingRequests { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public virtual ICollection<Favorite> Favorites { get; set; } = new List<Favorite>();
+
     }
 }

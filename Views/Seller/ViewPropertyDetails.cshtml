@@ -30,6 +30,16 @@
                             @Model.Status
                         </span>
                     </div>
+
+                    <!-- Fullscreen button -->
+                    @if (Model.ImageUrl != null && Model.ImageUrl.Any())
+                    {
+                        <button id="openGalleryButton" class="absolute bottom-4 right-4 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-70 transition-opacity">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5"></path>
+                            </svg>
+                        </button>
+                    }
                 </div>
 
                 <!-- Thumbnails and View All Button -->
@@ -215,7 +225,7 @@
                 @if (Model.Latitude != null && Model.Longitude != null)
                 {
                     <h2 class="text-2xl font-semibold mb-4">Location</h2>
-                    <div id="map" class="h-64 rounded-lg mb-6"></div>
+                    <div id="map" class="h-64 rounded-lg mb-6 shadow-md"></div>
                 }
 
                 <!-- Seller Information -->
@@ -236,9 +246,6 @@
                     <div>
                         <h3 class="font-medium text-lg">@Model.SellerName</h3>
                         <p class="text-gray-600">@Model.SellerContact</p>
-                        <button class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">
-                            Contact Seller
-                        </button>
                     </div>
                 </div>
             </div>
@@ -246,21 +253,21 @@
 
         <!-- Action Buttons -->
         <div class="p-6 border-t flex flex-wrap gap-4">
-            <a href="/Seller/EditProperty/@Model.Id" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 inline-flex items-center">
+            <a href="/Seller/EditProperty/@Model.Id" class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 inline-flex items-center transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                 </svg>
                 Edit Property
             </a>
-            <form method="post" action="/Seller/Delete/@Model.Id" onsubmit="return confirm('Are you sure you want to delete this property?');">
-                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 inline-flex items-center">
+            <form method="post" action="/Seller/Delete/@Model.Id" onsubmit="return confirm('Are you sure you want to delete this property? This action cannot be undone.');">
+                <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 inline-flex items-center transition-colors">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                     Delete
                 </button>
             </form>
-            <a href="/Seller/Listings" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 inline-flex items-center">
+            <a href="/Seller/Listings" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 inline-flex items-center transition-colors">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -271,10 +278,10 @@
 </div>
 
 <!-- Image Gallery Modal -->
-<div id="imageGalleryModal" class="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center hidden">
-    <div class="relative w-full max-w-4xl p-4">
+<div id="imageGalleryModal" class="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center hidden">
+    <div class="relative w-full max-w-5xl p-4">
         <!-- Close Button -->
-        <button id="closeGallery" class="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 z-10">
+        <button id="closeGallery" class="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 z-10 transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -282,15 +289,15 @@
 
         <!-- Main Image Container -->
         <div class="relative">
-            <img id="modalMainImage" src="/placeholder.svg" alt="Property image" class="w-full h-auto max-h-[70vh] object-contain">
+            <img id="modalMainImage" src="/placeholder.svg" alt="Property image" class="w-full h-auto max-h-[70vh] object-contain mx-auto">
 
             <!-- Navigation Arrows -->
-            <button id="prevImage" class="absolute left-2 top-1/2 transform -translate-y-1/2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70">
+            <button id="prevImage" class="absolute left-2 top-1/2 transform -translate-y-1/2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                 </svg>
             </button>
-            <button id="nextImage" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70">
+            <button id="nextImage" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-70 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -309,110 +316,136 @@
                 }
             }
         </div>
+
+        <!-- Image counter -->
+        <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
+            <span id="currentImageNum">1</span> / <span id="totalImages">@(Model.ImageUrl?.Count ?? 0)</span>
+        </div>
     </div>
 </div>
 
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.10.0/mapbox-gl.css" rel="stylesheet">
 
-    @if (Model.Latitude != null && Model.Longitude != null)
-    {
-        <script>
-            mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
-
-            var map = new mapboxgl.Map({
-                container: 'map',
-                style: 'mapbox://styles/mapbox/streets-v11',
-                center: [@Model.Longitude, @Model.Latitude],
-                zoom: 14
-            });
-
-            new mapboxgl.Marker()
-                .setLngLat([@Model.Longitude, @Model.Latitude])
-                .addTo(map);
-        </script>
-    }
-
+@if (Model.Latitude != null && Model.Longitude != null)
+{
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Image Gallery Functionality
-            const mainImage = document.getElementById('mainImage');
-            const thumbnailImages = document.querySelectorAll('.thumbnail-image');
-            const viewAllButton = document.getElementById('viewAllImages');
-            const imageGalleryModal = document.getElementById('imageGalleryModal');
-            const closeGallery = document.getElementById('closeGallery');
-            const modalMainImage = document.getElementById('modalMainImage');
-            const modalThumbnails = document.querySelectorAll('.modal-thumbnail');
-            const prevButton = document.getElementById('prevImage');
-            const nextButton = document.getElementById('nextImage');
+        mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
 
-            // Store all image paths
-            const allImages = @Html.Raw(Json.Serialize(Model.ImageUrl?.Select(img => $"~/Images/{img}").ToList() ?? new List<string>()));
-            let currentImageIndex = 0;
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [@Model.Longitude, @Model.Latitude],
+            zoom: 14
+        });
 
-            // Change main image when thumbnail is clicked
-            thumbnailImages.forEach(thumbnail => {
-                thumbnail.addEventListener('click', function() {
-                    const imagePath = this.getAttribute('data-image');
-                    mainImage.src = imagePath;
-                });
-            });
+        new mapboxgl.Marker()
+            .setLngLat([@Model.Longitude, @Model.Latitude])
+            .addTo(map);
+    </script>
+}
 
-            // Open gallery modal when "View All" is clicked
-            if (viewAllButton) {
-                viewAllButton.addEventListener('click', function() {
-                    openGalleryModal();
-                });
-            }
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Image Gallery Functionality
+        const mainImage = document.getElementById('mainImage');
+        const thumbnailImages = document.querySelectorAll('.thumbnail-image');
+        const viewAllButton = document.getElementById('viewAllImages');
+        const openGalleryButton = document.getElementById('openGalleryButton');
+        const imageGalleryModal = document.getElementById('imageGalleryModal');
+        const closeGallery = document.getElementById('closeGallery');
+        const modalMainImage = document.getElementById('modalMainImage');
+        const modalThumbnails = document.querySelectorAll('.modal-thumbnail');
+        const prevButton = document.getElementById('prevImage');
+        const nextButton = document.getElementById('nextImage');
+        const currentImageNum = document.getElementById('currentImageNum');
+        const totalImages = document.getElementById('totalImages');
 
-            // Close gallery modal
-            closeGallery.addEventListener('click', function() {
-                imageGalleryModal.classList.add('hidden');
-            });
 
-            // Change modal image when thumbnail is clicked
-            modalThumbnails.forEach((thumbnail, index) => {
-                thumbnail.addEventListener('click', function() {
-                    const imagePath = this.getAttribute('data-image');
-                    modalMainImage.src = imagePath;
-                    currentImageIndex = index;
-                });
-            });
+        // Store all image paths
+        const allImages = @Html.Raw(Json.Serialize(Model.ImageUrl?.Select(img => $"~/Images/{img}").ToList() ?? new List<string>()));
+        let currentImageIndex = 0;
 
-            // Navigate to previous image
-            prevButton.addEventListener('click', function() {
-                currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
-                modalMainImage.src = allImages[currentImageIndex];
-            });
-
-            // Navigate to next image
-            nextButton.addEventListener('click', function() {
-                currentImageIndex = (currentImageIndex + 1) % allImages.length;
-                modalMainImage.src = allImages[currentImageIndex];
-            });
-
-            // Open gallery modal and set initial image
-            function openGalleryModal() {
-                if (allImages.length > 0) {
-                    modalMainImage.src = allImages[0];
-                    currentImageIndex = 0;
-                    imageGalleryModal.classList.remove('hidden');
-                }
-            }
-
-            // Keyboard navigation
-            document.addEventListener('keydown', function(e) {
-                if (imageGalleryModal.classList.contains('hidden')) return;
-
-                if (e.key === 'ArrowLeft') {
-                    prevButton.click();
-                } else if (e.key === 'ArrowRight') {
-                    nextButton.click();
-                } else if (e.key === 'Escape') {
-                    closeGallery.click();
-                }
+        // Change main image when thumbnail is clicked
+        thumbnailImages.forEach(thumbnail => {
+            thumbnail.addEventListener('click', function() {
+                const imagePath = this.getAttribute('data-image');
+                mainImage.src = imagePath;
             });
         });
-    </script>
 
+        // Open gallery modal when "View All" is clicked
+        if (viewAllButton) {
+            viewAllButton.addEventListener('click', function() {
+                openGalleryModal();
+            });
+        }
+
+        // Open gallery when fullscreen button is clicked
+        if (openGalleryButton) {
+            openGalleryButton.addEventListener('click', function() {
+                openGalleryModal();
+            });
+        }
+
+        // Close gallery modal
+        closeGallery.addEventListener('click', function() {
+            imageGalleryModal.classList.add('hidden');
+        });
+
+        // Change modal image when thumbnail is clicked
+        modalThumbnails.forEach((thumbnail, index) => {
+            thumbnail.addEventListener('click', function() {
+                const imagePath = this.getAttribute('data-image');
+                modalMainImage.src = imagePath;
+                currentImageIndex = index;
+                updateImageCounter();
+            });
+        });
+
+        // Navigate to previous image
+        prevButton.addEventListener('click', function() {
+            currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+            modalMainImage.src = allImages[currentImageIndex];
+            updateImageCounter();
+        });
+
+        // Navigate to next image
+        nextButton.addEventListener('click', function() {
+            currentImageIndex = (currentImageIndex + 1) % allImages.length;
+            modalMainImage.src = allImages[currentImageIndex];
+            updateImageCounter();
+        });
+
+        // Update image counter
+        function updateImageCounter() {
+            currentImageNum.textContent = currentImageIndex + 1;
+        }
+
+        // Open gallery modal and set initial image
+        function openGalleryModal() {
+            if (allImages.length > 0) {
+                modalMainImage.src = allImages[0];
+                currentImageIndex = 0;
+                updateImageCounter();
+                imageGalleryModal.classList.remove('hidden');
+            }
+        }
+
+
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (imageGalleryModal.classList.contains('hidden')) return;
+
+            if (e.key === 'ArrowLeft') {
+                prevButton.click();
+            } else if (e.key === 'ArrowRight') {
+                nextButton.click();
+            } else if (e.key === 'Escape') {
+                closeGallery.click();
+            }
+        });
+    });
+</script>
 

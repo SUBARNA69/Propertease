@@ -36,8 +36,8 @@
                             <a asp-controller="Home" asp-action="About" class="text-gray-900 hover:text-blue-500">About</a>
                             <a asp-controller="Home" asp-action="Forum" class="text-gray-900 hover:text-blue-500">Forum</a>
                             <a asp-controller="Home" asp-action="MyPurchases" class="text-gray-900 hover:text-blue-500">My Purchases</a>
-                            <a asp-controller="Home" asp-action="MyBuyerRatings" class="text-gray-900 hover:text-blue-500">My Purchases</a>
-                            <a href="~/3DModels/index.html" class="text-gray-900 hover:text-blue-500">3d</a>
+                            <a asp-controller="Home" asp-action="MyBuyerRatings" class="text-gray-900 hover:text-blue-500">My Ratings</a>
+                            <a asp-controller="Home" asp-action="Favorites" class="text-gray-900 hover:text-blue-500">Favorites</a>
                         }
                         @* Role-based navigation links *@
                         else if (User.IsInRole("Seller"))
@@ -58,7 +58,6 @@
                             <a asp-controller="Admin" asp-action="AllProperties" class="text-gray-900 hover:text-blue-500">Property Management</a>
                             <a asp-controller="Admin" asp-action="UsersManagement" class="text-gray-900 hover:text-blue-500">User Management</a>
                             <a asp-controller="Admin" asp-action="Index" class="text-gray-900 hover:text-blue-500">Feedback</a>
-                            <a asp-controller="Admin" asp-action="Index" class="text-gray-900 hover:text-blue-500">Support</a>
                         }
                     </div>
 

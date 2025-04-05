@@ -1,6 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Home";
     var boostedPropertyIds = ViewBag.BoostedPropertyIds as List<int> ?? new List<int>();
+    var favoritePropertyIds = ViewBag.FavoritePropertyIds as List<int> ?? new List<int>();
 }
 @model IEnumerable<PropertyDetailsViewModel>
 
@@ -19,7 +20,7 @@
     .property-card {
         transition: all 0.4s ease;
         border: 1px solid #e5e7eb;
-        margin-bottom: 10px; /* Added margin-bottom */
+        margin-bottom: 10px;
     }
 
         .property-card:hover {
@@ -31,7 +32,7 @@
     .category-card {
         transition: all 0.3s ease;
         overflow: hidden;
-        margin-bottom: 10px; /* Added margin-bottom */
+        margin-bottom: 10px;
     }
 
         .category-card:hover {
@@ -66,7 +67,7 @@
 
     .testimonial-card {
         transition: all 0.3s ease;
-        margin-bottom: 10px; /* Added margin-bottom */
+        margin-bottom: 10px;
     }
 
         .testimonial-card:hover {
@@ -107,7 +108,7 @@
     .search-bar {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         transition: all 0.3s ease;
-        margin-bottom: 10px; /* Added margin-bottom */
+        margin-bottom: 10px;
     }
 
         .search-bar:hover {
@@ -135,7 +136,7 @@
     .newsletter-form {
         position: relative;
         z-index: 10;
-        margin-bottom: 10px; /* Added margin-bottom */
+        margin-bottom: 10px;
     }
 
     .newsletter-bg {
@@ -167,7 +168,7 @@
             background: rgba(59, 130, 246, 0.1);
             z-index: 1;
         }
-    /* New styles for better button visibility */
+
     .btn-view-details {
         background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
         color: white;
@@ -178,7 +179,7 @@
             background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
             transform: translateY(-2px);
         }
-    /* Added spacing between sections */
+
     section {
         margin-bottom: 10px;
     }
@@ -241,7 +242,36 @@
     .mapboxgl-popup {
         max-width: 200px;
     }
+
+    /* Toast notification styles */
+    .toast-notification {
+        position: fixed;
+        bottom: 1rem;
+        right: 1rem;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        color: white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        z-index: 50;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+    }
+
+    .toast-success {
+        background-color: #10b981;
+    }
+
+    .toast-error {
+        background-color: #ef4444;
+    }
+
+    .toast-info {
+        background-color: #3b82f6;
+    }
 </style>
+
+<!-- CSRF Token for AJAX requests -->
+@Html.AntiForgeryToken()
 
 <!-- Hero Section with Search -->
 <section class="relative hero-gradient py-24 overflow-hidden">
@@ -387,7 +417,7 @@
                 <h2 class="text-3xl font-bold mb-2 text-gray-900">🚀 Boosted Properties</h2>
                 <p class="text-gray-600 max-w-2xl">Exclusive properties with premium features and prime locations</p>
             </div>
-            <a href="#" class="btn-outline text-sky-600 hover:text-sky-800 font-medium flex items-center mt-4 md:mt-0 border border-sky-200 hover:border-sky-600 px-4 py-2 rounded-lg">
+            <a href="@Url.Action("BoostedProperties","Home")" class="btn-outline text-sky-600 hover:text-sky-800 font-medium flex items-center mt-4 md:mt-0 border border-sky-200 hover:border-sky-600 px-4 py-2 rounded-lg">
                 View all boosted properties
                 <i class="fa-solid fa-arrow-right ml-2"></i>
             </a>
@@ -398,7 +428,8 @@
             {
                 <div class="property-card bg-white rounded-xl overflow-hidden h-full"
                      data-latitude="@property.Latitude"
-                     data-longitude="@property.Longitude">
+                     data-longitude="@property.Longitude"
+                     data-id="@property.Id">
                     <div class="relative overflow-hidden h-64">
                         @if (property.ImageUrl != null && property.ImageUrl.Any())
                         {
@@ -520,7 +551,7 @@
                 <h2 class="text-3xl font-bold mb-2 text-gray-900">Featured Properties</h2>
                 <p class="text-gray-600 max-w-2xl">Explore our selection of high-quality properties in prime locations</p>
             </div>
-            <a href="#" class="btn-outline text-emerald-600 hover:text-emerald-800 font-medium flex items-center mt-4 md:mt-0 border border-emerald-200 hover:border-emerald-600 px-4 py-2 rounded-lg">
+            <a href="@Url.Action("Properties", "Home")" class="btn-outline text-emerald-600 hover:text-emerald-800 font-medium flex items-center mt-4 md:mt-0 border border-emerald-200 hover:border-emerald-600 px-4 py-2 rounded-lg">
                 View all properties
                 <i class="fa-solid fa-arrow-right ml-2"></i>
             </a>
@@ -531,7 +562,8 @@
             {
                 <div class="property-card bg-white rounded-xl overflow-hidden h-full"
                      data-latitude="@property.Latitude"
-                     data-longitude="@property.Longitude">
+                     data-longitude="@property.Longitude"
+                     data-id="@property.Id">
                     <div class="relative overflow-hidden h-64">
                         @if (property.ImageUrl != null && property.ImageUrl.Any())
                         {
@@ -907,4 +939,23 @@
             }
         });
     });
+
+    // Simple toast notification function
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${
+            type === 'success' ? 'toast-success' :
+            type === 'error' ? 'toast-error' :
+            'toast-info'
+        }`;
+        toast.innerHTML = message;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 500);
+        }, 3000);
+    }
 </script>

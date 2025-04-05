@@ -29,7 +29,9 @@ namespace Propertease.Models
         public DbSet<BuyerRating> BuyerRatings { get; set; }
         public DbSet<PropertyComment> PropertyComments { get; set; }
         public DbSet<SellerRating> SellerRatings { get; set; }
+        public DbSet<Favorite> Favorites { get; set; }
         //public DbSet<Payment> Payments { get; set; }
+        // ProperteaseDbContext.cs
         public DbSet<PropertyViewingRequest> PropertyViewingRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -164,7 +166,19 @@ namespace Propertease.Models
                 .WithMany(fp => fp.Comments)
                 .HasForeignKey(fc => fc.ForumPostId)
                 .OnDelete(DeleteBehavior.Cascade); // Cascade delete for ForumComment -> ForumPost
-           
+
+            modelBuilder.Entity<Favorite>()
+     .HasOne(f => f.Property)
+     .WithMany(p => p.Favorites)
+     .HasForeignKey(f => f.PropertyId)
+     .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Favorite>()
+    .HasOne(f => f.User)
+    .WithMany(u => u.Favorites)
+    .HasForeignKey(f => f.UserId)
+    .OnDelete(DeleteBehavior.NoAction);
+
             modelBuilder.Entity<User>(entity =>
             {
                 // Make sure the Email is unique

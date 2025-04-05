@@ -1133,6 +1133,49 @@ namespace Propertease.Controllers
             TempData["SuccessMessage"] = $"Property '{property.Title}' has been marked as sold.";
             return RedirectToAction(nameof(ViewingRequests));
         }
+        [HttpPost]
+        public async Task<IActionResult> MarkAsNotSold(int id)
+        {
+            // Get the viewing request
+            var request = await _context.PropertyViewingRequests.FindAsync(id);
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            // Verify the property belongs to the current seller
+            var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var property = await _context.properties
+                .FirstOrDefaultAsync(p => p.Id == request.PropertyId && p.SellerId == sellerId);
+
+            if (property == null)
+            {
+                return Forbid();
+            }
+
+            // Update property status back to "Approved"
+            property.Status = "Approved";
+
+            // Update request status to "Viewed" - this will ensure only the View button shows
+            request.Status = "Viewed";
+
+            await _context.SaveChangesAsync();
+
+            // Notify the buyer who viewed the property
+            if (request.BuyerId > 0)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    "Property Status Updated",
+                    $"The property '{property.Title}' is now available again.",
+                    "PropertyAvailable",
+                    request.BuyerId,
+                    property.Id
+                );
+            }
+
+            TempData["SuccessMessage"] = $"Property '{property.Title}' has been marked as not sold.";
+            return RedirectToAction(nameof(ViewingRequests));
+        }
         [HttpGet]
         public async Task<IActionResult> GetRequestDetails(int id)
         {
