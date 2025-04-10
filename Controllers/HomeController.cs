@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Claims;
+using System.Text;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Authorization;
@@ -8,9 +9,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using Org.BouncyCastle.Tls;
 using Propertease.Hubs;
 using Propertease.Models;
+using Propertease.Models.DTO;
 using Propertease.Repos;
 using Propertease.Services;
 
@@ -24,25 +27,112 @@ namespace Propertease.Controllers
         IWebHostEnvironment webHostEnvironment;
         private readonly INotificationService _notificationService;
         private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly PricePredictionService _pricePredictionService;
+        private readonly HousePricePredictionService _predictionService;
         private readonly PropertyRepository propertyRepository;
+        private readonly HttpClient _httpClient;
 
         public HomeController(ILogger<HomeController> logger, 
             ProperteaseDbContext context, 
             IWebHostEnvironment webHostEnvironment, 
             IHubContext<NotificationHub> _hubContext, 
-            INotificationService _notificationService, 
-            PricePredictionService _pricePredictionService,
-            PropertyRepository propertyRepository)
+            INotificationService _notificationService,
+            HousePricePredictionService predictionService,
+            PropertyRepository propertyRepository,
+            HttpClient httpClient)
         {
             _logger = logger;
             _context = context;
             this.webHostEnvironment = webHostEnvironment;
             this._notificationService = _notificationService;
-            this._pricePredictionService = _pricePredictionService;
+            _predictionService = predictionService;
             this.propertyRepository = propertyRepository;
+            _httpClient = httpClient;
         }
 
+
+        // To this if you want to keep the URL as /GetPredictedPrice/{id}
+        [Route("GetPredictedPrice/{id}")]
+        [HttpPost]
+        public async Task<IActionResult> GetPredictedPrice(int id)
+        {
+            try
+            {
+                // Get property data from database using id
+                var property = await _context.properties
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                if (property == null || property.PropertyType != "House")
+                {
+                    return Json(new { success = false, message = "Property not found or not a house" });
+                }
+
+                // Get the house-specific details
+                var house = await _context.Houses.FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+
+                if (house == null)
+                {
+                    return Json(new { success = false, message = "House details not found" });
+                }
+
+                // Create prediction request from property data
+                var predictionRequest = new HousePredictionRequest
+                {
+                    // Map the data from your house object to the prediction request
+                    Bedrooms = house.Bedrooms ?? 0,
+                    Bathrooms = house.Bathrooms ?? 0,
+                    Floors = house.Floors ?? 0,
+                    LotArea = house.LandArea ?? 0.0,
+                    HouseArea = house.BuildupArea ?? 0.0,
+                    // Handle DateOnly conversion to year as int
+                    BuiltYear = house.BuiltYear
+                };
+
+                // Get prediction
+                decimal predictedPrice = await _predictionService.PredictHousePrice(predictionRequest);
+
+                return Json(new
+                {
+                    success = true,
+                    predictedPrice,
+                    formattedPrice = String.Format("{0:C0}", predictedPrice) // C0 format for no decimal places
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log exception
+                return Json(new { success = false, message = "Failed to get price prediction: " + ex.Message });
+            }
+        }
+
+        private async Task<decimal> PredictPriceAsync(HouseFeaturesDto features)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("http://localhost:5000"); // or your server IP
+
+                var json = JsonConvert.SerializeObject(features);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync("/predict", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadAsStringAsync();
+                    dynamic prediction = JsonConvert.DeserializeObject(result);
+                    return (decimal)prediction.predicted_price;
+                }
+
+                throw new Exception("Prediction service call failed.");
+            }
+        }
+
+
+
+
+        public class ApiResponse
+    {
+        public List<PropertyRecommendation> Recommendations { get; set; }
+    }
         public async Task<IActionResult> Properties(string propertyType = null, string district = null, string priceRange = null, List<string> amenities = null)
         {
             // Start with a query for approved and not sold properties
@@ -408,8 +498,30 @@ namespace Propertease.Controllers
                     viewModel.BuildupArea = house.BuildupArea;
                     viewModel.BuiltYear = house.BuiltYear;
                     viewModel.FacingDirection = house.FacingDirection;
+
+                    // Call prediction
+                    var input = new HouseFeaturesDto
+                    {
+                        BuildupArea = house.BuildupArea,
+                        Bedrooms = house.Bedrooms,
+                        Bathrooms = house.Bathrooms,
+                        BuiltYear = house.BuiltYear.Year, // Take only the year
+                        LandArea = house.LandArea,
+                        Floors = house.Floors
+                    };
+
+                    try
+                    {
+                        var predictedPrice = await PredictPriceAsync(input);
+                        viewModel.PredictedPrice = predictedPrice;
+                    }
+                    catch (Exception ex)
+                    {
+                        viewModel.PredictedPrice = null;
+                    }
                 }
             }
+
             else if (property.PropertyType == "Apartment")
             {
                 var apartment = await _context.Apartments.FirstOrDefaultAsync(a => a.PropertyID == property.Id);
@@ -433,7 +545,7 @@ namespace Propertease.Controllers
                     viewModel.SoilQuality = land.SoilQuality;
                 }
             }
-
+            
             return View(viewModel);
         }
         // Controllers/HomeController.cs (or create a new controller)
@@ -460,77 +572,6 @@ namespace Propertease.Controllers
 
             // Return the file with the appropriate MIME type
             return PhysicalFile(modelPath, "model/gltf-binary");
-        }
-        public async Task<IActionResult> PredictPrice(int propertyId)
-        {
-            try
-            {
-                // Get property location with error handling
-                var property = await _context.properties
-                    .Where(p => p.Id == propertyId)
-                    .Select(p => new { p.Latitude, p.Longitude })
-                    .FirstOrDefaultAsync();
-
-                if (property == null)
-                {
-                    _logger.LogWarning($"Property with ID {propertyId} not found");
-                    return NotFound(new { success = false, message = "Property not found" });
-                }
-
-                // Get house details with error handling
-                var house = await _context.Houses
-                    .FirstOrDefaultAsync(h => h.ID == propertyId);
-
-                if (house == null)
-                {
-                    _logger.LogWarning($"House details for property ID {propertyId} not found");
-                    return NotFound(new { success = false, message = "House details not found" });
-                }
-
-                // Validate critical fields
-                if (!property.Latitude.HasValue || !property.Longitude.HasValue)
-                {
-                    _logger.LogWarning($"Property {propertyId} has missing coordinates");
-                    return BadRequest(new { success = false, message = "Property coordinates are missing" });
-                }
-
-                // IMPORTANT: Make sure these field mappings are correct
-                // Prepare input features with correct field mappings
-                var inputFeatures = new PropertyInputFeatures
-                {
-                    // Make sure these field mappings match your database schema and model expectations
-                    HouseArea = house.BuildupArea, // This should be the actual house area, not land area
-                    Bedrooms = house.Bedrooms,
-                    Bathrooms = house.Bathrooms,
-                    LotArea = house.LandArea, // This should be the land area
-                    Floors = house.Floors,
-                    Latitude = property.Latitude,
-                    Longitude = property.Longitude,
-                    BuiltYear = house.BuiltYear
-                };
-
-                // Log the input features for debugging
-                _logger.LogInformation($"Predicting price for property {propertyId} with features: " +
-                    $"HouseArea={inputFeatures.HouseArea}, Bedrooms={inputFeatures.Bedrooms}, " +
-                    $"Bathrooms={inputFeatures.Bathrooms}, LotArea={inputFeatures.LotArea}");
-
-                // Get prediction with try-catch
-                var predictedPrice = _pricePredictionService.PredictPrice(inputFeatures);
-
-                // Validate prediction result
-                if (float.IsNaN(predictedPrice) || float.IsInfinity(predictedPrice) || predictedPrice <= 0)
-                {
-                    _logger.LogWarning($"Invalid prediction result for property {propertyId}: {predictedPrice}");
-                    return BadRequest(new { success = false, message = "Invalid prediction result" });
-                }
-
-                return Json(new { success = true, predictedPrice });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error predicting price for property {propertyId}");
-                return StatusCode(500, new { success = false, message = "An error occurred during price prediction" });
-            }
         }
         [AllowAnonymous]
         public async Task<IActionResult> Home()
@@ -654,8 +695,9 @@ namespace Propertease.Controllers
 
         public async Task<IActionResult> CompareProperties()
         {
-            // Get properties from session
-            var compareList = HttpContext.Session.GetString("CompareProperties");
+            // Get properties from session with user-specific key
+            string sessionKey = GetUserSpecificSessionKey("CompareProperties");
+            var compareList = HttpContext.Session.GetString(sessionKey);
             var model = new ComparePropertyViewModel();
 
             if (!string.IsNullOrEmpty(compareList))
@@ -679,11 +721,40 @@ namespace Propertease.Controllers
             return View(model);
         }
 
+        // Helper method to get user-specific session key
+        private string GetUserSpecificSessionKey(string baseKey)
+        {
+            // If user is authenticated, append user ID to make the session key user-specific
+            if (User.Identity.IsAuthenticated)
+            {
+                string userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Assuming you're using ASP.NET Identity
+                return $"{baseKey}_{userId}";
+            }
+
+            // For anonymous users, you could use a temporary ID stored in a cookie
+            string anonymousId = Request.Cookies["AnonymousId"];
+            if (string.IsNullOrEmpty(anonymousId))
+            {
+                anonymousId = Guid.NewGuid().ToString();
+                Response.Cookies.Append("AnonymousId", anonymousId, new CookieOptions
+                {
+                    IsEssential = true,
+                    Expires = DateTimeOffset.Now.AddDays(7)
+                });
+            }
+
+            return $"{baseKey}_anonymous_{anonymousId}";
+        }
+
+        // Update all other methods to use the user-specific session key
         [HttpPost]
         public IActionResult AddToCompare(string id)
         {
+            // Get user-specific session key
+            string sessionKey = GetUserSpecificSessionKey("CompareProperties");
+
             // Get current compare list from session
-            var compareList = HttpContext.Session.GetString("CompareProperties");
+            var compareList = HttpContext.Session.GetString(sessionKey);
             List<string> propertyIds = new List<string>();
 
             if (!string.IsNullOrEmpty(compareList))
@@ -703,8 +774,8 @@ namespace Propertease.Controllers
                 propertyIds.Add(id);
             }
 
-            // Save back to session
-            HttpContext.Session.SetString("CompareProperties", System.Text.Json.JsonSerializer.Serialize(propertyIds));
+            // Save back to session with user-specific key
+            HttpContext.Session.SetString(sessionKey, System.Text.Json.JsonSerializer.Serialize(propertyIds));
 
             return Json(new { success = true, count = propertyIds.Count });
         }
@@ -712,16 +783,19 @@ namespace Propertease.Controllers
         [HttpPost]
         public IActionResult RemoveFromCompare(string id)
         {
+            // Get user-specific session key
+            string sessionKey = GetUserSpecificSessionKey("CompareProperties");
+
             // Get current compare list from session
-            var compareList = HttpContext.Session.GetString("CompareProperties");
+            var compareList = HttpContext.Session.GetString(sessionKey);
 
             if (!string.IsNullOrEmpty(compareList))
             {
                 var propertyIds = System.Text.Json.JsonSerializer.Deserialize<List<string>>(compareList);
                 propertyIds.Remove(id);
 
-                // Save back to session
-                HttpContext.Session.SetString("CompareProperties", System.Text.Json.JsonSerializer.Serialize(propertyIds));
+                // Save back to session with user-specific key
+                HttpContext.Session.SetString(sessionKey, System.Text.Json.JsonSerializer.Serialize(propertyIds));
 
                 return Json(new { success = true, count = propertyIds.Count });
             }
@@ -732,14 +806,21 @@ namespace Propertease.Controllers
         [HttpPost]
         public IActionResult ClearCompare()
         {
-            HttpContext.Session.Remove("CompareProperties");
+            // Get user-specific session key
+            string sessionKey = GetUserSpecificSessionKey("CompareProperties");
+
+            // Remove the user-specific session data
+            HttpContext.Session.Remove(sessionKey);
             return Json(new { success = true });
         }
 
         [HttpGet]
         public IActionResult GetCompareList()
         {
-            var compareList = HttpContext.Session.GetString("CompareProperties");
+            // Get user-specific session key
+            string sessionKey = GetUserSpecificSessionKey("CompareProperties");
+
+            var compareList = HttpContext.Session.GetString(sessionKey);
             List<string> propertyIds = new List<string>();
 
             if (!string.IsNullOrEmpty(compareList))
@@ -894,6 +975,16 @@ namespace Propertease.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ScheduleViewing(PropertyViewingRequest request)
         {
+            // Check if property is already booked
+            var isPropertyBooked = await _context.PropertyViewingRequests
+                .AnyAsync(r => r.PropertyId == request.PropertyId && r.Status == "Approved");
+
+            if (isPropertyBooked)
+            {
+                TempData["ErrorMessage"] = "This property is already booked for viewing.";
+                return RedirectToAction("Details", new { id = request.PropertyId });
+            }
+
             // Set BuyerId if user is authenticated
             if (User.Identity.IsAuthenticated)
             {
@@ -914,12 +1005,30 @@ namespace Propertease.Controllers
 
             // Set RequestedAt to current time
             request.RequestedAt = DateTime.UtcNow;
+            // Set initial status to Pending
+            request.Status = "Pending";
 
             try
             {
                 // Add to database
                 _context.PropertyViewingRequests.Add(request);
                 await _context.SaveChangesAsync();
+
+                // Get property details for notification
+                var property = await _context.properties
+                    .FirstOrDefaultAsync(p => p.Id == request.PropertyId);
+
+                if (property != null)
+                {
+                    // Send notification to seller
+                    await _notificationService.CreateNotificationAsync(
+                        "New Viewing Request",
+                        $"A new viewing request has been submitted for your property '{property.Title}'.",
+                        "ViewingRequest",
+                        property.SellerId,
+                        property.Id
+                    );
+                }
 
                 // Redirect to success page or back to details
                 TempData["SuccessMessage"] = "Viewing request submitted successfully!";
@@ -937,10 +1046,9 @@ namespace Propertease.Controllers
                 TempData["ErrorMessage"] = "An error occurred: " + ex.Message;
                 return RedirectToAction("Details", new { id = request.PropertyId });
             }
-        }
+}
 
-       
-        [HttpGet]
+            [HttpGet]
         public async Task<IActionResult> Forum()
         {
             // Fetch all forum posts with their related user and comments

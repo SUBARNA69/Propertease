@@ -4,90 +4,102 @@
     Layout = "_StaticLayout";
 }
 
-<style>
-    .top {
-        margin-top: 50px;
-    }
-</style>
-
-<div class="top">
-    <div class="max-w-sm mx-auto bg-white p-6 rounded-lg shadow-md">
-        <div class="text-center mb-6">
-            <svg class="mx-auto w-12 h-12 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.5L2 9.5V21h20V9.5l-10-7zM4 10.3V20H3V9.5l9-6.2 9 6.2v10.5H4V10.3z" />
-                <path d="M4 20v.5H20V20H4z" />
-            </svg>
-            <h1 class="text-2xl font-bold mt-2">Create your account</h1>
-            <p class="text-sm text-gray-500">Join our real estate platform</p>
+<div class="min-h-screen flex items-center justify-center bg-cover h-screen bg-center" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80'); background-color: rgba(0, 0, 0, 0.7); background-blend-mode: overlay;">
+    <div class="max-w-2xl w-full rounded-xl bg-white shadow-lg overflow-hidden mt-10">
+        <!-- Header with gradient background -->
+        <div class="bg-gradient-to-r from-purple-600 to-blue-500 p-6 text-center">
+            <div class="inline-flex p-4 bg-white backdrop-blur-sm rounded-full mb-3">
+                <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Create Your Account</h1>
+            <p class="text-sm text-white mt-1">Join our premium real estate platform</p>
         </div>
 
-        <form asp-action="Register" asp-controller="User" class="space-y-4" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
+        <!-- Form body -->
+        <div class="p-6">
+            <form asp-action="Register" asp-controller="User" class="space-y-5" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
 
-            <div asp-validation-summary="All" class="text-red-700"></div>
+                <div asp-validation-summary="All" class="text-sm text-red-600  rounded-lg "></div>
+                
+                <div class="flex w-full ">
 
-            <!-- Full Name -->
-            <div>
-                <label asp-for="FullName" class="block text-sm font-medium text-gray-700">Full Name</label>
-                <input asp-for="FullName" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="John Doe" required />
-                <span asp-validation-for="FullName" class="text-red-400"></span>
-            </div>
+                <div class=" w-1/2 p-4">
 
-            <!-- Email -->
-            <div>
-                <label asp-for="Email" class="block text-sm font-medium text-gray-700">Email Address</label>
-                <input asp-for="Email" type="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="you@example.com" required />
-                <span asp-validation-for="Email" class="text-red-400"></span>
-            </div>
+                
+                <!-- Full Name -->
+                <div>
+                    <label asp-for="FullName" class="block mb-2 text-sm font-medium text-gray-900">Full Name</label>
+                    <input asp-for="FullName" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                    <span asp-validation-for="FullName" class="mt-1 text-xs text-red-600"></span>
+                </div>
 
-            <!-- Contact Number -->
-            <div>
-                <label asp-for="ContactNumber" class="block text-sm font-medium text-gray-700">Contact Number</label>
-                <input asp-for="ContactNumber" type="tel" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="+1 (555) 000-0000" required />
-                <span asp-validation-for="ContactNumber" class="text-red-400"></span>
-            </div>
+                <!-- Email -->
+                <div>
+                    <label asp-for="Email" class="block mb-2 text-sm font-medium text-gray-900">Email Address</label>
+                    <input asp-for="Email" type="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                    <span asp-validation-for="Email" class="mt-1 text-xs text-red-600"></span>
+                </div>
 
-            <!-- Address -->
-            <div>
-                <label asp-for="Address" class="block text-sm font-medium text-gray-700">Address</label>
-                <input asp-for="Address" type="text" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="123 Main St, City, Country" />
-                <span asp-validation-for="Address" class="text-red-400"></span>
-            </div>
+                <!-- Contact Number -->
+                <div>
+                    <label asp-for="ContactNumber" class="block mb-2 text-sm font-medium text-gray-900">Contact Number</label>
+                    <input asp-for="ContactNumber" type="tel" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                    <span asp-validation-for="ContactNumber" class="mt-1 text-xs text-red-600"></span>
+                </div>
+                </div>
+                <div class=" w-1/2 p-4">
 
-            <!-- Role -->
-            <div>
-                <label asp-for="Role" class="block text-sm font-medium text-gray-700">Role</label>
-                <select asp-for="Role" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
-                    <option value="">Select Role</option>
-                    <option value="Buyer">Buyer</option>
-                    <option value="Seller">Seller</option>
-                </select>
-                <span asp-validation-for="Role" class="text-red-400"></span>
-            </div>
+               
+                <!-- Address -->
+                <div>
+                    <label asp-for="Address" class="block mb-2 text-sm font-medium text-gray-900">Address</label>
+                    <input asp-for="Address" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" />
+                    <span asp-validation-for="Address" class="mt-1 text-xs text-red-600"></span>
+                </div>
 
-            <!-- Password -->
-            <div>
-                <label asp-for="Password" class="block text-sm font-medium text-gray-700">Password</label>
-                <input asp-for="Password" type="password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="********" required />
-                <span asp-validation-for="Password" class="text-red-400"></span>
-                <p class="mt-2 text-xs text-gray-500">Minimum 8 characters, including an uppercase letter, a number, and a special character.</p>
-            </div>
+                <!-- Role -->
+                <div>
+                    <label asp-for="Role" class="block mb-2 text-sm font-medium text-gray-900">Role</label>
+                    <select asp-for="Role" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required>
+                        <option value="">Select Role</option>
+                        <option value="Buyer">Buyer</option>
+                        <option value="Seller">Seller</option>
+                    </select>
+                    <span asp-validation-for="Role" class="mt-1 text-xs text-red-600"></span>
+                </div>
 
-            <!-- Confirm Password -->
-            <div>
-                <label asp-for="ConfirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                <input asp-for="ConfirmPassword" type="password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm" placeholder="********" required />
-                <span asp-validation-for="ConfirmPassword" class="text-red-400"></span>
-            </div>
+                <!-- Password -->
+                <div>
+                    <label asp-for="Password" class="block mb-2 text-sm font-medium text-gray-900">Password</label>
+                    <input asp-for="Password" type="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                    <span asp-validation-for="Password" class="mt-1 text-xs text-red-600"></span>
+                    @* <p class="mt-2 text-xs text-gray-500">Minimum 8 characters, including an uppercase letter, a number, and a special character.</p> *@
+                </div>
+                </div>
+                </div>
 
-            <!-- Submit Button -->
-            <div>
-                <input type="submit" value="Register Account" class="w-full bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
+                @* <!-- Confirm Password --> *@
+                @* <div> *@
+                @*     <label asp-for="ConfirmPassword" class="block mb-2 text-sm font-medium text-gray-900">Confirm Password</label> *@
+                @*     <input asp-for="ConfirmPassword" type="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required /> *@
+                @*     <span asp-validation-for="ConfirmPassword" class="mt-1 text-xs text-red-600"></span> *@
+                @* </div> *@
 
-            <p class="text-sm text-center text-gray-500 mt-4">
-                Already have an account? <a asp-action="Login" class="text-blue-600 hover:underline">Login</a>
-            </p>
-        </form>
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center">
+                        Create Account
+                    </button>
+                </div>
+
+                <div class="text-sm text-center text-gray-500 mt-4">
+                    Already have an account?
+                    <a asp-action="Login" class="font-medium text-blue-600 hover:underline">Sign in</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>

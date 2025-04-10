@@ -11,12 +11,10 @@ namespace Propertease.Models
 
         public string? FullName { get; set; }
 
-        [Required]
         [EmailAddress]
 
         public string? Email { get; set; }
 
-        [Required]
         [Phone]
         public string? ContactNumber { get; set; }
 
@@ -28,9 +26,9 @@ namespace Propertease.Models
         public string? Password { get; set; }
 
         public string? Address {  get; set; }
-        [NotMapped]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string? ConfirmPassword { get; set; }
+        //[NotMapped]
+        //[Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        //public string? ConfirmPassword { get; set; }
         public string? EmailVerificationToken { get; set; } // Stores the verification code sent via SMS
         public bool IsEmailVerified { get; set; } = false; // Tracks whether the phone number is verified
                                                            // Add these properties to your User model

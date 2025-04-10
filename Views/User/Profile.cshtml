@@ -4,208 +4,260 @@
     ViewData["Title"] = "User Profile";
 }
 
-<div class="max-w-4xl mx-auto p-4">
-    <!-- Profile Card -->
-    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-        <!-- Profile Header/Banner -->
-        <div class="h-48 bg-gradient-to-r from-blue-600 to-cyan-400 relative">
-            <!-- Profile Image -->
-            <div class="absolute -bottom-16 left-6">
-                <div class="relative" id="profileImageContainer">
-                    <div class="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-white cursor-pointer shadow-lg">
-                        @if (!string.IsNullOrEmpty(Model.Image))
-                        {
-                            <img src="~/Images/@Model.Image" alt="Profile Image" class="w-full h-full object-cover" id="profileImage" />
-                        }
-                        else
-                        {
-                            <img src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Default Profile Image" class="w-full h-full object-cover" id="profileImage" />
-                        }
-                    </div>
-                    <div class="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1.5 border-2 border-white">
-                        <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                            <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4">
         <!-- Profile Content -->
-        <div class="pt-20 px-6 pb-6">
-            <!-- User Information with Rating -->
-            <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h2 class="text-3xl font-bold text-gray-900 mb-1">@Model.FullName</h2>
-                    <p class="text-gray-500">Member since @DateTime.Now.AddYears(-1).ToString("MMMM yyyy")</p>
-                </div>
-
-                <!-- Rating Badge -->
-                <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end">
-                    <div class="flex items-center mb-1">
-                        <span class="bg-blue-100 text-blue-800 text-lg font-semibold px-3 py-1 rounded-lg flex items-center gap-1">
-                            <svg class="w-5 h-5 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <!-- Profile Header -->
+            <div class="h-48 bg-gradient-to-r from-blue-600 to-blue-800 relative">
+                <!-- Profile Image -->
+                <div class="absolute -bottom-16 left-6">
+                    <div class="relative" id="profileImageContainer">
+                        <div class="w-32 h-32 rounded-full border-4 border-white overflow-hidden bg-white cursor-pointer shadow-lg">
+                            @if (!string.IsNullOrEmpty(Model.Image))
+                            {
+                                <img src="~/Images/@Model.Image" alt="Profile Image" class="w-full h-full object-cover" id="profileImage" />
+                            }
+                            else
+                            {
+                                <img src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Default Profile Image" class="w-full h-full object-cover" id="profileImage" />
+                            }
+                        </div>
+                        <div class="absolute bottom-0 right-0 bg-blue-600 rounded-full p-1.5 border-2 border-white">
+                            <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
                                 <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
                             </svg>
-                            <span>@ViewBag.AverageRating.ToString("0.0")</span>
-                        </span>
-                        <span class="ml-2 text-sm text-gray-500">(@ViewBag.TotalRatings ratings)</span>
+                        </div>
                     </div>
-                    <button id="editProfileButton" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none flex items-center">
-                        <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.109 17H1v-2a4 4 0 0 1 4-4h.87M10 4.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm7.95 2.55a2 2 0 0 1 0 2.829l-6.364 6.364-3.536.707.707-3.536 6.364-6.364a2 2 0 0 1 2.829 0Z" />
-                        </svg>
-                        Edit Profile
-                    </button>
                 </div>
             </div>
-            <a asp-controller="User" asp-action="ViewedProperties" class="text-gray-900 hover:text-blue-500">activity</a>
 
-            <!-- Rating Breakdown -->
-            <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <h3 class="font-semibold text-lg mb-3">Rating Breakdown</h3>
-                <div class="space-y-2">
-                    @{
-                        // This would be populated from your controller with actual data
-                        var ratingBreakdown = new List<(int Stars, int Count)>
-                    {
-                    (5, ViewBag.Rating5Count ?? 0),
-                    (4, ViewBag.Rating4Count ?? 0),
-                    (3, ViewBag.Rating3Count ?? 0),
-                    (2, ViewBag.Rating2Count ?? 0),
-                    (1, ViewBag.Rating1Count ?? 0)
-                    };
+            <!-- Profile Content -->
+            <div class="pt-20 px-6 pb-6">
+                <!-- User Information with Rating -->
+                <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-1">@Model.FullName</h2>
+                        <p class="text-gray-500">@Model.Role</p>
+                        <p class="text-gray-500">Member since @(Model.CreatedAt.HasValue ? Model.CreatedAt.Value.ToString("MMMM dd, yyyy") : "N/A")</p>
+                    </div>
 
-                        foreach (var item in ratingBreakdown)
+                    <!-- Rating Badge -->
+                    <div class="mt-4 md:mt-0 flex flex-col items-start md:items-end">
+                        <div class="flex items-center mb-1">
+                            <span class="bg-blue-100 text-blue-800 text-lg font-semibold px-3 py-1 rounded-lg flex items-center gap-1">
+                                <svg class="w-5 h-5 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                    <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                                </svg>
+                                <span>@ViewBag.AverageRating.ToString("0.0")</span>
+                            </span>
+                            <span class="ml-2 text-sm text-gray-500">(@ViewBag.TotalRatings ratings)</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="editProfileButton" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none flex items-center">
+                                <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.109 17H1v-2a4 4 0 0 1 4-4h.87M10 4.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Zm7.95 2.55a2 2 0 0 1 0 2.829l-6.364 6.364-3.536.707.707-3.536 6.364-6.364a2 2 0 0 1 2.829 0Z" />
+                                </svg>
+                                Edit Profile
+                            </button>
+                            <a href="@Url.Action("UpdatePassword", "User")" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 flex items-center">
+                                <svg class="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.5 8V4.5a3.5 3.5 0 1 0-7 0V8M8 15v-4m-6.5-3h13a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1v-8a1 1 0 0 1 1-1Z" />
+                                </svg>
+                                Change Password
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="border-b border-gray-200 mb-6">
+                    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+                        <li class="mr-2">
+                            <a href="#" class="inline-block p-4 border-b-2 border-blue-600 rounded-t-lg text-blue-600 active">Profile</a>
+                        </li>
+                        <li class="mr-2">
+                            <a href="@Url.Action("ViewedProperties", "User")" class="inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300">Activity</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Rating Breakdown -->
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 class="font-semibold text-lg mb-3">Rating Breakdown</h3>
+                    <div class="space-y-2">
+                        @{
+                            // This would be populated from your controller with actual data
+                            var ratingBreakdown = new List<(int Stars, int Count)>
                         {
-                            var percentage = ViewBag.TotalRatings > 0 ? (item.Count * 100) / ViewBag.TotalRatings : 0;
-                            <div class="flex items-center">
-                                <div class="w-16 flex items-center">
-                                    <span class="mr-1">@item.Stars</span>
-                                    <svg class="w-4 h-4 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                                    </svg>
+                        (5, ViewBag.Rating5Count ?? 0),
+                        (4, ViewBag.Rating4Count ?? 0),
+                        (3, ViewBag.Rating3Count ?? 0),
+                        (2, ViewBag.Rating2Count ?? 0),
+                        (1, ViewBag.Rating1Count ?? 0)
+                        };
+
+                            foreach (var item in ratingBreakdown)
+                            {
+                                var percentage = ViewBag.TotalRatings > 0 ? (item.Count * 100) / ViewBag.TotalRatings : 0;
+                                <div class="flex items-center">
+                                    <div class="w-16 flex items-center">
+                                        <span class="mr-1">@item.Stars</span>
+                                        <svg class="w-4 h-4 text-yellow-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                                            <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                                        </svg>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
+                                        <div class="bg-yellow-400 h-2.5 rounded-full" style="width: @percentage%"></div>
+                                    </div>
+                                    <div class="w-10 text-right text-sm text-gray-500">
+                                        @item.Count
+                                    </div>
                                 </div>
-                                <div class="w-full bg-gray-200 rounded-full h-2.5 mx-2">
-                                    <div class="bg-yellow-400 h-2.5 rounded-full" style="width: @percentage%"></div>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <!-- Information Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <!-- Email Card -->
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 2-8.4 7.05a1 1 0 0 1-1.2 0L1 2m18 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1m18 0v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Email</p>
+                            <p class="font-medium">@Model.Email</p>
+                        </div>
+                    </div>
+
+                    <!-- Phone Card -->
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16.344 12.168-1.4-1.4a1.98 1.98 0 0 0-2.8 0l-.7.7a1.98 1.98 0 0 1-2.8 0l-2.1-2.1a1.98 1.98 0 0 1 0-2.8l.7-.7a1.981 1.981 0 0 0 0-2.8l-1.4-1.4a1.828 1.828 0 0 0-2.8 0C-.638 5.323 1.1 9.542 4.78 13.22c3.68 3.678 7.9 5.418 11.564 1.752a1.828 1.828 0 0 0 0-2.804Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Phone</p>
+                            <p class="font-medium">@Model.ContactNumber</p>
+                        </div>
+                    </div>
+
+                    <!-- Address Card -->
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center md:col-span-2">
+                        <div class="flex-shrink-0 mr-3">
+                            <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-blue-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 21">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.8 12.938h-.01a7 7 0 1 0-11.465.144h-.016l.141.17c.1.128.2.252.3.372L8 20l5.13-6.248c.193-.209.373-.429.54-.66l.13-.154Z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500">Address</p>
+                            <p class="font-medium">@Model.Address</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Profile Form Modal -->
+<div id="editProfileForm" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full flex items-center justify-center bg-gray-900 bg-opacity-50">
+    <div class="relative w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow">
+            <!-- Modal header -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                <h3 class="text-xl font-semibold text-gray-900">
+                    Edit Profile
+                </h3>
+                <button type="button" id="closeEditButton" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                    </svg>
+                    <span class="sr-only">Close modal</span>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="p-4 md:p-5">
+                <form asp-action="Profile" asp-controller="User" method="post" enctype="multipart/form-data">
+                    <div class="grid gap-4 mb-4 grid-cols-2">
+                        <div class="col-span-2">
+                            <label for="photo" class="block mb-2 text-sm font-medium text-gray-900">Profile Image</label>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-20 h-20 rounded-full overflow-hidden bg-gray-100">
+                                    @if (!string.IsNullOrEmpty(Model.Image))
+                                    {
+                                        <img src="~/Images/@Model.Image" alt="Current Profile Image" class="w-full h-full object-cover" />
+                                    }
+                                    else
+                                    {
+                                        <img src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Default Profile Image" class="w-full h-full object-cover" />
+                                    }
                                 </div>
-                                <div class="w-10 text-right text-sm text-gray-500">
-                                    @item.Count
+                                <div class="flex-1">
+                                    <input type="file" name="Photo" id="photo" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none p-2.5" />
+                                    <p class="mt-1 text-sm text-gray-500">Optional: SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
                                 </div>
                             </div>
-                        }
-                    }
-                </div>
-            </div>
-
-            <!-- Information Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <!-- Email Card -->
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center">
-                    <div class="flex-shrink-0 mr-3">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 2-8.4 7.05a1 1 0 0 1-1.2 0L1 2m18 0a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1m18 0v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2" />
-                            </svg>
                         </div>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Email</p>
-                        <p class="font-medium">@Model.Email</p>
-                    </div>
-                </div>
-
-                <!-- Phone Card -->
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center">
-                    <div class="flex-shrink-0 mr-3">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16.344 12.168-1.4-1.4a1.98 1.98 0 0 0-2.8 0l-.7.7a1.98 1.98 0 0 1-2.8 0l-2.1-2.1a1.98 1.98 0 0 1 0-2.8l.7-.7a1.981 1.981 0 0 0 0-2.8l-1.4-1.4a1.828 1.828 0 0 0-2.8 0C-.638 5.323 1.1 9.542 4.78 13.22c3.68 3.678 7.9 5.418 11.564 1.752a1.828 1.828 0 0 0 0-2.804Z" />
-                            </svg>
+                        <div class="col-span-2">
+                            <label for="fullName" class="block mb-2 text-sm font-medium text-gray-900">Full Name</label>
+                            <input type="text" asp-for="FullName" id="fullName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
                         </div>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Phone</p>
-                        <p class="font-medium">@Model.ContactNumber</p>
-                    </div>
-                </div>
-
-                <!-- Address Card -->
-                <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center md:col-span-2">
-                    <div class="flex-shrink-0 mr-3">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                            <svg class="w-6 h-6 text-blue-600" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 21">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.8 12.938h-.01a7 7 0 1 0-11.465.144h-.016l.141.17c.1.128.2.252.3.372L8 20l5.13-6.248c.193-.209.373-.429.54-.66l.13-.154Z" />
-                            </svg>
+                        <div class="col-span-2">
+                            <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Email (Cannot be changed)</label>
+                            <input type="email" asp-for="Email" id="email" class="bg-gray-100 border border-gray-300 text-gray-500 text-sm rounded-lg block w-full p-2.5 cursor-not-allowed" readonly />
+                            <input type="hidden" asp-for="Email" /> <!-- Keep the original email value -->
                         </div>
+                        <div class="col-span-2">
+                            <label for="contactNumber" class="block mb-2 text-sm font-medium text-gray-900">Contact Number</label>
+                            <input type="text" asp-for="ContactNumber" id="contactNumber" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                        </div>
+                        <div class="col-span-2">
+                            <label for="address" class="block mb-2 text-sm font-medium text-gray-900">Address</label>
+                            <input type="text" asp-for="Address" id="address" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
+                        </div>
+                        <!-- Hidden field to preserve the role -->
+                        <input type="hidden" asp-for="Role" />
                     </div>
-                    <div>
-                        <p class="text-sm text-gray-500">Address</p>
-                        <p class="font-medium">@Model.Address</p>
+                    <div class="flex items-center space-x-4">
+                        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Save changes</button>
+                        <button type="button" id="cancelEditButton" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Cancel</button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Edit Profile Form -->
-    <div id="editProfileForm" class="mt-6 bg-white shadow-lg rounded-lg p-6 hidden">
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold text-gray-900">Edit Profile</h3>
-            <button type="button" id="closeEditButton" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                </svg>
-            </button>
-        </div>
-        <form asp-action="Profile" asp-controller="User" method="post" enctype="multipart/form-data">
-            <div class="grid gap-6 mb-6 md:grid-cols-2">
-                <div>
-                    <label for="fullName" class="block mb-2 text-sm font-medium text-gray-900">Full Name</label>
-                    <input type="text" asp-for="FullName" id="fullName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
-                </div>
-                <div>
-                    <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
-                    <input type="email" asp-for="Email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
-                </div>
-                <div>
-                    <label for="contactNumber" class="block mb-2 text-sm font-medium text-gray-900">Contact Number</label>
-                    <input type="text" asp-for="ContactNumber" id="contactNumber" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
-                </div>
-                <div>
-                    <label for="address" class="block mb-2 text-sm font-medium text-gray-900">Address</label>
-                    <input type="text" asp-for="Address" id="address" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" required />
-                </div>
-            </div>
-            <div class="mb-6">
-                <label class="block mb-2 text-sm font-medium text-gray-900" for="photo">Upload Profile Image</label>
-                <input type="file" name="Photo" id="photo" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none p-2.5" />
-                <p class="mt-1 text-sm text-gray-500">SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
-            </div>
-            <div class="flex space-x-3">
-                <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Save Changes</button>
-                <button type="button" id="cancelEditButton" class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center">Cancel</button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Full Screen Image Overlay -->
-    <div id="imageOverlay" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-        <img id="fullScreenImage" src="/placeholder.svg" alt="Full Screen Image" class="max-w-full max-h-full" />
-        <button id="closeOverlayButton" class="absolute top-4 right-4 text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center">
-            <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-            </svg>
-            <span class="sr-only">Close</span>
-        </button>
-    </div>
+<!-- Full Screen Image Overlay -->
+<div id="imageOverlay" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+    <img id="fullScreenImage" src="/placeholder.svg" alt="Full Screen Image" class="max-w-full max-h-full" />
+    <button id="closeOverlayButton" class="absolute top-4 right-4 text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-full text-sm p-2.5 text-center inline-flex items-center">
+        <svg class="w-6 h-6" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+        </svg>
+        <span class="sr-only">Close</span>
+    </button>
 </div>
 
 <script>
     // Toggle Edit Profile Form
     document.getElementById('editProfileButton').addEventListener('click', function() {
-        document.getElementById('editProfileForm').classList.toggle('hidden');
+        document.getElementById('editProfileForm').classList.remove('hidden');
     });
 
     document.getElementById('cancelEditButton').addEventListener('click', function() {

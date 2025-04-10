@@ -49,8 +49,10 @@ builder.Services.AddDbContext<ProperteaseDbContext>(options =>
            .EnableSensitiveDataLogging());
 builder.Services.AddSingleton<AwsSnsService>();
 builder.Services.AddTransient<EmailService>();
+builder.Services.AddScoped<HousePricePredictionService>();
+
 // Add this to your services configuration
-builder.Services.AddSingleton<PricePredictionService>();
+builder.Services.AddSingleton<HousePricePredictionService>();
 // Add this to your ConfigureServices method
 builder.Services.AddHostedService<BoostedPropertyCleanupService>();
 // Add this line with your other SignalR configuration

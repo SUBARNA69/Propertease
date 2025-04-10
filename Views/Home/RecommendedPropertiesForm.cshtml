@@ -1,0 +1,31 @@
+﻿@model Propertease.Models.PropertyInput
+@{
+    ViewData["Title"] = "Recommended Properties Form";
+}
+
+<h1>Find Recommended Properties</h1>
+
+<form asp-action="RecommendedProperties" method="post">
+    <div>
+        <label>House Area (sqft):</label>
+        <input asp-for="HouseArea" type="number" required />
+    </div>
+    <div>
+        <label>Number of Bedrooms:</label>
+        <input asp-for="Bedrooms" type="number" required />
+    </div>
+    <div>
+        <label>Number of Bathrooms:</label>
+        <input asp-for="Bathrooms" type="number" required />
+    </div>
+    <div>
+        <label>Number of Floors:</label>
+        <input asp-for="Floors" type="number" required />
+    </div>
+    <button type="submit">View Recommended Properties</button>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <div style="color:red;">@ViewBag.Error</div>
+}

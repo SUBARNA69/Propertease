@@ -637,7 +637,7 @@ namespace Propertease.Controllers
                         worksheet.Cell(row, 7).Value = boost.StartTime.ToString("yyyy-MM-dd HH:mm:ss");
 
                         // Style amount column as currency
-                        worksheet.Cell(row, 6).Style.NumberFormat.Format = "₹#,##0.00";
+                        worksheet.Cell(row, 6).Style.NumberFormat.Format = "Rs.#,##0.00";
 
                         row++;
                     }
@@ -649,7 +649,7 @@ namespace Propertease.Controllers
 
                     worksheet.Cell(row, 6).FormulaA1 = $"SUM(F2:F{row - 1})";
                     worksheet.Cell(row, 6).Style.Font.Bold = true;
-                    worksheet.Cell(row, 6).Style.NumberFormat.Format = "₹#,##0.00";
+                    worksheet.Cell(row, 6).Style.NumberFormat.Format = "Rs.#,##0.00";
                     worksheet.Cell(row, 6).Style.Fill.BackgroundColor = XLColor.LightGreen;
 
                     // Auto-fit columns

@@ -83,6 +83,10 @@
                 View 3D Virtual Tour
             </a>
         }
+        @if (Model.PredictedPrice.HasValue)
+{
+    <p><strong>Predicted Market Price:</strong> ₹@Model.PredictedPrice.Value.ToString("N0")</p>
+}
 
         <div class="text-gray-600 space-y-2">
             <p>📍 Location: @Model.City, @Model.District, @Model.Province</p>
@@ -177,14 +181,7 @@
         </div>
 
         <div class="mt-6 flex space-x-4">
-            <button id="contactAgentBtn" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">Contact Agent</button>
             <button id="scheduleViewingBtn" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">Schedule Viewing</button>
-            <button id="predictPriceBtn" class="text-white bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none">
-                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                </svg>
-                See Predicted Price
-            </button>
             <!-- Add this button to your Details.cshtml view, next to the "Predict Price" button -->
             <button id="addToCompareBtn" class="text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 focus:outline-none">
                 <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -196,62 +193,6 @@
                 <a href="@Url.Action("CompareProperties", "Home")" class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
                     Compare (<span id="compareCount">0</span>) properties
                 </a>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Prediction Modal -->
-<div id="predictionModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 w-full md:inset-0 h-modal md:h-full justify-center items-center">
-    <div class="relative p-4 w-full max-w-md h-full md:h-auto">
-        <!-- Modal content -->
-        <div class="relative bg-white rounded-lg shadow">
-            <!-- Modal header -->
-            <div class="flex justify-between items-start p-4 rounded-t border-b">
-                <h3 class="text-xl font-semibold text-gray-900">
-                    <svg class="w-6 h-6 inline mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                    </svg>
-                    AI Price Prediction
-                </h3>
-                <button id="closePredictionModal" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                    </svg>
-                </button>
-            </div>
-            <!-- Modal body -->
-            <div class="p-6 space-y-4">
-                <div id="predictionResult" class="text-center">
-                    <div role="status" id="loadingSpinner" class="flex justify-center">
-                        <svg aria-hidden="true" class="w-8 h-8 mr-2 text-gray-200 animate-spin fill-purple-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                        </svg>
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <p id="predictionText" class="text-gray-700 mb-4"></p>
-
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <div class="p-4 bg-gray-50 rounded-lg">
-                            <p class="text-sm font-medium text-gray-500">Listed Price</p>
-                            <p class="text-xl font-bold">$@Model.Price.ToString("N0")</p>
-                        </div>
-                        <div class="p-4 bg-purple-50 rounded-lg">
-                            <p class="text-sm font-medium text-purple-600">Predicted Price</p>
-                            <p id="predictedPriceValue" class="text-xl font-bold text-purple-600"></p>
-                        </div>
-                    </div>
-
-                    <div id="predictionInsight" class="p-4 bg-blue-50 rounded-lg text-left">
-                        <h4 class="font-medium text-blue-800 mb-2">AI Insight</h4>
-                        <p id="predictionNote" class="text-sm text-blue-700"></p>
-                    </div>
-                </div>
-            </div>
-            <!-- Modal footer -->
-            <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-200">
-                <button id="closePredictionModalBtn" type="button" class="text-white bg-purple-600 hover:bg-purple-700 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Close</button>
-                <button id="learnMoreBtn" type="button" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Learn More</button>
             </div>
         </div>
     </div>
@@ -376,77 +317,8 @@
                     </div>
                 </div>
                 <p class="text-sm text-gray-600 mb-3">Based on @Model.SellerTotalRatings reviews</p>
-
-                <!-- Rating distribution bars -->
-                @if (Model.SellerTotalRatings > 0)
-                {
-                    <div class="space-y-2 mb-4">
-                        @for (int i = 5; i >= 1; i--)
-                        {
-                            var count = Model.SellerReviews?.Count(r => r.Rating == i) ?? 0;
-                            var percentage = Model.SellerTotalRatings > 0 ? (count * 100) / Model.SellerTotalRatings : 0;
-
-                            <div class="flex items-center text-sm">
-                                <span class="w-8 text-gray-600">@i star</span>
-                                <div class="w-48 h-2 mx-2 bg-gray-200 rounded">
-                                    <div class="h-2 bg-yellow-400 rounded" style="width: @percentage%"></div>
-                                </div>
-                                <span class="text-gray-600">@count</span>
-                            </div>
-                        }
                     </div>
-                }
-
-                <!-- Recent reviews -->
-                @if (Model.SellerReviews != null && Model.SellerReviews.Any())
-                {
-                    <div class="space-y-3 mt-4">
-                        <h6 class="font-medium text-gray-700">Recent Reviews</h6>
-                        @foreach (var review in Model.SellerReviews)
-                        {
-                            <div class="border-t pt-3">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="font-medium text-gray-800">@review.BuyerName</p>
-                                        <div class="flex items-center mt-1">
-                                            @for (int i = 1; i <= 5; i++)
-                                            {
-                                                if (i <= review.Rating)
-                                                {
-                                                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                    </svg>
-                                                }
-                                                else
-                                                {
-                                                    <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                                                    </svg>
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-                                    <span class="text-xs text-gray-500">@review.CreatedAt.ToString("MMM dd, yyyy")</span>
-                                </div>
-                                @if (!string.IsNullOrEmpty(review.Review))
-                                {
-                                    <p class="text-gray-600 text-sm mt-2">@review.Review</p>
-                                }
-                            </div>
-                        }
-
-                        @if (Model.SellerTotalRatings > 3)
-                        {
-                            <div class="text-center mt-2">
-                                <a href="#" class="text-blue-600 hover:text-blue-800 text-sm">View all @Model.SellerTotalRatings reviews</a>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <p class="text-gray-600 text-sm italic">No reviews yet</p>
-                }
+                
             </div>
 
             <div class="mb-4">
@@ -472,10 +344,6 @@
                             </a>
                         }
                     </div>
-
-                    <div class="text-center mt-3">
-                        <a href="#" class="text-blue-600 hover:text-blue-800 text-sm">View all properties by this seller</a>
-                    </div>
                 }
                 else
                 {
@@ -483,9 +351,6 @@
                 }
             </div>
 
-            <div class="mt-6">
-                <button type="button" id="profileContactBtn" class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Contact Seller</button>
-            </div>
         </div>
     </div>
 </div>
@@ -947,184 +812,6 @@
             if (event.target === chatModal) {
                 chatModal.classList.add('hidden');
             }
-        });
-
-        const chatModal = document.getElementById('chatModal');
-        document.getElementById('contactAgentBtn').addEventListener('click', () => {
-            chatModal.classList.remove('hidden');
-            document.getElementById('messageInput').focus();
-        });
-
-        document.getElementById('closeChatModal').addEventListener('click', () => {
-            chatModal.classList.add('hidden');
-        });
-
-        // Chat Form Submission
-        document.getElementById('chatForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const message = formData.get('message').trim();
-            const typingIndicator = document.getElementById('typingIndicator');
-
-            if (!message) return;
-
-            try {
-                typingIndicator.classList.remove('hidden');
-
-                // Optimistic UI Update - show message immediately
-                addMessageToChat(message, true);
-                form.reset();
-
-                // Send to server
-                const response = await fetch('/Home/ContactSeller', {
-                    method: 'POST',
-                    body: formData,
-                    credentials: 'same-origin'
-                });
-
-                const data = await response.json();
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Failed to send message');
-                }
-
-                typingIndicator.textContent = "Sent!";
-                setTimeout(() => typingIndicator.classList.add('hidden'), 2000);
-
-            } catch (error) {
-                console.error('Error:', error);
-                typingIndicator.textContent = error.message;
-                setTimeout(() => typingIndicator.classList.add('hidden'), 3000);
-            }
-        });
-
-        // Helper function to add messages to chat
-        function addMessageToChat(content, isBuyer) {
-            const chatMessages = document.getElementById('chatMessages');
-            const messageDiv = document.createElement('div');
-
-            messageDiv.className = `flex ${isBuyer ? 'justify-end' : 'justify-start'} mb-4`;
-            messageDiv.innerHTML = `
-                <div class="${isBuyer ? 'bg-blue-100' : 'bg-white'} rounded-lg py-2 px-3 max-w-[75%] shadow-sm">
-                    <p class="text-sm">${content}</p>
-                    <p class="text-xs text-gray-500 mt-1">${new Date().toLocaleTimeString()}</p>
-                </div>
-            `;
-
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        // Price Prediction Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const predictPriceBtn = document.getElementById('predictPriceBtn');
-            const predictionModal = document.getElementById('predictionModal');
-            const closePredictionModal = document.getElementById('closePredictionModal');
-            const closePredictionModalBtn = document.getElementById('closePredictionModalBtn');
-            const predictionText = document.getElementById('predictionText');
-            const predictedPriceValue = document.getElementById('predictedPriceValue');
-            const predictionNote = document.getElementById('predictionNote');
-            const loadingSpinner = document.getElementById('loadingSpinner');
-            const predictionResult = document.getElementById('predictionResult');
-            const predictionInsight = document.getElementById('predictionInsight');
-
-            // Check if all elements exist to prevent null reference errors
-            if (!predictPriceBtn || !predictionModal || !closePredictionModal ||
-                !closePredictionModalBtn || !predictionText || !predictedPriceValue ||
-                !predictionNote || !loadingSpinner || !predictionResult || !predictionInsight) {
-                console.error('One or more prediction elements not found in the DOM');
-                return;
-            }
-
-            // Simple modal functionality instead of relying on Flowbite
-            function showModal() {
-                predictionModal.classList.remove('hidden');
-            }
-
-            function hideModal() {
-                predictionModal.classList.add('hidden');
-            }
-
-            // Open prediction modal
-            predictPriceBtn.addEventListener('click', async function() {
-                showModal();
-                loadingSpinner.classList.remove('hidden');
-                predictionText.textContent = 'Analyzing property features with our AI model...';
-                predictedPriceValue.textContent = '';
-                predictionNote.textContent = '';
-                predictionInsight.classList.add('hidden');
-
-                try {
-                    // IMPORTANT: Fix the parameter name to match your controller action
-                    const response = await fetch(`/Home/PredictPrice?propertyId=@Model.Id`);
-
-                    // Check if the request was successful
-                    if (!response.ok) {
-                        const errorText = await response.text();
-                        console.error('API error:', response.status, errorText);
-                        throw new Error(`Server error: ${response.status}`);
-                    }
-
-                    const data = await response.json();
-
-                    if (!data.success) {
-                        throw new Error(data.message || 'Failed to predict price');
-                    }
-
-                    // Validate the prediction value
-                    if (typeof data.predictedPrice !== 'number' ||
-                        isNaN(data.predictedPrice) ||
-                        !isFinite(data.predictedPrice) ||
-                        data.predictedPrice <= 0) {
-                        throw new Error('Invalid prediction value received');
-                    }
-
-                    loadingSpinner.classList.add('hidden');
-                    predictionText.textContent = 'Our AI model predicts this property is worth:';
-                    predictedPriceValue.textContent = `$${data.predictedPrice.toLocaleString('en-US', {maximumFractionDigits: 0})}`;
-
-                    // Add some analysis based on the prediction
-                    const priceDifference = data.predictedPrice - @Model.Price;
-                    const percentageDiff = (Math.abs(priceDifference) / @Model.Price) * 100;
-
-                    if (priceDifference > 0) {
-                        predictionNote.textContent = `The predicted value is ${percentageDiff.toFixed(1)}% higher than the asking price. This suggests the property may be undervalued.`;
-                    } else if (priceDifference < 0) {
-                        predictionNote.textContent = `The predicted value is ${percentageDiff.toFixed(1)}% lower than the asking price. Consider negotiating or reviewing comparable properties.`;
-                    } else {
-                        predictionNote.textContent = 'The predicted price matches the listed price exactly, suggesting it\'s fairly valued.';
-                    }
-
-                    predictionInsight.classList.remove('hidden');
-
-                } catch (error) {
-                    console.error('Prediction error:', error);
-                    loadingSpinner.classList.add('hidden');
-                    predictionText.textContent = 'Error generating prediction';
-                    predictionNote.textContent = `Our AI model encountered an error: ${error.message}. Please try again later or contact support.`;
-                    predictionInsight.classList.remove('hidden');
-                }
-            });
-
-            // Close prediction modal
-            [closePredictionModal, closePredictionModalBtn].forEach(btn => {
-                btn.addEventListener('click', function() {
-                    hideModal();
-                });
-            });
-
-            // Close modal when clicking outside
-            window.addEventListener('click', function(event) {
-                if (event.target === predictionModal) {
-                    hideModal();
-                }
-            });
-
-            // Learn more button
-            document.getElementById('learnMoreBtn')?.addEventListener('click', function() {
-                window.open('/how-ai-pricing-works', '_blank');
-            });
         });
 
         $(document).ready(function() {

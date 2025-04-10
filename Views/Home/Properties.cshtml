@@ -86,11 +86,11 @@
 @Html.AntiForgeryToken()
 
 <!-- Page Header -->
-<div class="bg-gradient-to-r from-sky-500 to-blue-700 py-16">
+<div class="bg-gradient-to-r from-sky-400 to-blue-700 py-12">
     <div class="max-w-screen-xl mx-auto px-4">
         <div class="text-center">
-            <h1 class="text-3xl font-bold text-black sm:text-4xl mb-4">Browse Properties</h1>
-            <p class="text-lg text-black text-opacity-90 max-w-2xl mx-auto">Find your perfect property from our extensive collection</p>
+            <h1 class="text-3xl font-bold text-white sm:text-4xl mb-4">Browse Properties</h1>
+            <p class="text-lg text-white text-opacity-90 max-w-2xl mx-auto">Find your perfect property from our extensive collection</p>
         </div>
     </div>
 </div>
@@ -201,7 +201,7 @@
                                 <span class="text-gray-500">No Image Available</span>
                             </div>
                         }
-                        <div class="absolute top-4 right-4 bg-sky-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+                        <div class="absolute top-4 right-5 bg-sky-600 text-white px-3 py-1 rounded-full text-sm font-medium">
                             @property.PropertyType
                         </div>
                         <div class="absolute bottom-4 left-4 flex gap-2">
@@ -215,19 +215,22 @@
                                 </span>
                             }
                         </div>
-                        <div class="absolute top-4 left-4">
-                            <button type="button"
-                                    class="favorite-btn p-2 rounded-full bg-white/80 hover:bg-white transition-colors duration-300"
-                                    onclick="toggleFavorite(@property.Id, this)">
-                                <i class="fa-heart @(favoritePropertyIds.Contains(property.Id) ? "fa-solid text-red-500" : "fa-regular")"></i>
-                            </button>
-                        </div>
+                        
                     </div>
 
                     <div class="p-6">
-                        <div class="flex items-center mb-3">
-                            <span class="bg-sky-100 text-sky-800 text-xs font-medium px-2.5 py-0.5 rounded-full">@property.PropertyType</span>
-                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full ml-2">For Sale</span>
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="flex item-start">
+                            <span class="bg-sky-100 text-sky-800 text-xs font-medium   rounded-full">@property.PropertyType</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5  rounded-full ml-3">For Sale</span>
+                            </div>
+                            <div class="">
+                                <button type="button"
+                                        class="favorite-btn p-2 rounded-full bg-white/80 hover:bg-white transition-colors duration-300"
+                                        onclick="toggleFavorite(@property.Id, this)">
+                                    <i class="fa-heart @(favoritePropertyIds.Contains(property.Id) ? "fa-solid text-red-500" : "fa-regular")"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <h3 class="text-xl font-bold text-gray-800 mb-2 hover:text-sky-600 transition-colors duration-300">@property.Title</h3>
@@ -287,7 +290,7 @@
 
                         <div class="pt-4 border-t border-gray-100 flex justify-between items-center">
                             <span class="text-2xl font-bold text-sky-600">Rs. @property.Price.ToString("N0")</span>
-                            <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white font-medium rounded-lg text-sm px-4 py-2 flex items-center transition-all duration-300">
+                            <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="bg-gradient-to-br from-sky-400 to-blue-500 hover:from-sky-400 hover:to-blue-600 text-white font-medium rounded-lg text-sm px-4 py-2 flex items-center transition-all duration-300">
                                 View Details <i class="fa-solid fa-arrow-right ml-2"></i>
                             </a>
                         </div>

@@ -43,6 +43,8 @@
         public string PropertyType { get; set; } // House, Apartment, Land
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public decimal? PredictedPrice { get; set; }
+
         public string? ThreeDModel { get; set; }
         // Add these properties to PropertyDetailsViewMode
         // Add this property to your existing PropertyDetailsViewModel class

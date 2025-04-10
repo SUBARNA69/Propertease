@@ -3,77 +3,196 @@
     Layout = "_StaticLayoutL";
 }
 
-
 @{
     ViewData["Title"] = "Login";
 }
 
-<div class="flex items-center justify-center min-h-screen ">
-    <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-lg dark:bg-gray-800">
-        <!-- Login Header -->
-        <div class="text-center">
-            <svg class="mx-auto w-12 h-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2.5L2 9.5V21h20V9.5l-10-7zM4 10.3V20H3V9.5l9-6.2 9 6.2v10.5H4V10.3z" />
-                <path d="M4 20v.5H20V20H4z" />
-            </svg>
-            <h2 class="mt-4 text-2xl font-bold text-gray-900 dark:text-white">Login</h2>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Welcome back! Please enter your credentials to log in.
-            </p>
+<div class="min-h-screen flex items-center justify-center bg-cover h-screen bg-center" style="background-image: url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80'); background-color: rgba(0, 0, 0, 0.7); background-blend-mode: overlay;">
+    <div class="max-w-md w-full my- mx-4 bg-white rounded-xl shadow-2xl overflow-hidden">
+        <!-- Header with gradient background -->
+        <div class="bg-gradient-to-r from-purple-600 to-blue-500 p-6 text-center">
+            <div class="inline-flex p-4 bg-white/20 backdrop-blur-sm rounded-full mb-3">
+                <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-white">Welcome Back</h1>
+            <p class="text-sm text-white mt-1">Sign in to your account</p>
         </div>
 
-        <!-- Login Form -->
-        <form asp-action="Login" asp-controller="User" method="post" class="mt-6 space-y-4">
-            @Html.AntiForgeryToken()
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
-            <!-- Validation Summary -->
-            <div asp-validation-summary="All" class="text-red-500 text-sm"></div>
+        <!-- Form body -->
+        <div class="p-6">
+            <form asp-action="Login" asp-controller="User" method="post" class="space-y-5" id="loginForm">
+                @Html.AntiForgeryToken()
 
-            <!-- Email Field -->
-            <div>
-                <label asp-for="Email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <input asp-for="Email" type="email"
-                       class="mt-1 block w-full px-4 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                       placeholder="Enter your email" required />
-                <span asp-validation-for="Email" class="text-sm text-red-500"></span>
-            </div>
+                <!-- Hidden validation summary (will be used to populate toast) -->
+                <div asp-validation-summary="All" class="hidden text-sm text-red-600 rounded-lg" id="validation-summary"></div>
 
-            <!-- Password Field -->
-            <div>
-                <label asp-for="Password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-                <input asp-for="Password" type="password"
-                       class="mt-1 block w-full px-4 py-2 text-gray-900 bg-gray-50 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
-                       placeholder="Enter your password" required />
-                <span asp-validation-for="Password" class="text-sm text-red-500"></span>
-            </div>
-
-            <!-- Remember Me & Forgot Password -->
-            <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <input id="rememberMe" type="checkbox"
-                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-400">
-                    <label for="rememberMe" class="ml-2 text-sm text-gray-600 dark:text-gray-300">Remember me</label>
+                <!-- Email Field -->
+                <div>
+                    <label asp-for="Email" class="block mb-2 text-sm font-medium text-gray-900">Email Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                            </svg>
+                        </div>
+                        <input asp-for="Email" type="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" required />
+                    </div>
+                    <span asp-validation-for="Email" class="mt-1 text-xs text-red-600"></span>
                 </div>
-                <a href="/User/ForgotPassword" class="text-sm text-blue-600 hover:underline dark:text-blue-400">Forgot Password?</a>
-            </div>
 
-            <!-- Submit Button -->
-            <div>
-                <button type="submit"
-                        class="w-full px-4 py-2 text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 focus:ring-4 focus:ring-blue-500 focus:outline-none dark:bg-blue-500 dark:hover:bg-blue-600">
-                    Log In
+                <!-- Password Field -->
+                <div>
+                    <label asp-for="Password" class="block mb-2 text-sm font-medium text-gray-900">Password</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <input asp-for="Password" type="password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5" required />
+                    </div>
+                    <span asp-validation-for="Password" class="mt-1 text-xs text-red-600"></span>
+                </div>
+
+                <!-- Remember Me & Forgot Password -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="rememberMe" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="rememberMe" class="ml-2 text-sm text-gray-600">Remember me</label>
+                    </div>
+                    <a href="/User/ForgotPassword" class="text-sm font-medium text-blue-600 hover:underline">Forgot Password?</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-3 text-center mt-6">
+                    Sign In
                 </button>
-            </div>
-        </form>
 
-        <!-- Footer -->
-        <p class="mt-4 text-sm text-center text-gray-600 dark:text-gray-400">
-            Don't have an account?
-            <a asp-action="Register" asp-controller="User" class="text-blue-600 hover:underline dark:text-blue-400">Sign Up</a>
-        </p>
+                <div class="text-sm text-center text-gray-500 mt-4">
+                    Don't have an account?
+                    <a asp-action="Register" asp-controller="User" class="font-medium text-blue-600 hover:underline">Sign up</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-@section Scripts {
-    @await Html.PartialAsync("_ValidationScriptsPartial");
-}
+@await Html.PartialAsync("_ValidationScriptsPartial");
+
+<!-- Toast Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create toast notification
+        function showToast(message, type = 'error') {
+            const toastContainer = document.getElementById('toast-container');
+
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `flex items-center w-full max-w-xs p-4 mb-4 rounded-lg shadow ${type === 'error' ? 'text-red-500 bg-red-100' : 'text-green-500 bg-green-100'} transition-opacity duration-300`;
+
+            // Toast content
+            toast.innerHTML = `
+                <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 ${type === 'error' ? 'text-red-500 bg-red-100' : 'text-green-500 bg-green-100'} rounded-lg">
+                    ${type === 'error' ?
+                        '<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 0C4.477 0 0 4.477 0 10c0 5.523 4.477 10 10 10s10-4.477 10-10C20 4.477 15.523 0 10 0zm1 15H9v-2h2v2zm0-4H9V5h2v6z"/></svg>' :
+                        '<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"><path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/></svg>'
+                    }
+                    <span class="sr-only">${type === 'error' ? 'Error' : 'Success'} icon</span>
+                </div>
+                <div class="ml-3 text-sm font-normal">${message}</div>
+                <button type="button" class="ml-auto -mx-1.5 -my-1.5 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 inline-flex h-8 w-8 text-gray-500 hover:text-gray-900 hover:bg-gray-100" data-dismiss-target="#toast-danger" aria-label="Close">
+                    <span class="sr-only">Close</span>
+                    <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                </button>
+            `;
+
+            // Add to container
+            toastContainer.appendChild(toast);
+
+            // Close button functionality
+            const closeButton = toast.querySelector('button');
+            closeButton.addEventListener('click', function() {
+                fadeOutAndRemove(toast);
+            });
+
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                fadeOutAndRemove(toast);
+            }, 5000);
+        }
+
+        // Fade out and remove element
+        function fadeOutAndRemove(element) {
+            element.style.opacity = '0';
+            setTimeout(() => {
+                if (element.parentNode) {
+                    element.parentNode.removeChild(element);
+                }
+            }, 300);
+        }
+
+        // Handle form validation errors
+        const form = document.getElementById('loginForm');
+        const validationSummary = document.getElementById('validation-summary');
+
+        if (form && validationSummary) {
+            // Check if validation summary has errors on page load
+            if (validationSummary.children.length > 0) {
+                // Display each error as a toast
+                Array.from(validationSummary.getElementsByTagName('ul')[0]?.children || []).forEach(item => {
+                    if (item.textContent.trim()) {
+                        showToast(item.textContent.trim(), 'error');
+                    }
+                });
+            }
+
+            // Handle client-side validation
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+
+                    // Get validation messages
+                    const emailInput = document.querySelector('[name="Email"]');
+                    const passwordInput = document.querySelector('[name="Password"]');
+
+                    if (emailInput && !emailInput.validity.valid) {
+                        showToast(emailInput.validationMessage || 'Please enter a valid email address', 'error');
+                    }
+
+                    if (passwordInput && !passwordInput.validity.valid) {
+                        showToast(passwordInput.validationMessage || 'Please enter your password', 'error');
+                    }
+                }
+            });
+        }
+
+        // Listen for model validation errors via MVC unobtrusive validation
+        if (typeof $.validator !== 'undefined') {
+            $.validator.setDefaults({
+                highlight: function(element) {
+                    $(element).addClass('border-red-500').removeClass('border-gray-300');
+                },
+                unhighlight: function(element) {
+                    $(element).removeClass('border-red-500').addClass('border-gray-300');
+                },
+                errorPlacement: function(error, element) {
+                    // Display the error message in the toast
+                    if (error.text()) {
+                        showToast(error.text(), 'error');
+                    }
+
+                    // Also keep the original error placement for accessibility
+                    error.insertAfter(element);
+                }
+            });
+        }
+    });
+</script>

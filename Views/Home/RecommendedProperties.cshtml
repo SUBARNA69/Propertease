@@ -1,0 +1,43 @@
+﻿@model List<Propertease.Models.PropertyRecommendation>
+@{
+    ViewData["Title"] = "Recommended Properties";
+}
+
+<h1>Recommended Properties</h1>
+
+@if (Model != null && Model.Count > 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Area (sqft)</th>
+                <th>Bedrooms</th>
+                <th>Bathrooms</th>
+                <th>Floors</th>
+                <th>Price</th>
+                <th>Built Year</th>
+                <th>Lot Area</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var prop in Model)
+            {
+                <tr>
+                    <td>@prop.AreaOfTheHouse</td>
+                    <td>@prop.NumberOfBedrooms</td>
+                    <td>@prop.NumberOfBathrooms</td>
+                    <td>@prop.NumberOfFloors</td>
+                    <td>@prop.Price.ToString("C")</td>
+                    <td>@prop.BuiltYear</td>
+                    <td>@prop.LotArea</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No recommendations found.</p>
+}
+
+<a href="@Url.Action("RecommendedPropertiesForm", "Home")">Back to Recommendation Form</a>

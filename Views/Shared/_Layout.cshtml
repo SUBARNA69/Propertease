@@ -16,7 +16,7 @@
     <script src="~/js/notification.js"></script>
 </head>
 <body>
-    <header>
+    <header class="fixed top-0  w-full z-50 ">
         <nav class="bg-white border-gray-200 dark:bg-gray-900">
             <div class="p-4 mx-auto flex max-w-screen-xl flex-wrap items-center justify-between">
                 <!-- Left side: PROPERTEASE -->
@@ -114,15 +114,15 @@
         </nav>
     </header>
 
-    <div class="mt-5 container">
+    <div style="margin-top:65px" class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - PROPERTEASE - <a href="#">Privacy</a>
+    <footer class="footer ">
+        <div class="container text-center text-xs font-bold">
+            &copy; 2025 - PROPERTEASE - <a href="#">Privacy</a>
         </div>
     </footer>
 

@@ -88,109 +88,277 @@
                         }
                     </tr>
 
-                    <!-- Conditional rows based on property type -->
-                    @if (Model.Properties.Any(p => p.PropertyType == "House" || p.PropertyType == "Apartment"))
-                    {
-                        <tr>
-                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Bedrooms</td>
-                            @foreach (var property in Model.Properties)
+                    <!-- Bedrooms/Rooms -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">
+                            @if (Model.Properties.Any(p => p.PropertyType == "House"))
                             {
-                                <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "House" ? property.Bedrooms.ToString() :
-                                        property.PropertyType == "Apartment" ? property.Rooms.ToString() : "-")
-                                </td>
+                                <span>Bedrooms</span>
                             }
-                        </tr>
-                        <tr>
-                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Bathrooms</td>
-                            @foreach (var property in Model.Properties)
+                            else if (Model.Properties.Any(p => p.PropertyType == "Apartment"))
                             {
-                                <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "House" || property.PropertyType == "Apartment"
-                                        ? property.Bathrooms.ToString() : "-")
-                                </td>
+                                <span>Rooms</span>
                             }
-                        </tr>
-                        <tr>
-                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Kitchens</td>
-                            @foreach (var property in Model.Properties)
+                            else
                             {
-                                <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "House" || property.PropertyType == "Apartment"
-                                        ? property.Kitchens.ToString() : "-")
-                                </td>
+                                <span>Bedrooms/Rooms</span>
                             }
-                        </tr>
-                    }
+                        </td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @if (property.PropertyType == "House" && property.Bedrooms.HasValue)
+                                {
+                                    @property.Bedrooms
+                                }
+                                else if (property.PropertyType == "Apartment" && property.Rooms.HasValue)
+                                {
+                                    @property.Rooms
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
 
-                    @if (Model.Properties.Any(p => p.PropertyType == "House" || p.PropertyType == "Land"))
-                    {
-                        <tr>
-                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Land Area</td>
-                            @foreach (var property in Model.Properties)
-                            {
-                                <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "House" || property.PropertyType == "Land"
-                                        ? $"{property.LandArea} sq ft" : "-")
-                                </td>
-                            }
-                        </tr>
-                    }
+                    <!-- Bathrooms -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Bathrooms</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @if ((property.PropertyType == "House" || property.PropertyType == "Apartment") && property.Bathrooms.HasValue)
+                                {
+                                    @property.Bathrooms
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
 
+                    <!-- Kitchens -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Kitchens</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @if ((property.PropertyType == "House" || property.PropertyType == "Apartment") && property.Kitchens.HasValue)
+                                {
+                                    @property.Kitchens
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Sitting Rooms -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Sitting Rooms</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @if ((property.PropertyType == "House" || property.PropertyType == "Apartment") && property.SittingRooms.HasValue)
+                                {
+                                    @property.SittingRooms
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+                    <!-- House-specific properties -->
                     @if (Model.Properties.Any(p => p.PropertyType == "House"))
                     {
+                        <!-- Floors -->
                         <tr>
-                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Built Year</td>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Floors</td>
                             @foreach (var property in Model.Properties)
                             {
                                 <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "House" ? property.BuiltYear.ToString() : "-")
+                                    @if (property.PropertyType == "House" && property.Floors.HasValue)
+                                    {
+                                        @property.Floors
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- Facing Direction -->
+                        <tr>
+                            <td class="p-4 font-medium bg-gray-100 text-gray-600">Facing Direction</td>
+                            @foreach (var property in Model.Properties)
+                            {
+                                <td class="p-4 text-center border-b">
+                                    @if (property.PropertyType == "House" && !string.IsNullOrEmpty(property.FacingDirection))
+                                    {
+                                        @property.FacingDirection
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
                                 </td>
                             }
                         </tr>
                     }
 
+                    <!-- Apartment-specific properties -->
                     @if (Model.Properties.Any(p => p.PropertyType == "Apartment"))
                     {
+                        <!-- Room Size -->
                         <tr>
                             <td class="p-4 font-medium bg-gray-100 text-gray-600">Room Size</td>
                             @foreach (var property in Model.Properties)
                             {
                                 <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "Apartment" ? $"{property.RoomSize} sq ft" : "-")
+                                    @if (property.PropertyType == "Apartment" && property.RoomSize.HasValue)
+                                    {
+                                        @($"{property.RoomSize} sq ft")
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
                                 </td>
                             }
                         </tr>
                     }
 
+                    <!-- Built Year (for both House and Apartment) -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Built Year</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @if (property.PropertyType == "House" || property.PropertyType == "Apartment")
+                                {
+                                    @property.BuiltYear.ToString("yyyy")
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Land Area (for both House and Land) -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Land Area</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @if ((property.PropertyType == "House" || property.PropertyType == "Land") && property.LandArea.HasValue)
+                                {
+                                    @($"{property.LandArea} sq ft")
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Buildup Area (for House) -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Buildup Area</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                @if (property.PropertyType == "House" && property.BuildupArea.HasValue)
+                                {
+                                    @($"{property.BuildupArea} sq ft")
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Land-specific properties -->
                     @if (Model.Properties.Any(p => p.PropertyType == "Land"))
                     {
+                        <!-- Land Type -->
                         <tr>
                             <td class="p-4 font-medium bg-gray-100 text-gray-600">Land Type</td>
                             @foreach (var property in Model.Properties)
                             {
                                 <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "Land" ? property.LandType : "-")
+                                    @if (property.PropertyType == "Land" && !string.IsNullOrEmpty(property.LandType))
+                                    {
+                                        @property.LandType
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
                                 </td>
                             }
                         </tr>
+
+                        <!-- Soil Quality -->
                         <tr>
                             <td class="p-4 font-medium bg-gray-100 text-gray-600">Soil Quality</td>
                             @foreach (var property in Model.Properties)
                             {
                                 <td class="p-4 text-center border-b">
-                                    @(property.PropertyType == "Land" ? property.SoilQuality : "-")
+                                    @if (property.PropertyType == "Land" && !string.IsNullOrEmpty(property.SoilQuality))
+                                    {
+                                        @property.SoilQuality
+                                    }
+                                    else
+                                    {
+                                        <span>-</span>
+                                    }
                                 </td>
                             }
                         </tr>
                     }
 
+                    <!-- Road Access (common for all) -->
                     <tr>
                         <td class="p-4 font-medium bg-gray-100 text-gray-600">Road Access</td>
                         @foreach (var property in Model.Properties)
                         {
                             <td class="p-4 text-center border-b">
-                                @property.RoadAccess
+                                @if (!string.IsNullOrEmpty(property.RoadAccess))
+                                {
+                                    @property.RoadAccess
+                                }
+                                else
+                                {
+                                    <span>-</span>
+                                }
+                            </td>
+                        }
+                    </tr>
+
+                    <!-- Actions -->
+                    <tr>
+                        <td class="p-4 font-medium bg-gray-100 text-gray-600">Actions</td>
+                        @foreach (var property in Model.Properties)
+                        {
+                            <td class="p-4 text-center border-b">
+                                <a href="@Url.Action("Details", "Home", new { id = property.Id })" class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 inline-block mb-2">
+                                    View Details
+                                </a>
                             </td>
                         }
                     </tr>
@@ -200,39 +368,38 @@
     }
 </div>
 
+<script>
+    // Add to Compare functionality
+    $(document).ready(function() {
+        // Remove property from comparison
+        $('.remove-property-btn').click(function() {
+            const propertyId = $(this).data('id');
 
-    <script>
-        // Add to Compare functionality
-        $(document).ready(function() {
-            // Remove property from comparison
-            $('.remove-property-btn').click(function() {
-                const propertyId = $(this).data('id');
-
-                $.ajax({
-                    url: '@Url.Action("RemoveFromCompare", "Home")',
-                    type: 'POST',
-                    data: { id: propertyId },
-                    success: function(response) {
-                        if (response.success) {
-                            // Reload the page to update the comparison table
-                            location.reload();
-                        }
+            $.ajax({
+                url: '@Url.Action("RemoveFromCompare", "Home")',
+                type: 'POST',
+                data: { id: propertyId },
+                success: function(response) {
+                    if (response.success) {
+                        // Reload the page to update the comparison table
+                        location.reload();
                     }
-                });
-            });
-
-            // Clear all properties from comparison
-            $('#clearCompareBtn').click(function() {
-                $.ajax({
-                    url: '@Url.Action("ClearCompare", "Home")',
-                    type: 'POST',
-                    success: function(response) {
-                        if (response.success) {
-                            // Reload the page to update the comparison table
-                            location.reload();
-                        }
-                    }
-                });
+                }
             });
         });
-    </script>
+
+        // Clear all properties from comparison
+        $('#clearCompareBtn').click(function() {
+            $.ajax({
+                url: '@Url.Action("ClearCompare", "Home")',
+                type: 'POST',
+                success: function(response) {
+                    if (response.success) {
+                        // Reload the page to update the comparison table
+                        location.reload();
+                    }
+                }
+            });
+        });
+    });
+</script>
