@@ -30,8 +30,7 @@ namespace Propertease.Models
         //[Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         //public string? ConfirmPassword { get; set; }
         public string? EmailVerificationToken { get; set; } // Stores the verification code sent via SMS
-        public bool IsEmailVerified { get; set; } = false; // Tracks whether the phone number is verified
-                                                           // Add these properties to your User model
+        public bool IsEmailVerified { get; set; } = false; // Tracks whether the phone number is verified                                        // Add these properties to your User model
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
         public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the user registered

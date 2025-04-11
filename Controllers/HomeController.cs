@@ -533,8 +533,31 @@ namespace Propertease.Controllers
                     viewModel.SittingRooms = apartment.SittingRooms;
                     viewModel.RoomSize = apartment.RoomSize;
                     viewModel.BuiltYear = apartment.BuiltYear;
+
+                    // Apartment price prediction
+                    using (var client = new HttpClient())
+                    {
+                        var jsonData = JsonConvert.SerializeObject(new
+                        {
+                            Rooms = apartment.Rooms,
+                            Kitchens = apartment.Kitchens,
+                            Bathrooms = apartment.Bathrooms,
+                            SittingRooms = apartment.SittingRooms,
+                            BuiltYear = apartment.BuiltYear.Year // Take only the year
+                        });
+
+                        var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                        var response = await client.PostAsync("http://127.0.0.1:5000/apredict/apartment", content);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var result = JsonConvert.DeserializeObject<dynamic>(await response.Content.ReadAsStringAsync());
+                            viewModel.PredictedPrice = (decimal)result.predicted_price;
+                        }
+                    }
                 }
             }
+
             else if (property.PropertyType == "Land")
             {
                 var land = await _context.Lands.FirstOrDefaultAsync(l => l.PropertyID == property.Id);
