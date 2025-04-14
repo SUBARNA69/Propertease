@@ -1,0 +1,20 @@
+﻿@model Propertease.Models.DTO.RecommendationInput
+
+<form asp-action="GetRecommendations" method="post">
+    <input asp-for="Area" placeholder="Area of the house" />
+    <input asp-for="Bedrooms" placeholder="Number of bedrooms" />
+    <input asp-for="BuiltYear" placeholder="Built Year" />
+    <input asp-for="Floors" placeholder="Number of floors" />
+    <button type="submit">Get Recommendations</button>
+</form>
+
+@if (Model.Recommendations != null)
+{
+    <h3>Top Matches</h3>
+    <ul>
+        @foreach (var item in Model.Recommendations)
+        {
+            <li>@item["price"] - @item["number of bedrooms"] Beds</li>
+        }
+    </ul>
+}

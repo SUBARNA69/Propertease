@@ -81,12 +81,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         o.LoginPath = "/User/Login";
         o.LogoutPath = "/User/Logout";
         o.AccessDeniedPath = "/User/AccessDenied";
-        o.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+        o.ExpireTimeSpan = TimeSpan.FromMinutes(1);
         o.SlidingExpiration = true;
     });
 builder.Services.AddSession(o =>
 {
-    o.IdleTimeout = TimeSpan.FromMinutes(15);
+    o.IdleTimeout = TimeSpan.FromMinutes(1);
     o.Cookie.HttpOnly = true;
     o.Cookie.IsEssential = true;
 

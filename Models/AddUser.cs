@@ -18,7 +18,8 @@ namespace Propertease.Models
         public IFormFile? photo { get; set; }
         public string? Password { get; set; } = null!;
         public string? Address { get; set; } = null!;
-        public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the user registered
+        public DateTime? CreatedAt { get; set; } = DateTime.Now.AddMinutes(345); // When the user registered
+        public bool RememberMe { get; set; }
 
         public string ?EncId { get; set; } = null!;
 

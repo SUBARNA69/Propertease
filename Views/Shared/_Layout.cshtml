@@ -48,7 +48,7 @@
                             <a asp-controller="Seller" asp-action="MyProperties" class="text-gray-900 hover:text-blue-500">Boosted Properties</a>
                             <a asp-controller="Seller" asp-action="ViewingRequests" class="text-gray-900 hover:text-blue-500">Property View Requests</a>
                             <a asp-controller="Seller" asp-action="MyRatings" class="text-gray-900 hover:text-blue-500">My Ratings</a>
-                            <a asp-controller="Seller" asp-action="SoldProperties" class="text-gray-900 hover:text-blue-500">My Ratings</a>
+                            <a asp-controller="Seller" asp-action="SoldProperties" class="text-gray-900 hover:text-blue-500">Sold Properties</a>
                         }
                         else if (User.IsInRole("Admin"))
                         {
@@ -107,8 +107,16 @@
                 }
                 else
                 {
+                    <div>
+                        <a asp-controller="Home" asp-action="Home" class="text-gray-900 hover:text-blue-500 p-4">Home</a>
+                        <a asp-controller="Home" asp-action="Properties" class="text-gray-900 hover:text-blue-500 p-4">Properties</a>
+                        <a asp-controller="Home" asp-action="About" class="text-gray-900 hover:text-blue-500 p-4">About</a>
+                    </div>
+                    <div>
                     <!-- Login button for non-logged-in users -->
-                    <a asp-controller="User" asp-action="Login" class="bg-blue-500 text-white rounded-full px-4 py-2 hover:bg-blue-600">Login</a>
+                    <a asp-controller="User" asp-action="Register" class="border-1  text-gray-800 px-4 py-2">Sign up</a>
+                    <a asp-controller="User" asp-action="Login" class="border-1 bg-gray-800 text-white rounded-md  px-4 py-2 ">Login</a>
+                    </div>
                 }
             </div>
         </nav>

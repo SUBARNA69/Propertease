@@ -1,0 +1,58 @@
+﻿@* Views/Properties/_SimilarProperties.cshtml - Partial View for Similar Properties *@
+@model List<Propertease.Models.PropertyDetailsViewModel>
+
+@if (Model != null && Model.Any())
+{
+    <div class="similar-properties my-5">
+        <h3 class="mb-4">Similar Properties You May Like</h3>
+
+        <div class="row">
+            @foreach (var property in Model)
+            {
+                <div class="col-md-3 mb-4">
+                    <div class="card property-card h-100">
+                        <div class="property-image">
+                            <img src="@(property.ImageUrl?.FirstOrDefault() ?? "/Images/placeholder.svg")"
+                                 class="card-img-top" alt="@property.Title">
+                            <div class="property-tag">@property.PropertyType</div>
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="@Url.Action("Details", "Properties", new { id = property.Id })">
+                                    @property.Title
+                                </a>
+                            </h5>
+                            <h6 class="price">@property.Price.ToString("C0")</h6>
+
+                            <div class="property-features">
+                                @if (property.PropertyType == "House")
+                                {
+                                    <span><i class="fas fa-bed"></i> @property.Bedrooms Beds</span>
+                                    <span><i class="fas fa-bath"></i> @property.Bathrooms Baths</span>
+                                    <span><i class="fas fa-ruler-combined"></i> @property.BuildupArea m²</span>
+                                }
+                                else if (property.PropertyType == "Apartment")
+                                {
+                                    <span><i class="fas fa-door-open"></i> @property.Rooms Rooms</span>
+                                    <span><i class="fas fa-bath"></i> @property.Bathrooms Baths</span>
+                                    <span><i class="fas fa-ruler-combined"></i> @property.RoomSize m²</span>
+                                }
+                                else if (property.PropertyType == "Land")
+                                {
+                                    <span><i class="fas fa-ruler-combined"></i> @property.LandArea m²</span>
+                                    <span><i class="fas fa-road"></i> @property.RoadAccess</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white">
+                            <a href="@Url.Action("Details", "Properties", new { id = property.Id })"
+                               class="btn btn-outline-primary btn-sm w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

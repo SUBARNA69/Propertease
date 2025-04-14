@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Org.BouncyCastle.Tls;
 using Propertease.Hubs;
@@ -30,6 +31,8 @@ namespace Propertease.Controllers
         private readonly HousePricePredictionService _predictionService;
         private readonly PropertyRepository propertyRepository;
         private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _clientFactory;
+
 
         public HomeController(ILogger<HomeController> logger, 
             ProperteaseDbContext context, 
@@ -38,7 +41,8 @@ namespace Propertease.Controllers
             INotificationService _notificationService,
             HousePricePredictionService predictionService,
             PropertyRepository propertyRepository,
-            HttpClient httpClient)
+            HttpClient httpClient,
+            IHttpClientFactory clientFactory)
         {
             _logger = logger;
             _context = context;
@@ -47,6 +51,7 @@ namespace Propertease.Controllers
             _predictionService = predictionService;
             this.propertyRepository = propertyRepository;
             _httpClient = httpClient;
+            _clientFactory = clientFactory;
         }
 
 
@@ -519,6 +524,58 @@ namespace Propertease.Controllers
                     {
                         viewModel.PredictedPrice = null;
                     }
+                    try
+                    {
+                        using (var client = new HttpClient())
+                        {
+                            var jsonData = JsonConvert.SerializeObject(new
+                            {
+                                Area = house.BuildupArea,
+                                Bedrooms = house.Bedrooms,
+                                BuiltYear = house.BuiltYear.Year,
+                                Floors = house.Floors,
+                                CurrentPropertyId = property.Id  // Added this line to exclude current property
+                            });
+
+                            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                            var response = await client.PostAsync("http://127.0.0.1:5000/recommend", content);
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var similarIds = JsonConvert.DeserializeObject<List<int>>(await response.Content.ReadAsStringAsync());
+
+                                if (similarIds.Any())
+                                {
+                                    // Get the similar properties from the database
+                                    var similarProperties = await _context.properties
+                                        .Include(p => p.PropertyImages)
+                                        .Where(p => similarIds.Contains(p.Id))
+                                        .ToListAsync();
+
+                                    // Map to view model
+                                    viewModel.SimilarProperties = similarProperties.Select(p => new SimilarProperty
+                                    {
+                                        Id = p.Id,
+                                        Title = p.Title,
+                                        Price = p.Price,
+                                        ImageUrl = p.PropertyImages.FirstOrDefault()?.Photo != null
+                                            ? "/Images/" + p.PropertyImages.FirstOrDefault()?.Photo
+                                            : "/placeholder.svg?height=150&width=150",
+                                        District = p.District,
+                                        City = p.City
+                                    }).ToList();
+                                }
+                            }
+                            else
+                            {
+                                _logger.LogError($"Failed to get similar properties. Status code: {response.StatusCode}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error getting similar properties: {0}", ex.Message);
+                    }
                 }
             }
 
@@ -571,6 +628,147 @@ namespace Propertease.Controllers
             
             return View(viewModel);
         }
+        /*private async Task GetSimilarProperties(Properties property, PropertyDetailsViewModel viewModel)
+        {
+            try
+            {
+                // Prepare recommendation payload based on property type
+                object recommendPayload = null;
+
+                switch (property.PropertyType)
+                {
+                    case "House":
+                        var house = await _context.Houses
+                            .FirstOrDefaultAsync(h => h.PropertyID == property.Id);
+
+                        if (house != null)
+                        {
+                            recommendPayload = new
+                            {
+                                Area = house.BuildupArea,
+                                Bedrooms = house.Bedrooms,
+                                BuiltYear = house.BuiltYear.Year,
+                                Floors = house.Floors,
+                                PropertyType = "House"
+                            };
+                        }
+                        break;
+
+                    //case "Apartment":
+                    //    var apartment = await _context.Apartments
+                    //        .FirstOrDefaultAsync(a => a.PropertyID == property.Id);
+
+                    //    if (apartment != null)
+                    //    {
+                    //        recommendPayload = new
+                    //        {
+                    //            Area = apartment.RoomSize,
+                    //            Bedrooms = apartment.Rooms,
+                    //            BuiltYear = apartment.BuiltYear.Year,
+                    //            Floors = 1, // Default for apartments
+                    //            PropertyType = "Apartment"
+                    //        };
+                    //    }
+                    //    break;
+
+                }
+
+                if (recommendPayload != null)
+                {
+                    // Call recommendation API
+                    var client = _clientFactory.CreateClient();
+                    var json = JsonConvert.SerializeObject(recommendPayload);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync("http://localhost:5000/recommend", content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var recommendedIds = JsonConvert.DeserializeObject<List<int>>(responseContent);
+
+                        // Exclude current property from recommendations
+                        recommendedIds = recommendedIds.Where(id => id != property.Id).Take(4).ToList();
+
+                        if (recommendedIds.Any())
+                        {
+                            // Get similar properties based on property type
+                            switch (property.PropertyType)
+                            {
+                                case "House":
+                                    await GetSimilarHouses(recommendedIds, viewModel);
+                                    break;
+
+                                //case "Apartment":
+                                //    await GetSimilarApartments(recommendedIds, viewModel);
+                                //    break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Recommendation API returned status code: {response.StatusCode}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting similar properties");
+                // Don't fail the entire request if recommendations fail
+            }
+        }
+        /*
+        private async Task GetSimilarHouses(List<int> propertyIds, PropertyDetailsViewModel viewModel)
+        {
+            var similarHouses = await _context.Houses
+                .Include(h => h.Properties)
+                .Include(h => h.Properties.PropertyImages)
+                .Where(h => propertyIds.Contains(h.PropertyID) && h.Properties.Status != "Sold")
+                .ToListAsync();
+
+            viewModel.SimilarProperties = similarHouses.Select(h => new PropertyDetailsViewModel
+            {
+                Id = h.PropertyID,
+                Title = h.Properties.Title,
+                Price = h.Properties.Price,
+                PropertyType = "House",
+                Bedrooms = h.Bedrooms,
+                Bathrooms = h.Bathrooms,
+                BuildupArea = h.BuildupArea,
+                Floors = h.Floors,
+                BuiltYear = h.BuiltYear,
+                ImageUrl = h.Properties.PropertyImages
+                    .Select(img => "/Images/" + img.Photo)
+                    .FirstOrDefault() != null
+                    ? new List<string> { h.Properties.PropertyImages.Select(img => "/Images/" + img.Photo).FirstOrDefault() }
+                    : new List<string> { "/Images/placeholder.svg" }
+            }).ToList();
+        }
+        */
+        /*private async Task GetSimilarApartments(List<int> propertyIds, PropertyDetailsViewModel viewModel)
+        {
+            var similarApartments = await _context.Apartments
+                .Include(a => a.Properties)
+                .Include(a => a.Properties.PropertyImages)
+                .Where(a => propertyIds.Contains(a.PropertyID) && a.Properties.Status != "Sold")
+                .ToListAsync();
+
+            viewModel.SimilarProperties = similarApartments.Select(a => new PropertyDetailsViewModel
+            {
+                Id = a.PropertyID,
+                Title = a.Properties.Title,
+                Price = a.Properties.Price,
+                PropertyType = "Apartment",
+                Rooms = a.Rooms,
+                Bathrooms = a.Bathrooms,
+                RoomSize = a.RoomSize,
+                BuiltYear = a.BuiltYear,
+                ImageUrl = a.Properties.PropertyImages
+                    .Select(img => "/Images/" + img.Photo)
+                    .FirstOrDefault() != null
+                    ? new List<string> { a.Properties.PropertyImages.Select(img => "/Images/" + img.Photo).FirstOrDefault() }
+                    : new List<string> { "/Images/placeholder.svg" }
+            }).ToList();
+        }*/
         // Controllers/HomeController.cs (or create a new controller)
         [HttpGet]
         // Add this method to your existing controller
@@ -909,7 +1107,7 @@ namespace Propertease.Controllers
             // Serve the file with the correct MIME type
             return PhysicalFile(modelPath, "model/gltf-binary");
         }
-
+        [AllowAnonymous]
         public IActionResult About()
         {
             return View();

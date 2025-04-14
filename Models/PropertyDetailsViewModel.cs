@@ -54,7 +54,16 @@
         public int SellerTotalRatings { get; set; }
         public List<SellerReview> SellerReviews { get; set; }
         public List<SellerPastProperty> SellerPastProperties { get; set; }
+        public List<SimilarProperty> SimilarProperties { get; set; } = new List<SimilarProperty>();
 
     }
-
+    public class SimilarProperty
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public decimal Price { get; set; }
+        public string ImageUrl { get; set; }
+        public string District { get; set; }
+        public string City { get; set; }
+    }
 }

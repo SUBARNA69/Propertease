@@ -1,0 +1,30 @@
+﻿@model List<SimilarPropertyViewModel>
+
+<h2>Similar Properties</h2>
+
+@if (!Model.Any())
+{
+    <p>No similar properties found.</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var p in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="@p.ImageUrl" class="card-img-top" alt="..." />
+                    <div class="card-body">
+                        <h5 class="card-title">@p.Title</h5>
+                        <p class="card-text">
+                            ₹@p.Price.ToString("N0") <br />
+                            Beds: @p.Bedrooms, Baths: @p.Bathrooms<br />
+                            Area: @p.BuildupArea m², Floors: @p.Floors
+                        </p>
+                        <a href="@Url.Action("Details", "Properties", new { id = p.PropertyId })" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

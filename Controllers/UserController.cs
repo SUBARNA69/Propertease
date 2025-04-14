@@ -185,7 +185,7 @@ namespace Propertease.Controllers
         }
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Login(User uEdit)
+        public async Task<IActionResult> Login(AddUser uEdit)
         {
             // Fetch all users from the database
             var users = UserDbContext.Users.ToList();
@@ -211,13 +211,26 @@ namespace Propertease.Controllers
                         new Claim(ClaimTypes.NameIdentifier, u.Id.ToString()),  // Using Id instead of FullName
                         new Claim(ClaimTypes.Role, u.Role ?? "DefaultRole"),    // Use Role from User model
                         new Claim("FullName", u.FullName),                     // Custom claim for FullName
-                        new Claim(ClaimTypes.Email, u.Email)                   // Correct ClaimType for email
+                        new Claim(ClaimTypes.Email, u.Email)   
+                        // Correct ClaimType for email
                     };
 
                     // Create a ClaimsIdentity and sign in the user
                     var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(identity));
+                    var principal = new ClaimsPrincipal(identity);
+
+                    // Add RememberMe logic here
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = uEdit.RememberMe, // Will be true if "Remember Me" is checked
+                        ExpiresUtc = DateTime.UtcNow.AddDays(7) // Token valid for 7 days
+                    };
+
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        principal,
+                        authProperties);
+
 
                     // Role-based redirection
                     if (u.Role != null && u.Role.Equals("Seller", StringComparison.OrdinalIgnoreCase))

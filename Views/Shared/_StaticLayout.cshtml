@@ -44,7 +44,8 @@
     <header class="fixed top-0 w-full">
         <nav class="bg-white border-gray-200 dark:bg-gray-900 ">
             <div class="p-4 mx-auto flex max-w-screen-xl flex-wrap items-center justify-between">
-                <a href="#" class="space-x-3 flex items-center rtl:space-x-reverse">PROPERTEASE
+                <a href="@Url.Action("Home","Home")" class="text-2xl w-1/3 font-semibold dark:text-white">
+                    PROPERTEASE
                 </a>
                 <button data-collapse-toggle="navbar-default" type="button" class="p-2 w-10 h-10 text-gray-500 inline-flex items-center justify-center rounded-lg text-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 md:hidden dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
                     <span class="sr-only">Open main menu</span>
@@ -56,7 +57,7 @@
                     <ul class="p-4 mt-4 border-gray-100 bg-gray-50 flex flex-col rounded-lg border font-medium rtl:space-x-reverse dark:bg-gray-800 dark:border-gray-700 md:p-0 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white md:dark:bg-gray-900">
                         <li>
 
-                            <a asp-action="Login" asp-controller="User" class="py-2 px-3 text-white bg-blue-700 block rounded dark:text-white md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500" aria-current="page">Login</a>
+                            <a asp-action="Login" asp-controller="User" class="py-2 px-3 text-white bg-gray-700 rounded-md " aria-current="page">Login</a>
                         </li>
                     </ul>
                 </div>
