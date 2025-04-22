@@ -148,5 +148,25 @@ namespace Propertease.Controllers
                 return StatusCode(500, "An error occurred while deleting notification");
             }
         }
+        [HttpDelete("DeleteAll")]
+        public async Task<IActionResult> DeleteAll()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized();
+                }
+
+                var result = await _notificationService.DeleteAllNotificationsAsync(int.Parse(userId));
+                return Json(new { success = result });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting all notifications");
+                return StatusCode(500, "An error occurred while deleting all notifications");
+            }
+        }
     }
 }

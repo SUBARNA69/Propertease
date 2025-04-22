@@ -25,18 +25,18 @@ namespace Propertease.Models
         [Required]
         public string Province { get; set; }
         public string RoadAccess { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         public string? ThreeDModel { get; set; } // You can modify this to store path or URL for 3D model if applicable
-
+        public DateTime? SoldDate { get; set; } = DateTime.Now;
         public int SellerId { get; set; }   // Foreign Key
-
         public string Status { get; set; }
         public User Seller { get; set; } // Link to the User model
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the property was first listed
-        //public DateTime? SoldDate { get; set; } 
 
+        //public DateTime? SoldDate { get; set; } 
         public ICollection<Apartment> Apartments { get; set; }
         public ICollection<House> Houses { get; set; }
         public ICollection<Land> Lands { get; set; }

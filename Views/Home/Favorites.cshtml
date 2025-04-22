@@ -1,5 +1,6 @@
 ﻿@{
     ViewData["Title"] = "My Favorites";
+    Layout = "_Layout";
     var favoritePropertyIds = ViewBag.FavoritePropertyIds as List<int> ?? new List<int>();
 }
 @model IEnumerable<PropertyDetailsViewModel>

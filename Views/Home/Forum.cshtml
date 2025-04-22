@@ -1,14 +1,19 @@
 ﻿@model Propertease.Models.ForumViewModel
 @{
+    Layout = "_Layout";
     ViewData["Title"] = "Forum";
 }
+
+<!-- Toast Container - Fixed position at the top right -->
+<div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
+
 <div class="max-w-4xl mx-auto p-4 ">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Left side: Create post form -->
         <div class="md:col-span-1">
             <div class="bg-white shadow rounded-lg p-4">
                 <h1 class="text-2xl font-bold mb-6">Create a New Post</h1>
-                <form asp-action="Forum" method="post" enctype="multipart/form-data" class="space-y-4">
+                <form id="createPostForm" asp-action="Forum" method="post" enctype="multipart/form-data" class="space-y-4">
                     <!-- Display validation summary -->
                     <div asp-validation-summary="ModelOnly" class="text-red-500"></div>
 
@@ -105,7 +110,7 @@
                                     }
                                 }
                                 <!-- Comment Form -->
-                                <form asp-action="AddForumComment" method="post" class="mt-4">
+                                <form class="comment-form mt-4" data-post-id="@post.Id" asp-action="AddForumComment" method="post">
                                     <input type="hidden" name="postId" value="@post.Id" />
                                     <div class="flex gap-2">
                                         <input type="text"
@@ -135,6 +140,126 @@
 </div>
 
 <script>
+    function showToast(message, type = 'success', duration = 3000) {
+        const toast = document.createElement('div');
+        toast.className = `animate-fade-in max-w-sm p-4 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+        toast.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="font-medium">${message}</span>
+                </div>
+                <button class="ml-4 text-white hover:text-gray-200" onclick="this.parentElement.parentElement.remove()">
+                    &times;
+                </button>
+            </div>
+        `;
+
+        // Add to container
+        const container = document.getElementById('toastContainer');
+        container.appendChild(toast);
+
+        // Auto-remove after duration
+        setTimeout(() => {
+            toast.classList.add('animate-fade-out');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 300); // Match to animation duration
+        }, duration);
+    }
+
+    // Add necessary CSS animations
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-in-out;
+            }
+            .animate-fade-out {
+                animation: fadeOut 0.3s ease-in-out;
+            }
+    @@keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+    @@keyframes fadeOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+            }
+        </style>
+    `);
+
+    // Check for success message in TempData/ViewData
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if we're redirected after post creation (check URL parameters)
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('postCreated')) {
+            showToast('Your post has been created successfully!', 'success');
+        }
+
+        // Attach event listener to the post form submission
+        const postForm = document.getElementById('createPostForm');
+        if (postForm) {
+            postForm.addEventListener('submit', function(e) {
+                // Client-side validation here if needed
+                const titleInput = document.querySelector('[name="ForumPost.Title"]');
+                const contentInput = document.querySelector('[name="ForumPost.Content"]');
+
+                if (titleInput.value.trim() === '' || contentInput.value.trim() === '') {
+                    e.preventDefault();
+                    showToast('Please fill in all required fields', 'error');
+                    return false;
+                }
+            });
+        }
+
+        // Attach event listeners to all comment forms
+        const commentForms = document.querySelectorAll('.comment-form');
+        commentForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const postId = this.getAttribute('data-post-id');
+                const contentInput = this.querySelector('input[name="content"]');
+
+                if (contentInput.value.trim() === '') {
+                    showToast('Comment cannot be empty', 'error');
+                    return false;
+                }
+
+                // Submit the form via AJAX
+                const formData = new FormData(this);
+
+                fetch(this.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Clear the comment input
+                        contentInput.value = '';
+                        showToast('Comment added successfully!', 'success');
+
+                        // Optionally reload the comments section
+                        // This would require a partial view or API endpoint to get just the comments
+                        // For now, we can reload the page after a short delay
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        showToast('Failed to add comment. Please try again.', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred while adding your comment', 'error');
+                });
+            });
+        });
+    });
+
     // Toggle comments visibility
     function toggleComments(postId) {
         const commentsContainer = document.getElementById(`comments-${postId}`);
@@ -178,11 +303,14 @@
                     const base64data = reader.result;
                     document.getElementById("audioData").value = base64data;
                     console.log("Audio data captured and stored in form");
+
+                    // Show a toast notification that audio is ready
+                    showToast('Audio recording captured successfully!', 'success');
                 };
             };
         } catch (err) {
             console.error("Error accessing microphone:", err);
-            alert("Could not access microphone. Please check your browser permissions.");
+            showToast('Could not access microphone. Please check your browser permissions.', 'error');
             document.getElementById("startRecording").classList.remove("hidden");
             document.getElementById("stopRecording").classList.add("hidden");
         }
@@ -196,4 +324,3 @@
         }
     });
 </script>
-

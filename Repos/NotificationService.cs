@@ -236,5 +236,35 @@ namespace Propertease.Services
                 throw;
             }
         }
+        public async Task<bool> DeleteAllNotificationsAsync(int userId)
+        {
+            try
+            {
+                var notifications = await _context.Notifications
+                    .Where(n => n.RecipientId == userId)
+                    .ToListAsync();
+
+                if (!notifications.Any())
+                {
+                    _logger.LogInformation($"No notifications found to delete for user {userId}");
+                    return false;
+                }
+
+                _context.Notifications.RemoveRange(notifications);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Deleted all notifications for user {userId}");
+
+                // Update unread count to zero since all notifications are deleted
+                await _hubContext.Clients.Group($"User_{userId}").SendAsync("ReceiveUnreadCount", 0);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting all notifications for user {userId}");
+                throw;
+            }
+        }
     }
 }

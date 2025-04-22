@@ -13,7 +13,7 @@
         public int SellerId { get; set; }
         public string SellerName { get; set; }
         public DateTime ViewingDate { get; set; }
-        public DateTime CompletionDate { get; set; }
+        public DateTime? PurchasedDate { get; set; }
         public bool HasBeenRated { get; set; }
     }
 }

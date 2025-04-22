@@ -147,6 +147,33 @@ function addNotificationToList(notification) {
 }
 
 // Mark a notification as read
+// Delete all notifications and clear them from the UI
+function deleteAllNotifications() {
+    // Make an HTTP request to delete all notifications from the database
+    fetch('/Notification/DeleteAll', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+        .then(response => {
+            if (response.ok) {
+                console.log("All notifications deleted");
+
+                // Update UI
+                const notificationList = document.getElementById("notification-list");
+                if (notificationList) {
+                    notificationList.innerHTML = '<li class="text-sm text-gray-700 py-2 border-b empty-notification">No new notifications</li>';
+                    updateNotificationBadgeCount(0);
+                }
+            } else {
+                console.error("Failed to delete all notifications");
+            }
+        })
+        .catch(error => {
+            console.error("Error deleting all notifications:", error);
+        });
+}
 function markNotificationAsRead(notificationId) {
     // Make an HTTP request to ensure the change is persisted in the database
     fetch(`/Notification/MarkAsRead/${notificationId}`, {
@@ -391,9 +418,16 @@ document.addEventListener("DOMContentLoaded", function () {
         notificationIcon.addEventListener("click", toggleNotificationPanel);
     }
 
+    // Replace the current clear button event listener with this:
     const clearBtn = document.getElementById("clear-notifications");
     if (clearBtn) {
-        clearBtn.addEventListener("click", markAllNotificationsAsRead);
+        console.log("Found clear button, adding click event");
+        clearBtn.addEventListener("click", function () {
+            console.log("Clear button clicked");
+            deleteAllNotifications();
+        });
+    } else {
+        console.error("Clear button not found in DOM");
     }
 
     // Close notification panel when clicking outside
@@ -412,3 +446,4 @@ window.markNotificationAsRead = markNotificationAsRead;
 window.markAllNotificationsAsRead = markAllNotificationsAsRead;
 window.markAllNotificationsAsReadOnly = markAllNotificationsAsReadOnly;
 window.toggleNotificationPanel = toggleNotificationPanel;
+window.deleteAllNotifications = deleteAllNotifications;

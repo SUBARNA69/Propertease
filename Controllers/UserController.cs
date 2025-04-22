@@ -17,6 +17,7 @@ using Propertease.Repos;
 using Propertease.Repos.Propertease.Services;
 using Esri.ArcGISRuntime.Ogc;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 namespace Propertease.Controllers
 {
@@ -404,11 +405,11 @@ namespace Propertease.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }
-        [Authorize]
-        public IActionResult Dashboard()
-        {
-            return RedirectToAction("Index", "Home");
-        }
+        //[Authorize]
+        //public IActionResult Dashboard()
+        //{
+        //    return RedirectToAction("Index", "Home");
+        //}
 
         [Authorize]
         [HttpGet]
@@ -532,7 +533,7 @@ namespace Propertease.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Profile(User model, IFormFile Photo)
+        public async Task<IActionResult> Profile(User model, IFormFile? Photo)
         {
             if (!ModelState.IsValid)
             {
@@ -544,7 +545,6 @@ namespace Propertease.Controllers
 
             // Get the user from the database
             var user = await UserDbContext.Users.FindAsync(userId);
-
             if (user == null)
             {
                 return NotFound();
@@ -556,7 +556,7 @@ namespace Propertease.Controllers
             user.ContactNumber = model.ContactNumber;
             user.Address = model.Address;
 
-            // Handle profile image upload
+            // Handle profile image upload only if a new photo is provided
             if (Photo != null && Photo.Length > 0)
             {
                 // Delete old image if exists
@@ -572,14 +572,13 @@ namespace Propertease.Controllers
                 // Save new image
                 string fileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(Photo.FileName);
                 string filePath = Path.Combine(webHostEnvironment.WebRootPath, "Images", fileName);
-
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await Photo.CopyToAsync(fileStream);
                 }
-
                 user.Image = fileName;
             }
+            // Otherwise, image remains unchanged - no need for additional code here
 
             // Save changes
             await UserDbContext.SaveChangesAsync();
@@ -673,6 +672,5 @@ namespace Propertease.Controllers
 
             return View(groupedViews);
         }
-
     }
 }

@@ -14,5 +14,6 @@ namespace Propertease.Services
         Task<bool> MarkAllAsReadAsync(int userId);
         Task<bool> SendNotificationToUserAsync(int recipientId, Notification notification);
         Task<bool> DeleteNotificationAsync(int notificationId, int userId);
+        Task<bool> DeleteAllNotificationsAsync(int userId);
     }
 }

@@ -303,8 +303,9 @@ namespace Propertease.Controllers
         public async Task<IActionResult> Listings()
         {
             var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
             var properties = await _context.properties
-                .Where(p => p.SellerId == sellerId)
+                .Where(p => p.SellerId == sellerId && !p.IsDeleted) // 👈 only non-deleted
                 .Include(p => p.PropertyImages)
                 .ToListAsync();
 
@@ -315,6 +316,7 @@ namespace Propertease.Controllers
 
             return View(properties);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> EditProperty(int id)
@@ -570,11 +572,14 @@ namespace Propertease.Controllers
             var property = await _context.properties.FindAsync(id);
             if (property != null)
             {
-                _context.properties.Remove(property);
+                property.IsDeleted = true;
+                _context.properties.Update(property);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("Listings");
         }
+
+
 
         public async Task<IActionResult> Dashboard()
         {
@@ -592,12 +597,46 @@ namespace Propertease.Controllers
                 var pendingApprovals = properties.Count(p => p.Status == "Pending");
                 var activeProperties = properties.Count(p => p.Status == "Approved");
                 var newInquiries = properties.Count(p => p.Status == "Rejected");
+                var soldProperties = properties.Count(p => p.Status == "Sold");
+
+                // Get sold properties grouped by month for the chart
+                var soldPropertiesByMonth = properties
+                    .Where(p => p.Status == "Sold" && p.SoldDate != null)
+                    .GroupBy(p => new { Month = p.SoldDate.Value.Month, Year = p.SoldDate.Value.Year })
+                    .Select(g => new
+                    {
+                        Date = new DateTime(g.Key.Year, g.Key.Month, 1),
+                        Count = g.Count()
+                    })
+                    .OrderBy(x => x.Date)
+                    .Take(7)
+                    .ToList();
+                // In your Dashboard action method, you already have:
+                var propertyTypeDistribution = properties
+                    .Where(p => p.Status == "Approved")
+                    .GroupBy(p => p.PropertyType)
+                    .Select(g => new
+                    {
+                        Type = g.Key,
+                        Count = g.Count()
+                    })
+                    .OrderBy(x => x.Type)
+                    .ToList();
+
+                // And you're setting these ViewBag properties:
+                ViewBag.PropertyTypeLabels = propertyTypeDistribution.Select(x => x.Type).ToList();
+                ViewBag.PropertyTypeCounts = propertyTypeDistribution.Select(x => x.Count).ToList();
 
                 ViewBag.TotalListings = totalListings;
                 ViewBag.PendingApprovals = pendingApprovals;
                 ViewBag.ActiveProperties = activeProperties;
                 ViewBag.NewInquiries = newInquiries;
+                ViewBag.SoldProperties = soldProperties;
                 ViewBag.Name = firstName;
+
+                // Pass the sold properties data to the view
+                ViewBag.SoldPropertiesMonths = soldPropertiesByMonth.Select(x => x.Date.ToString("MMM")).ToList();
+                ViewBag.SoldPropertiesCounts = soldPropertiesByMonth.Select(x => x.Count).ToList();
 
                 return View(properties);
             }
@@ -606,7 +645,6 @@ namespace Propertease.Controllers
                 return Content($"Error: {ex.Message}");
             }
         }
-
         [HttpGet]
         public IActionResult Boost(int? propertyId = null)
         {
@@ -952,7 +990,7 @@ namespace Propertease.Controllers
             // Get all properties belonging to this seller
             var properties = await _context.properties
                 .Include(p => p.PropertyImages)
-                .Where(p => p.SellerId == userId)
+                .Where(p => p.SellerId == userId && p.Status!= "Sold")
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
 
@@ -983,11 +1021,12 @@ namespace Propertease.Controllers
 
             // Get all viewing requests for these properties
             var viewingRequests = await _context.PropertyViewingRequests
-                .Include(r => r.Properties)
-                .Include(r => r.Buyer)
-                .Where(r => sellerProperties.Contains(r.PropertyId))
-                .OrderByDescending(r => r.RequestedAt)
-                .ToListAsync();
+            .Include(r => r.Properties)
+            .Include(r => r.Buyer)
+            .Where(r => sellerProperties.Contains(r.PropertyId) && r.Status == "Pending")
+            .OrderByDescending(r => r.RequestedAt)
+            .ToListAsync();
+
 
             return View(viewingRequests);
         }
@@ -1090,6 +1129,7 @@ namespace Propertease.Controllers
 
             // Update property status to "Sold"
             property.Status = "Sold";
+            property.SoldDate = DateTime.UtcNow.AddMinutes(345);
 
             // Update request status to "Completed"
             request.Status = "Completed";

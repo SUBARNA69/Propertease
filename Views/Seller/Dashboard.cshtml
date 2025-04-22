@@ -11,9 +11,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <div class="flex">
-    <!-- Sidebar -->
-    
-
     <!-- Main Content -->
     <div class="p-4 max-w-7xl mx-auto">
         <!-- Header -->
@@ -85,20 +82,18 @@
 
         <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <!-- Property Views Chart -->
+            <!-- Sold Properties Chart (Now as Bar Graph) -->
             <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700 lg:col-span-2">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Performance Overview</h3>
+                    <h3 class="text-lg font-semibold">Sold Properties By Month</h3>
                     <div>
                         <select id="chartPeriod" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                            <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
                         </select>
                     </div>
                 </div>
                 <div class="relative h-80">
-                    <canvas id="propertyViewsChart"></canvas>
+                    <canvas id="soldPropertiesChart"></canvas>
                 </div>
             </div>
 
@@ -119,136 +114,31 @@
             </div>
         </div>
 
-        <!-- Bottom Row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Real Estate Tips -->
-            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
-                <h3 class="text-lg font-semibold mb-4">Real Estate Tips</h3>
-                <div class="space-y-4">
-                    <div class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Optimize Your Listings</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Use high-quality photos and detailed descriptions to attract more buyers.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Market Trends</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Stay updated with local market trends to price your properties competitively.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Virtual Tours</h4>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Properties with virtual tours get 30% more views than those without.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
-                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
-                <ul class="space-y-3">
-                    <li class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-blue-100 text-blue-500 dark:bg-blue-800 dark:text-blue-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm text-gray-900 dark:text-white">New Inquiry for 123 Main St</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm text-gray-900 dark:text-white">Listing approved: 456 Oak Ave</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">5 hours ago</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-purple-100 text-purple-500 dark:bg-purple-800 dark:text-purple-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M18 7.5h-.423l-.452-1.09.3-.3a1.5 1.5 0 0 0 0-2.121L16.01 2.575a1.5 1.5 0 0 0-2.121 0l-.3.3-1.089-.452V2A1.5 1.5 0 0 0 11 .5H9A1.5 1.5 0 0 0 7.5 2v.423l-1.09.452-.3-.3a1.5 1.5 0 0 0-2.121 0L2.576 3.99a1.5 1.5 0 0 0 0 2.121l.3.3L2.423 7.5H2A1.5 1.5 0 0 0 .5 9v2A1.5 1.5 0 0 0 2 12.5h.423l.452 1.09-.3.3a1.5 1.5 0 0 0 0 2.121l1.415 1.413a1.5 1.5 0 0 0 2.121 0l.3-.3 1.09.452V18A1.5 1.5 0 0 0 9 19.5h2a1.5 1.5 0 0 0 1.5-1.5v-.423l1.09-.452.3.3a1.5 1.5 0 0 0 2.121 0l1.415-1.414a1.5 1.5 0 0 0 0-2.121l-.3-.3.452-1.09H18a1.5 1.5 0 0 0 1.5-1.5V9A1.5 1.5 0 0 0 18 7.5Zm-8 6a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm text-gray-900 dark:text-white">Price updated on 789 Pine Rd</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">1 day ago</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Important Alerts -->
-            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
-                <h3 class="text-lg font-semibold mb-4">Important Alerts</h3>
-                <ul class="space-y-3">
-                    <li class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm text-gray-900 dark:text-white">Listing Expiring Soon: 789 Pine Rd</p>
-                            <p class="text-xs text-red-500 dark:text-red-400">3 days left</p>
-                        </div>
-                    </li>
-                    <li class="flex items-start gap-2">
-                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
-                            </svg>
-                        </span>
-                        <div>
-                            <p class="text-sm text-gray-900 dark:text-white">Document Update Required: Please update property tax info</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
+       
+        
 <!-- Chart.js Initialization -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Property Views Chart
-        const viewsCtx = document.getElementById('propertyViewsChart').getContext('2d');
-        const propertyViewsChart = new Chart(viewsCtx, {
-            type: 'line',
+        // Sold Properties Chart (Now as Bar Graph)
+        const soldCtx = document.getElementById('soldPropertiesChart').getContext('2d');
+
+        // Get data from ViewBag or use default values if not available
+        const months = @Html.Raw(Json.Serialize(ViewBag.SoldPropertiesMonths ?? new List<string>() { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul" }));
+        const soldCounts = @Html.Raw(Json.Serialize(ViewBag.SoldPropertiesCounts ?? new List<int>() { 0, 0, 0, 0, 0, 0, 0 }));
+
+        const soldPropertiesChart = new Chart(soldCtx, {
+            type: 'bar', // Changed from 'line' to 'bar'
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+                labels: months,
                 datasets: [{
-                    label: 'Property Views',
-                    data: [120, 150, 180, 220, 300, 250, 400],
-                    borderColor: '#8b5cf6',
-                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
+                    label: 'Sold Properties',
+                    data: soldCounts,
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)', // Solid color for bars
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4, // Rounded corners on bars
+                    barPercentage: 0.6, // Make bars slightly thinner
+                    categoryPercentage: 0.8
                 }]
             },
             options: {
@@ -260,7 +150,12 @@
                     },
                     tooltip: {
                         mode: 'index',
-                        intersect: false
+                        intersect: false,
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                return 'Sold Properties - ' + tooltipItems[0].label;
+                            }
+                        }
                     }
                 },
                 scales: {
@@ -268,6 +163,9 @@
                         beginAtZero: true,
                         grid: {
                             drawBorder: false
+                        },
+                        ticks: {
+                            precision: 0 // Only show whole numbers
                         }
                     },
                     x: {
@@ -284,14 +182,20 @@
         const propertyStatusChart = new Chart(statusCtx, {
             type: 'bar',
             data: {
-                labels: ['Active', 'Pending', 'Rejected'],
+                labels: ['Active', 'Pending', 'Rejected', 'Sold'],
                 datasets: [{
                     label: 'Properties',
-                    data: [@ViewBag.ActiveProperties, @ViewBag.PendingApprovals, @ViewBag.NewInquiries],
+                    data: [
+    @ViewBag.ActiveProperties,
+    @ViewBag.PendingApprovals,
+    @ViewBag.NewInquiries,
+    @(ViewBag.SoldProperties ?? 0)
+                    ],
                     backgroundColor: [
-                        'rgba(16, 185, 129, 0.8)',  // Green
-                        'rgba(245, 158, 11, 0.8)',  // Amber
-                        'rgba(239, 68, 68, 0.8)'    // Red
+                        'rgba(16, 185, 129, 0.8)',  // Green for Active
+                        'rgba(245, 158, 11, 0.8)',  // Amber for Pending
+                        'rgba(239, 68, 68, 0.8)',   // Red for Rejected
+                        'rgba(59, 130, 246, 0.8)'   // Blue for Sold
                     ],
                     borderRadius: 4
                 }]
@@ -320,52 +224,77 @@
             }
         });
 
-        // Property Type Chart
-        const typeCtx = document.getElementById('propertyTypeChart').getContext('2d');
-        const propertyTypeChart = new Chart(typeCtx, {
-            type: 'pie',
-            data: {
-                labels: ['House', 'Apartment', 'Land'],
-                datasets: [{
-                    data: [5, 4, 3],
-                    backgroundColor: [
-                        'rgba(59, 130, 246, 0.8)',  // Blue
-                        'rgba(139, 92, 246, 0.8)',  // Purple
-                        'rgba(236, 72, 153, 0.8)'   // Pink
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
+           // Replace the static Property Type Chart initialization in your view with:
+    const typeCtx = document.getElementById('propertyTypeChart').getContext('2d');
+
+    // Get dynamic data from ViewBag
+    const propertyTypeLabels = @Html.Raw(Json.Serialize(ViewBag.PropertyTypeLabels ?? new List<string>() { "House", "Apartment", "Land" }));
+    const propertyTypeCounts = @Html.Raw(Json.Serialize(ViewBag.PropertyTypeCounts ?? new List<int>() { 0, 0, 0 }));
+
+    // Dynamic colors based on the number of property types
+    const generateColors = (count) => {
+        const colors = [
+            'rgba(59, 130, 246, 0.8)',  // Blue
+            'rgba(139, 92, 246, 0.8)',  // Purple
+            'rgba(236, 72, 153, 0.8)',  // Pink
+            'rgba(16, 185, 129, 0.8)',  // Green
+            'rgba(245, 158, 11, 0.8)',  // Amber
+            'rgba(239, 68, 68, 0.8)',   // Red
+            'rgba(75, 85, 99, 0.8)'     // Gray
+        ];
+
+        // Return colors for the number of property types (cycle through if more types than colors)
+        return Array(count).fill().map((_, i) => colors[i % colors.length]);
+    };
+
+    const propertyTypeChart = new Chart(typeCtx, {
+        type: 'pie',
+        data: {
+            labels: propertyTypeLabels,
+            datasets: [{
+                data: propertyTypeCounts,
+                backgroundColor: generateColors(propertyTypeLabels.length),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return tooltipItems[0].label;
+                        },
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((acc, val) => acc + val, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
                     }
                 }
             }
-        });
+        }
+    });
 
         // Chart period selector
         document.getElementById('chartPeriod').addEventListener('change', function() {
             const period = this.value;
-            let labels, data;
 
-            if (period === 'weekly') {
-                labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                data = [30, 45, 60, 35, 70, 90, 50];
-            } else if (period === 'monthly') {
-                labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
-                data = [120, 150, 180, 220, 300, 250, 400];
-            } else {
-                labels = ['2018', '2019', '2020', '2021', '2022', '2023', '2024'];
-                data = [800, 1200, 900, 1500, 1800, 2200, 2500];
-            }
+            // In a real implementation, you would fetch different data based on the period
+            // For now, we'll just simulate different data
+           
+                // Reset to the original monthly data
+                soldPropertiesChart.data.labels = months;
+                soldPropertiesChart.data.datasets[0].data = soldCounts;
+            
 
-            propertyViewsChart.data.labels = labels;
-            propertyViewsChart.data.datasets[0].data = data;
-            propertyViewsChart.update();
+            soldPropertiesChart.update();
         });
     });
 </script>

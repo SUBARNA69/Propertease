@@ -35,8 +35,6 @@
                             <a asp-controller="Home" asp-action="Properties" class="text-gray-900 hover:text-blue-500">Properties</a>
                             <a asp-controller="Home" asp-action="About" class="text-gray-900 hover:text-blue-500">About</a>
                             <a asp-controller="Home" asp-action="Forum" class="text-gray-900 hover:text-blue-500">Forum</a>
-                            <a asp-controller="Home" asp-action="MyPurchases" class="text-gray-900 hover:text-blue-500">My Purchases</a>
-                            <a asp-controller="Home" asp-action="MyBuyerRatings" class="text-gray-900 hover:text-blue-500">My Ratings</a>
                             <a asp-controller="Home" asp-action="Favorites" class="text-gray-900 hover:text-blue-500">Favorites</a>
                         }
                         @* Role-based navigation links *@
@@ -47,8 +45,6 @@
                             <a asp-controller="Seller" asp-action="Listings" class="text-gray-900 hover:text-blue-500">My Listings</a>
                             <a asp-controller="Seller" asp-action="MyProperties" class="text-gray-900 hover:text-blue-500">Boosted Properties</a>
                             <a asp-controller="Seller" asp-action="ViewingRequests" class="text-gray-900 hover:text-blue-500">Property View Requests</a>
-                            <a asp-controller="Seller" asp-action="MyRatings" class="text-gray-900 hover:text-blue-500">My Ratings</a>
-                            <a asp-controller="Seller" asp-action="SoldProperties" class="text-gray-900 hover:text-blue-500">Sold Properties</a>
                         }
                         else if (User.IsInRole("Admin"))
                         {
@@ -57,7 +53,6 @@
                             <a asp-controller="Admin" asp-action="AdminRequests" class="text-gray-900 hover:text-blue-500">Property Request</a>
                             <a asp-controller="Admin" asp-action="AllProperties" class="text-gray-900 hover:text-blue-500">Property Management</a>
                             <a asp-controller="Admin" asp-action="UsersManagement" class="text-gray-900 hover:text-blue-500">User Management</a>
-                            <a asp-controller="Admin" asp-action="Index" class="text-gray-900 hover:text-blue-500">Feedback</a>
                         }
                     </div>
 
@@ -99,9 +94,16 @@
                         <ul>
                             <li><a asp-action="Profile" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Profile</a></li>
                             <li><a asp-action="UpdatePassword" asp-controller="User" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Change Password</a></li>
-                            <li>
-                                <a asp-controller="User" asp-action="Logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a>
-                            </li>
+                            @if (User.IsInRole("Buyer"))
+                            {
+                                <a asp-controller="Home" asp-action="MyPurchases" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Purchases</a>
+                                <a asp-controller="Home" asp-action="MyBuyerRatings" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Ratings</a>
+                            }@if (User.IsInRole("Seller"))
+                            {
+                                <a asp-controller="Seller" asp-action="SoldProperties" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sold Properties</a>
+                                <a asp-controller="Seller" asp-action="MyRatings" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Ratings</a>
+                            }
+                            <li><a asp-controller="User" asp-action="Logout" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Logout</a></li>
                         </ul>
                     </div>
                 }

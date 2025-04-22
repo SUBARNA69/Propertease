@@ -1,0 +1,400 @@
+﻿@{
+
+    ViewData["Title"] = "Seller Dashboard";
+    Layout = "_Layout";
+}
+
+<!-- Flowbite
+CSS
+and
+JS-- >
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="flex">
+    <!-- Main Content -->
+    <div class="p-4 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-2xl font-semibold">Welcome back, @ViewBag.Name!</h1>
+                <p class="text-gray-600">Here's what's happening with your properties</p>
+            </div>
+            <a href="@Url.Action("AddProperty", "Seller")" class="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-purple-600 dark:hover:bg-purple-700 focus:outline-none dark:focus:ring-purple-800">
+                + Add New Listing
+            </a>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center">
+                    <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-blue-100 text-blue-500 dark:bg-blue-800 dark:text-blue-200">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5 0H1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1Zm14 0h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1V1a1 1 0 0 0-1-1ZM5 14H1a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1Zm14 0h-4a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1ZM12 2H8a1 1 0 0 0 0 2h4a1 1 0 1 0 0-2Zm0 14H8a1 1 0 0 0 0 2h4a1 1 0 0 0 0-2Zm-8-4V8a1 1 0 0 0-2 0v4a1 1 0 1 0 2 0Zm14 0V8a1 1 0 0 0-2 0v4a1 1 0 0 0 2 0Z" />
+                        </svg>
+                    </div>
+                    <div class="ms-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Listings</p>
+                        <h3 class="text-xl font-bold">@ViewBag.TotalListings</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center">
+                    <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
+                        </svg>
+                    </div>
+                    <div class="ms-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Approvals</p>
+                        <h3 class="text-xl font-bold">@ViewBag.PendingApprovals</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center">
+                    <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
+                        </svg>
+                    </div>
+                    <div class="ms-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Rejected Properties</p>
+                        <h3 class="text-xl font-bold">@ViewBag.NewInquiries</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center">
+                    <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M19.725 9.292a1 1 0 0 0-.768-.256l-2.839.521V7.994a1 1 0 0 0-.703-.953l-5.3-1.529V3.383l1.423.641a1 1 0 0 0 1.285-.438l.617-1.25a1 1 0 0 0-.438-1.342l-6.33-3.136a1 1 0 0 0-1.344.438l-.616 1.25a1 1 0 0 0 .437 1.342l1.529.7V5.5a1 1 0 0 0 .724.962l5.3 1.529v.461l-5.11.931a1 1 0 0 0-.813.984v2.823L2.9 11.866a1 1 0 0 0-.813.983v4.5a1 1 0 0 0 1.164.983l7.389-1.346a1 1 0 0 0 .813-.983v-.461l7.389-1.346a1 1 0 0 0 .813-.983v-4.5a1 1 0 0 0-.93-.921ZM8.5 16.057l-5 .909v-2.117l5-.909v2.117Z" />
+                        </svg>
+                    </div>
+                    <div class="ms-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Properties</p>
+                        <h3 class="text-xl font-bold">@ViewBag.ActiveProperties</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <div class="flex items-center">
+                    <div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-purple-100 text-purple-500 dark:bg-purple-800 dark:text-purple-200">
+                        <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                        </svg>
+                    </div>
+                    <div class="ms-3">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Sold Properties</p>
+                        <h3 class="text-xl font-bold">@ViewBag.SoldProperties</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Sold Properties Chart -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700 lg:col-span-2">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Sold Properties Over Time</h3>
+                    <div>
+                        <select id="chartPeriod" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                            <option value="all">All Time</option>
+                            <option value="year">Past Year</option>
+                            <option value="sixMonths">Past 6 Months</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="soldPropertiesChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Property Status Chart -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Property Status</h3>
+                <div class="relative h-64">
+                    <canvas id="propertyStatusChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Property Type Distribution -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Property Types</h3>
+                <div class="relative h-64">
+                    <canvas id="propertyTypeChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Real Estate Tips -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Real Estate Tips</h3>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Optimize Your Listings</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Use high-quality photos and detailed descriptions to attract more buyers.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Market Trends</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Stay updated with local market trends to price your properties competitively.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Virtual Tours</h4>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Properties with virtual tours get 30% more views than those without.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Recent Activity</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-blue-100 text-blue-500 dark:bg-blue-800 dark:text-blue-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 0a10 10 0 1 0 10 10A10.011 10.011 0 0 0 10 0Zm3.982 13.982a1 1 0 0 1-1.414 0l-3.274-3.274A1.012 1.012 0 0 1 9 10V6a1 1 0 0 1 2 0v3.586l2.982 2.982a1 1 0 0 1 0 1.414Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-900 dark:text-white">New Inquiry for 123 Main St</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-900 dark:text-white">Listing approved: 456 Oak Ave</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">5 hours ago</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-purple-100 text-purple-500 dark:bg-purple-800 dark:text-purple-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M18 7.5h-.423l-.452-1.09.3-.3a1.5 1.5 0 0 0 0-2.121L16.01 2.575a1.5 1.5 0 0 0-2.121 0l-.3.3-1.089-.452V2A1.5 1.5 0 0 0 11 .5H9A1.5 1.5 0 0 0 7.5 2v.423l-1.09.452-.3-.3a1.5 1.5 0 0 0-2.121 0L2.576 3.99a1.5 1.5 0 0 0 0 2.121l.3.3L2.423 7.5H2A1.5 1.5 0 0 0 .5 9v2A1.5 1.5 0 0 0 2 12.5h.423l.452 1.09-.3.3a1.5 1.5 0 0 0 0 2.121l1.415 1.413a1.5 1.5 0 0 0 2.121 0l.3-.3 1.09.452V18A1.5 1.5 0 0 0 9 19.5h2a1.5 1.5 0 0 0 1.5-1.5v-.423l1.09-.452.3.3a1.5 1.5 0 0 0 2.121 0l1.415-1.414a1.5 1.5 0 0 0 0-2.121l-.3-.3.452-1.09H18a1.5 1.5 0 0 0 1.5-1.5V9A1.5 1.5 0 0 0 18 7.5Zm-8 6a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-900 dark:text-white">Price updated on 789 Pine Rd</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">1 day ago</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Important Alerts -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow p-4 dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Important Alerts</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-900 dark:text-white">Listing Expiring Soon: 789 Pine Rd</p>
+                            <p class="text-xs text-red-500 dark:text-red-400">3 days left</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-2">
+                        <span class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200">
+                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
+                            </svg>
+                        </span>
+                        <div>
+                            <p class="text-sm text-gray-900 dark:text-white">Document Update Required: Please update property tax info</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Initialization -->
+<script>
+              document.addEventListener('DOMContentLoaded', function() {
+            // Sold Properties Chart
+            const soldCtx = document.getElementById('soldPropertiesChart').getContext('2d');
+
+            // Get data from controller - properly handle null values
+            const soldMonths = @(ViewBag.SoldMonths != null ? Html.Raw(ViewBag.SoldMonths) : "[]");
+            const soldCounts = @(ViewBag.SoldCounts != null ? Html.Raw(ViewBag.SoldCounts) : "[]");
+
+            // Default data if no sold properties data available
+            const defaultMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const defaultCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+            const soldPropertiesChart = new Chart(soldCtx, {
+                type: 'line',
+                data: {
+                    labels: soldMonths && soldMonths.length > 0 ? soldMonths : defaultMonths,
+                    datasets: [{
+                        label: 'Sold Properties',
+                        data: soldCounts && soldCounts.length > 0 ? soldCounts : defaultCounts,
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)', // Purple with transparency
+                        borderColor: 'rgba(139, 92, 246, 1)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true,
+                        pointBackgroundColor: 'rgba(139, 92, 246, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Property Status Chart
+            const statusCtx = document.getElementById('propertyStatusChart').getContext('2d');
+
+            // Use data from ViewBag statistics
+            const statusLabels = ['Pending', 'Approved', 'Rejected', 'Sold'];
+            const statusCounts = [
+    @(ViewBag.PendingApprovals ?? 0),
+    @(ViewBag.ActiveProperties ?? 0),
+    @(ViewBag.NewInquiries ?? 0),
+    @(ViewBag.SoldProperties ?? 0)
+            ];
+
+            const statusColors = [
+                'rgba(234, 179, 8, 0.8)',  // Yellow for Pending
+                'rgba(34, 197, 94, 0.8)',   // Green for Approved
+                'rgba(239, 68, 68, 0.8)',   // Red for Rejected
+                'rgba(139, 92, 246, 0.8)'   // Purple for Sold
+            ];
+
+            const propertyStatusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusCounts,
+                        backgroundColor: statusColors,
+                        borderColor: statusColors.map(color => color.replace('0.8', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+
+            // Property Type Chart
+            const typeCtx = document.getElementById('propertyTypeChart').getContext('2d');
+
+            // Update property types to only include Land, House, and Apartment
+            const typeLabels = ['Land', 'House', 'Apartment'];
+            const typeCounts = [
+                Math.floor(Math.random() * 10) + 1,
+                Math.floor(Math.random() * 10) + 1,
+                Math.floor(Math.random() * 10) + 1
+            ];
+
+            const typeColors = [
+                'rgba(59, 130, 246, 0.8)',   // Blue for Land
+                'rgba(16, 185, 129, 0.8)',   // Green for House
+                'rgba(249, 115, 22, 0.8)'    // Orange for Apartment
+    ];
+
+    const propertyTypeChart = new Chart(typeCtx, {
+        type: 'pie',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                data: typeCounts,
+                backgroundColor: typeColors,
+                borderColor: typeColors.map(color => color.replace('0.8', '1')),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right'
+                }
+            }
+        }
+    });
+
+    // Update the chart period filter to work with the line chart
+    document.getElementById('chartPeriod').addEventListener('change', function() {
+        const period = this.value;
+        let filteredMonths = soldMonths;
+        let filteredCounts = soldCounts;
+
+        if (period === 'year') {
+            // Filter to last 12 months
+            const lastYear = soldMonths.slice(-12);
+            filteredMonths = lastYear;
+            filteredCounts = soldCounts.slice(-12);
+        } else if (period === 'sixMonths') {
+            // Filter to last 6 months
+            const lastSixMonths = soldMonths.slice(-6);
+            filteredMonths = lastSixMonths;
+            filteredCounts = soldCounts.slice(-6);
+        }
+
+        // Update chart data
+        soldPropertiesChart.data.labels = filteredMonths && filteredMonths.length > 0 ? filteredMonths : defaultMonths;
+        soldPropertiesChart.data.datasets[0].data = filteredCounts && filteredCounts.length > 0 ? filteredCounts : defaultCounts;
+        soldPropertiesChart.update();
+    });
+        });
+</script>

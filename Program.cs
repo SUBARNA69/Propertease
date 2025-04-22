@@ -12,7 +12,14 @@ using PROPERTEASE.Services;
 using OfficeOpenXml;
 using System.Threading.RateLimiting;
 
+
+// OLD way (obsolete in EPPlus 8):
+// ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
+// NEW way for EPPlus 8:
+ 
 var builder = WebApplication.CreateBuilder(args);
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 // Register CORS policy (allowing all origins for testing purposes)
 builder.Services.AddCors(options =>
@@ -37,9 +44,9 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1)
             }));
 });
+
 // Register other services
 // Add this before building the host
-ExcelPackage.LicenseContext = LicenseContext.NonCommercial; // For non-commercial use
 // Or use LicenseContext.Commercial if you have a commercial license
 builder.Services.AddScoped<PropertyRepository>();
 // Add this line where your other services are registered
@@ -112,7 +119,27 @@ app.UseCors("AllowAllOrigins");
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.Use(async (context, next) =>
+{
+    // Only intercept GET requests for the root path
+    if (context.Request.Method == "GET" && context.Request.Path == "/"
+        && context.User?.Identity?.IsAuthenticated == true)
+    {
+        string redirectTo = "/";
 
+        if (context.User.IsInRole("Seller"))
+            redirectTo = "/Seller/Dashboard";
+        else if (context.User.IsInRole("Buyer"))
+            redirectTo = "/Home/Home";
+        else if (context.User.IsInRole("Admin"))
+            redirectTo = "/Admin/Dashboard";
+
+        context.Response.Redirect(redirectTo);
+        return;
+    }
+
+    await next();
+});
 // Map SignalR hubs after authentication
 
 app.MapHub<NotificationHub>("/notificationHub");

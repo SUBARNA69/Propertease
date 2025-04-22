@@ -285,7 +285,7 @@
             <p class="text-xl text-white mb-10">Discover the perfect place to call home with our exclusive collection of premium properties</p>
 
             <div class="search-bar bg-gray-100 rounded-xl p-4 md:p-4 max-w-4xl mx-auto">
-                <form class="flex flex-row gap-4">
+                <form id="search-form" class="flex flex-row gap-4" onsubmit="handleSearch(event)">
                     <div class="w-full">
                         <label for="location" class="block mb-2 text-sm font-medium text-gray-700">Location</label>
                         <div class="relative">
@@ -295,21 +295,47 @@
                             <input type="text" id="location" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-3" placeholder="City, neighborhood...">
                         </div>
                     </div>
-                    <div class="w-full ">
+                    <div class="w-full">
                         <label for="property-type" class="block mb-2 text-sm font-medium text-gray-700">Property Type</label>
                         <select id="property-type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-3">
-                            <option selected>All Types</option>
-                            <option value="house">House</option>
-                            <option value="apartment">Apartment</option>
-                            <option value="land">Land</option>
+                            <option value="all" selected>All Types</option>
+                            <option value="House">House</option>
+                            <option value="Apartment">Apartment</option>
+                            <option value="Land">Land</option>
                         </select>
                     </div>
                     <div class="w-1/3 flex items-end">
-                        <button type="submit" class="w- btn-primary text-white font-medium rounded-lg text-base px-6 py-3 flex items-center justify-center">
+                        <button type="submit" class="w-full btn-primary text-white font-medium rounded-lg text-base px-6 py-3 flex items-center justify-center">
                             <i class="fa-solid fa-magnifying-glass mr-2"></i> Search
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Add a div to show search results count and reset option -->
+            <div id="search-results-info" class="max-w-screen-xl mx-auto px-4 mt-8 hidden">
+                <div class="flex items-center justify-between bg-blue-50 rounded-lg p-4">
+                    <div>
+                        <span id="search-results-count" class="text-blue-700 font-medium"></span>
+                        <span class="text-blue-600 ml-2" id="search-criteria"></span>
+                    </div>
+                    <button onclick="resetSearch()" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fa-solid fa-times mr-2"></i> Clear Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- Add a div to show search results count and reset option -->
+            <div id="search-results-info" class="max-w-screen-xl mx-auto px-4 mt-8 hidden">
+                <div class="flex items-center justify-between bg-blue-50 rounded-lg p-4">
+                    <div>
+                        <span id="search-results-count" class="text-blue-700 font-medium"></span>
+                        <span class="text-blue-600 ml-2" id="search-criteria"></span>
+                    </div>
+                    <button onclick="resetSearch()" class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <i class="fa-solid fa-times mr-2"></i> Clear Search
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -320,11 +346,11 @@
     <div class="max-w-screen-xl mx-auto px-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div class="p-4">
-                <h3 class="text-3xl font-bold text-sky-600 mb-2">@Model.Count()</h3>
+                <h3 class="text-3xl font-bold text-sky-600 mb-2">@Model.Count()+</h3>
                 <p class="text-gray-600">Properties Listed</p>
             </div>
             <div class="p-4">
-                <h3 class="text-3xl font-bold text-sky-600 mb-2">850+</h3>
+                <h3 class="text-3xl font-bold text-sky-600 mb-2">@ViewBag.VerifiedUsersCount+</h3>
                 <p class="text-gray-600">Happy Clients</p>
             </div>
             <div class="p-4">
@@ -332,13 +358,12 @@
                 <p class="text-gray-600">Client Satisfaction</p>
             </div>
             <div class="p-4">
-                <h3 class="text-3xl font-bold text-sky-600 mb-2">15+</h3>
+                <h3 class="text-3xl font-bold text-sky-600 mb-2">1+</h3>
                 <p class="text-gray-600">Years Experience</p>
             </div>
         </div>
     </div>
 </section>
-
 <!-- Categories Section -->
 <section class="py-16 bg-gray-50">
     <div class="max-w-screen-xl mx-auto px-4">
@@ -844,10 +869,17 @@
 <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
 
 <script>
+    // Store all properties for filtering
+    let allProperties = [];
+    let map; // Store map instance globally
+
     document.addEventListener('DOMContentLoaded', function() {
+        // Initial collection of all property cards
+        allProperties = Array.from(document.querySelectorAll('.property-card'));
+
         // Initialize Mapbox
         mapboxgl.accessToken = 'pk.eyJ1Ijoia3Jvc3NzdWJhcm5hIiwiYSI6ImNtN3NteGp5ajE2dWgyanNibHNxc2o5YXcifQ.GSxJY20oRcqu6qnF154OEg';
-        const map = new mapboxgl.Map({
+        map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/streets-v12',
             center: [80.7718, 7.8731], // Center on Sri Lanka
@@ -859,83 +891,201 @@
 
         // Add property markers to the map
         map.on('load', function() {
-            // Get all property cards
-            const properties = document.querySelectorAll('.property-card');
-
-            // Add markers for each property
-            properties.forEach(property => {
-                // Get the actual coordinates from the data attributes
-                const lat = parseFloat(property.dataset.latitude);
-                const lng = parseFloat(property.dataset.longitude);
-
-                // Only add markers for properties with valid coordinates
-                if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
-                    const title = property.querySelector('.text-xl.font-bold').textContent;
-                    const price = property.querySelector('.text-2xl.font-bold').textContent;
-                    const location = property.querySelector('.flex.items-center.text-gray-500 span').textContent;
-
-                    // Create custom HTML element for the marker
-                    const el = document.createElement('div');
-                    el.className = 'custom-marker';
-
-                    // Create price label that appears above the marker
-                    const priceLabel = document.createElement('div');
-                    priceLabel.className = 'price-label';
-                    priceLabel.textContent = price;
-
-                    // Create marker icon
-                    const markerIcon = document.createElement('div');
-                    markerIcon.className = 'marker-icon';
-
-                    // Append elements
-                    el.appendChild(priceLabel);
-                    el.appendChild(markerIcon);
-
-                    // Create a marker with the custom HTML element
-                    const marker = new mapboxgl.Marker(el)
-                        .setLngLat([lng, lat])
-                        .setPopup(new mapboxgl.Popup({ offset: 25 })
-                            .setHTML(`
-                                <h3 class="font-bold text-sm">${title}</h3>
-                                <p class="text-sm">${location}</p>
-                                <p class="text-sm font-semibold text-sky-600">${price}</p>
-                            `))
-                        .addTo(map);
-                }
-            });
-
-            // Adjust the map bounds to fit all markers if there are valid properties
-            const validProperties = Array.from(properties).filter(p => {
-                const lat = parseFloat(p.dataset.latitude);
-                const lng = parseFloat(p.dataset.longitude);
-                return lat && lng && !isNaN(lat) && !isNaN(lng);
-            });
-
-            if (validProperties.length > 0) {
-                const bounds = new mapboxgl.LngLatBounds();
-                validProperties.forEach(p => {
-                    bounds.extend([
-                        parseFloat(p.dataset.longitude),
-                        parseFloat(p.dataset.latitude)
-                    ]);
-                });
-                map.fitBounds(bounds, { padding: 50 });
-            }
-        });
-
-        // Handle property type selection for search
-        const propertyTypeSelect = document.getElementById('property-type');
-        propertyTypeSelect.addEventListener('change', function() {
-            const selectedType = this.value;
-            if (selectedType === 'house') {
-                window.location.href = '/Home/Homes';
-            } else if (selectedType === 'apartment') {
-                window.location.href = '/Home/Apartments';
-            } else if (selectedType === 'land') {
-                window.location.href = '/Home/Lands';
-            }
+            updateMapMarkers(map, allProperties);
         });
     });
+
+    // Function to update map markers
+    function updateMapMarkers(mapInstance, properties) {
+        // Remove existing markers
+        const existingMarkers = document.getElementsByClassName('custom-marker');
+        while (existingMarkers.length > 0) {
+            existingMarkers[0].remove();
+        }
+
+        // Remove existing popups
+        const existingPopups = document.getElementsByClassName('mapboxgl-popup');
+        while (existingPopups.length > 0) {
+            existingPopups[0].remove();
+        }
+
+        // Add markers for filtered properties
+        properties.forEach(property => {
+            const lat = parseFloat(property.dataset.latitude);
+            const lng = parseFloat(property.dataset.longitude);
+
+            if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+                const title = property.querySelector('.text-xl.font-bold').textContent;
+                const price = property.querySelector('.text-2xl.font-bold').textContent;
+                const location = property.querySelector('.flex.items-center.text-gray-500 span').textContent;
+
+                // Create custom HTML element for the marker
+                const el = document.createElement('div');
+                el.className = 'custom-marker';
+
+                // Create price label that appears above the marker
+                const priceLabel = document.createElement('div');
+                priceLabel.className = 'price-label';
+                priceLabel.textContent = price;
+
+                // Create marker icon
+                const markerIcon = document.createElement('div');
+                markerIcon.className = 'marker-icon';
+
+                // Append elements
+                el.appendChild(priceLabel);
+                el.appendChild(markerIcon);
+
+                // Create a marker with the custom HTML element
+                const marker = new mapboxgl.Marker(el)
+                    .setLngLat([lng, lat])
+                    .setPopup(new mapboxgl.Popup({ offset: 25 })
+                        .setHTML(`
+                            <h3 class="font-bold text-sm">${title}</h3>
+                            <p class="text-sm">${location}</p>
+                            <p class="text-sm font-semibold text-sky-600">${price}</p>
+                        `))
+                    .addTo(mapInstance);
+            }
+        });
+
+        // Adjust map bounds to fit filtered markers
+        const validProperties = properties.filter(p => {
+            const lat = parseFloat(p.dataset.latitude);
+            const lng = parseFloat(p.dataset.longitude);
+            return lat && lng && !isNaN(lat) && !isNaN(lng);
+        });
+
+        if (validProperties.length > 0) {
+            const bounds = new mapboxgl.LngLatBounds();
+            validProperties.forEach(p => {
+                bounds.extend([
+                    parseFloat(p.dataset.longitude),
+                    parseFloat(p.dataset.latitude)
+                ]);
+            });
+            mapInstance.fitBounds(bounds, { padding: 50 });
+        }
+    }
+
+    // Handle search form submission
+    function handleSearch(event) {
+        event.preventDefault();
+        const locationInput = document.getElementById('location').value.toLowerCase();
+        const typeSelect = document.getElementById('property-type').value;
+
+        filterProperties(locationInput, typeSelect);
+
+        // Show a toast notification for search action
+        showToast('Searching properties...', 'info');
+    }
+
+    // Filter properties based on search criteria
+    function filterProperties(locationQuery, type) {
+        let filteredProperties = allProperties;
+
+        // Filter by location (city or district)
+        if (locationQuery) {
+            filteredProperties = filteredProperties.filter(property => {
+                const locationText = property.querySelector('.flex.items-center.text-gray-500 span').textContent.toLowerCase();
+                return locationText.includes(locationQuery);
+            });
+        }
+
+        // Filter by property type
+        if (type !== 'all') {
+            filteredProperties = filteredProperties.filter(property => {
+                const propertyTypeElement = property.querySelector('.bg-sky-100.text-sky-800');
+                return propertyTypeElement.textContent === type;
+            });
+        }
+
+        // Update the display of properties
+        updatePropertyDisplay(filteredProperties);
+
+        // Update search results info
+        updateSearchResultsInfo(filteredProperties.length, locationQuery, type);
+
+        // Update map with filtered properties
+        updateMapMarkers(map, filteredProperties);
+
+        // Show search results toast
+        showToast(`Found ${filteredProperties.length} properties`, filteredProperties.length > 0 ? 'success' : 'info');
+    }
+
+    // Update property display based on filter
+    function updatePropertyDisplay(filteredProperties) {
+        // Hide all properties first
+        allProperties.forEach(property => {
+            property.style.display = 'none';
+        });
+
+        // Show filtered properties
+        filteredProperties.forEach(property => {
+            property.style.display = 'block';
+        });
+
+        // Update sections visibility
+        const boostedSection = document.querySelector('section:has(.badge-boosted)');
+        const featuredSection = document.querySelector('.bg-gray-50');
+
+        if (boostedSection) {
+            const boostedVisible = Array.from(boostedSection.querySelectorAll('.property-card'))
+                .some(card => card.style.display !== 'none');
+            boostedSection.style.display = boostedVisible ? 'block' : 'none';
+        }
+
+        if (featuredSection) {
+            const featuredVisible = Array.from(featuredSection.querySelectorAll('.property-card'))
+                .some(card => card.style.display !== 'none');
+            featuredSection.style.display = featuredVisible ? 'block' : 'none';
+        }
+    }
+
+    // Update search results information
+    function updateSearchResultsInfo(count, location, type) {
+        const resultsInfo = document.getElementById('search-results-info');
+        const resultsCount = document.getElementById('search-results-count');
+        const searchCriteria = document.getElementById('search-criteria');
+
+        if (location || type !== 'all') {
+            resultsInfo.classList.remove('hidden');
+            resultsCount.textContent = `Found ${count} properties`;
+
+            let criteria = [];
+            if (location) criteria.push(`in "${location}"`);
+            if (type !== 'all') criteria.push(`of type "${type}"`);
+
+            searchCriteria.textContent = criteria.join(' ');
+        } else {
+            resultsInfo.classList.add('hidden');
+        }
+    }
+
+    // Reset search
+    function resetSearch() {
+        document.getElementById('location').value = '';
+        document.getElementById('property-type').value = 'all';
+
+        // Show all properties
+        allProperties.forEach(property => {
+            property.style.display = 'block';
+        });
+
+        // Reset sections visibility
+        document.querySelectorAll('section').forEach(section => {
+            section.style.display = 'block';
+        });
+
+        // Hide search results info
+        document.getElementById('search-results-info').classList.add('hidden');
+
+        // Reset map
+        updateMapMarkers(map, allProperties);
+
+        // Show reset toast
+        showToast('Search cleared', 'info');
+    }
 
     // Simple toast notification function
     function showToast(message, type = 'info') {
