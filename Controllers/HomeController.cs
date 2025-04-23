@@ -137,7 +137,7 @@ namespace Propertease.Controllers
             var query = _context.properties
                 .Include(p => p.PropertyImages)
                 .Include(p => p.Seller)
-                .Where(p => p.Status == "Approved" && p.Status != "Sold");
+                .Where(p => p.Status == "Approved" && p.Status != "Sold" && p.IsDeleted==false);
 
             // Apply server-side filters if provided
             if (!string.IsNullOrEmpty(propertyType))
@@ -663,7 +663,7 @@ namespace Propertease.Controllers
                 .ToListAsync();
             // Count verified users for "Happy Clients" statistic
             var verifiedUsersCount = await _context.Users
-                .Where(u => u.IsEmailVerified == true)
+                .Where(u => u.IsEmailVerified == true && u.IsDeleted==false)
                 .CountAsync();
 
             // Pass the verified users count to the view
@@ -1252,6 +1252,40 @@ namespace Propertease.Controllers
             return RedirectToAction(nameof(Forum));
         }
 
+        // POST: /Forum/DeleteForumComment/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteForumComment(int id)
+        {
+            var comment = await _context.ForumComments
+                .Include(c => c.ForumPost)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (comment == null)
+            {
+                return NotFound("Comment not found.");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return NotFound("User ID not found.");
+            }
+
+            var currentUserId = int.Parse(userId);
+
+            // Allow deletion only if the current user is the comment owner or the post owner
+            if (comment.UserId != currentUserId && comment.ForumPost.UserId != currentUserId)
+            {
+                return Forbid("You are not authorized to delete this comment.");
+            }
+
+            _context.ForumComments.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Forum));
+        }
+
 
         [Authorize(Roles = "Buyer")]
         [HttpGet]
@@ -1352,7 +1386,7 @@ namespace Propertease.Controllers
                     .ThenInclude(p => p.Seller)
                 .Include(r => r.Properties)
                     .ThenInclude(p => p.PropertyImages)
-                .Where(r => r.BuyerId == buyerId && r.Status == "Completed")
+                .Where(r => r.BuyerId == buyerId && r.Status == "Completed" && r.Properties.IsDeleted == false)
                 .OrderByDescending(r => r.RequestedAt)
                 .ToListAsync();
 
@@ -1410,26 +1444,26 @@ namespace Propertease.Controllers
             return View(ratings);
         }
         // Add this method to the HomeController class to track property views
-        private async Task TrackPropertyView(int propertyId)
-        {
-            // Only track views for authenticated users
-            if (User.Identity.IsAuthenticated)
-            {
-                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        //private async Task TrackPropertyView(int propertyId)
+        //{
+        //    // Only track views for authenticated users
+        //    if (User.Identity.IsAuthenticated)
+        //    {
+        //        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-                // Create a new property view record
-                var propertyView = new PropertyView
-                {
-                    UserId = userId,
-                    PropertyId = propertyId,
-                    ViewedAt = DateTime.Now
-                };
+        //        // Create a new property view record
+        //        var propertyView = new PropertyView
+        //        {
+        //            UserId = userId,
+        //            PropertyId = propertyId,
+        //            ViewedAt = DateTime.Now
+        //        };
 
-                // Add to database
-                _context.PropertyViews.Add(propertyView);
-                await _context.SaveChangesAsync();
-            }
-        }
+        //        // Add to database
+        //        _context.PropertyViews.Add(propertyView);
+        //        await _context.SaveChangesAsync();
+        //    }
+        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]

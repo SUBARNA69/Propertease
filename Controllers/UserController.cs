@@ -650,27 +650,27 @@ namespace Propertease.Controllers
         }
 
         // Add this action to the UserController to display viewed properties
-        [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> ViewedProperties()
-        {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        //[HttpGet]
+        //[Authorize]
+        //public async Task<IActionResult> ViewedProperties()
+        //{
+        //    var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            // Get the user's property views, ordered by most recent
-            var propertyViews = await UserDbContext.PropertyViews
-                .Include(pv => pv.Property)
-                    .ThenInclude(p => p.PropertyImages)
-                .Where(pv => pv.UserId == userId)
-                .OrderByDescending(pv => pv.ViewedAt)
-                .ToListAsync();
+        //    // Get the user's property views, ordered by most recent
+        //    var propertyViews = await UserDbContext.PropertyViews
+        //        .Include(pv => pv.Property)
+        //            .ThenInclude(p => p.PropertyImages)
+        //        .Where(pv => pv.UserId == userId)
+        //        .OrderByDescending(pv => pv.ViewedAt)
+        //        .ToListAsync();
 
-            // Group by property to avoid duplicates, taking the most recent view date
-            var groupedViews = propertyViews
-                .GroupBy(pv => pv.PropertyId)
-                .Select(g => g.OrderByDescending(pv => pv.ViewedAt).First())
-                .ToList();
+        //    // Group by property to avoid duplicates, taking the most recent view date
+        //    var groupedViews = propertyViews
+        //        .GroupBy(pv => pv.PropertyId)
+        //        .Select(g => g.OrderByDescending(pv => pv.ViewedAt).First())
+        //        .ToList();
 
-            return View(groupedViews);
-        }
+        //    return View(groupedViews);
+        //}
     }
 }

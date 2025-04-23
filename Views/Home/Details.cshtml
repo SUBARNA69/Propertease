@@ -24,7 +24,7 @@
                 <div class="relative rounded-lg ">
                     <img id="mainImage" src="@Model.ImageUrl.First()" alt="@Model.Title" class="w-full h-64 object-cover cursor-pointer">
                     <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-4">
-                        <h1 class="text-2xl font-bold">$@Model.Price</h1>
+                        <h1 class="text-2xl font-bold">Rs. @Model.Price</h1>
                         <p class="text-sm">@Model.City, @Model.District, @Model.Province</p>
                     </div>
                 </div>
@@ -73,7 +73,7 @@
         {
             <img src="https://via.placeholder.com/800x400" alt="Property Main Image" class="w-full h-64 object-cover">
             <div class="absolute bottom-0 left-0 bg-black bg-opacity-50 text-white p-4">
-                <h1 class="text-2xl font-bold">$@Model.Price</h1>
+                <h1 class="text-2xl font-bold">Rs.@Model.Price</h1>
                 <p class="text-sm">@Model.City, @Model.District, @Model.Province</p>
             </div>
         }
@@ -94,7 +94,7 @@
     <div class="p-6 ">
         @if (Model.PredictedPrice.HasValue)
 {
-    <p class="ml-1 mb-2 font-medium text-2xl">Predicted Market Price: ₹@Model.PredictedPrice.Value.ToString("N0")</p>
+    <p class="ml-1 mb-2 font-medium text-2xl">Predicted Market Price: Rs. @Model.PredictedPrice.Value.ToString("N0")</p>
 }
 
         <div class="text-gray-600 space-y-2">
@@ -222,7 +222,7 @@
                     </a>
                     <div class="p-2">
                         <h5 class="mb-1 text-lg font-bold tracking-tight text-gray-900 truncate">@property.Title</h5>
-                        <p class="mb-1 font-normal text-gray-700">@property.Price.ToString("C")</p>
+                        <p class="mb-1 font-normal text-gray-700">@("Rs " + property.Price.ToString("N2"))</p>
                         <p class="mb-1 font-normal text-gray-700 text-sm">@property.District, @property.City</p>
                         <a href="@Url.Action("Details", "Home", new { id = property.Id })" 
                            class="inline-flex items-center w-full justify-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300">

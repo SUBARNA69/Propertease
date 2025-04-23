@@ -1,4 +1,5 @@
-﻿@model Propertease.Models.ForumViewModel
+﻿@using System.Security.Claims
+@model Propertease.Models.ForumViewModel
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Forum";
@@ -74,6 +75,9 @@
                             <div class="text-sm text-gray-600">Title: @post.Title</div>
                             <p class="text-gray-700 mt-2">@post.Content</p>
 
+                            <!-- Store the post user ID as a data attribute -->
+                            <div class="hidden" data-post-user-id="@post.UserId"></div>
+
                             <!-- Audio Playback (if audio exists) -->
                             @if (!string.IsNullOrEmpty(post.AudioFile))
                             {
@@ -100,10 +104,33 @@
                                 {
                                     foreach (var comment in post.Comments)
                                     {
-                                        <div class="bg-gray-50 p-3 rounded mb-2">
+                                        <div class="bg-gray-50 p-3 rounded mb-2 relative" data-comment-id="@comment.Id" data-comment-user-id="@comment.UserId">
                                             <div class="flex justify-between">
                                                 <span class="font-medium">@(comment.User?.FullName ?? "Unknown")</span>
-                                                <span class="text-sm text-gray-500">@comment.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                                <div class="flex items-center">
+                                                    <span class="text-sm text-gray-500 mr-2">@comment.CreatedAt.ToString("MMM dd, yyyy HH:mm")</span>
+                                                    <!-- Three dots menu button -->
+                                                    <div class="relative comment-menu">
+                                                        <button type="button" class="comment-menu-button p-1 rounded-full hover:bg-gray-200" onclick="toggleCommentMenu('@comment.Id')">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                                                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                            </svg>
+                                                        </button>
+                                                        <!-- Dropdown menu -->
+                                                        <div id="comment-menu-@comment.Id" class="absolute right-0 mt-1 w-36 bg-white rounded-md shadow-lg z-10 hidden">
+                                                            <form id="deleteForm-@comment.Id" asp-action="DeleteForumComment" method="post" onsubmit="return checkDeletePermission(event, '@comment.Id', '@post.Id')">
+                                                                @Html.AntiForgeryToken()
+                                                                <input type="hidden" name="id" value="@comment.Id" />
+                                                                <button type="submit" class="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-100 rounded-md">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                    </svg>
+                                                                    Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                             <p class="text-gray-700 mt-1">@comment.Content</p>
                                         </div>
@@ -139,7 +166,30 @@
     </div>
 </div>
 
+<!-- Modal for permission denied -->
+<div id="permissionDeniedModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-red-600">Permission Denied</h3>
+            <button onclick="closePermissionModal()" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        <p class="text-gray-700 mb-4">You cannot delete this comment. Only the comment owner or post owner can delete comments.</p>
+        <div class="flex justify-end">
+            <button onclick="closePermissionModal()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // Store current user ID - You'll need to pass this from your controller
+    const currentUserId = '@User.FindFirstValue(ClaimTypes.NameIdentifier)';
+
     function showToast(message, type = 'success', duration = 3000) {
         const toast = document.createElement('div');
         toast.className = `animate-fade-in max-w-sm p-4 rounded shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
@@ -189,12 +239,82 @@
         </style>
     `);
 
+    // Function to toggle comment menu visibility
+    function toggleCommentMenu(commentId) {
+        // Close all other menus first
+        document.querySelectorAll('.comment-menu div[id^="comment-menu-"]').forEach(menu => {
+            if (menu.id !== `comment-menu-${commentId}`) {
+                menu.classList.add('hidden');
+            }
+        });
+
+        // Toggle the selected menu
+        const menu = document.getElementById(`comment-menu-${commentId}`);
+        menu.classList.toggle('hidden');
+    }
+
+    // Function to check if user has permission to delete a comment
+    function checkDeletePermission(event, commentId, postId) {
+        if (!currentUserId) {
+            event.preventDefault();
+            showToast('You must be logged in to delete comments', 'error');
+            return false;
+        }
+
+        const commentElement = document.querySelector(`[data-comment-id="${commentId}"]`);
+        const commentUserId = commentElement.getAttribute('data-comment-user-id');
+
+        // Find the post container and get its user ID
+        const postContainer = commentElement.closest('.posts-container > div');
+        const postUserIdDiv = postContainer.querySelector('[data-post-user-id]');
+        const postUserId = postUserIdDiv.getAttribute('data-post-user-id');
+
+        // Check if current user is either comment owner or post owner
+        if (currentUserId !== commentUserId && currentUserId !== postUserId) {
+            event.preventDefault();
+            showPermissionDeniedModal();
+            return false;
+        }
+
+        // If permission check passes, confirm deletion
+        return confirm('Are you sure you want to delete this comment?');
+    }
+
+    // Functions to show/hide permission denied modal
+    function showPermissionDeniedModal() {
+        document.getElementById('permissionDeniedModal').classList.remove('hidden');
+    }
+
+    function closePermissionModal() {
+        document.getElementById('permissionDeniedModal').classList.add('hidden');
+    }
+
+    // Close comment menus when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.comment-menu')) {
+            document.querySelectorAll('.comment-menu div[id^="comment-menu-"]').forEach(menu => {
+                menu.classList.add('hidden');
+            });
+        }
+    });
+
     // Check for success message in TempData/ViewData
     document.addEventListener('DOMContentLoaded', function() {
         // Check if we're redirected after post creation (check URL parameters)
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('postCreated')) {
             showToast('Your post has been created successfully!', 'success');
+        }
+
+        // Check if comment was deleted
+        if (urlParams.has('commentDeleted')) {
+            showToast('Comment deleted successfully!', 'success');
+        }
+
+        // Check if there was an error deleting the comment
+        if (urlParams.has('deleteError')) {
+            const errorMessage = urlParams.get('errorMessage') || 'Error deleting comment';
+            showToast(errorMessage, 'error');
         }
 
         // Attach event listener to the post form submission

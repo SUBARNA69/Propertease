@@ -305,8 +305,10 @@ namespace Propertease.Controllers
             var sellerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var properties = await _context.properties
-                .Where(p => p.SellerId == sellerId && !p.IsDeleted) // 👈 only non-deleted
+                .Where(p => p.SellerId == sellerId && !p.IsDeleted)
                 .Include(p => p.PropertyImages)
+                .OrderByDescending(p => p.Status == "Approved") // ✅ Approved ones first
+                .ThenByDescending(p => p.CreatedAt) // Optional: then order by newest
                 .ToListAsync();
 
             if (properties == null || !properties.Any())
@@ -316,6 +318,7 @@ namespace Propertease.Controllers
 
             return View(properties);
         }
+
 
 
         [HttpGet]
@@ -590,18 +593,18 @@ namespace Propertease.Controllers
                 var firstName = fullName.Split(' ').FirstOrDefault();
 
                 var properties = await _context.properties
-                    .Where(p => p.SellerId == sellerId)
+                    .Where(p => p.SellerId == sellerId && p.IsDeleted == false)
                     .ToListAsync();
 
                 var totalListings = properties.Count;
-                var pendingApprovals = properties.Count(p => p.Status == "Pending");
-                var activeProperties = properties.Count(p => p.Status == "Approved");
-                var newInquiries = properties.Count(p => p.Status == "Rejected");
-                var soldProperties = properties.Count(p => p.Status == "Sold");
+                var pendingApprovals = properties.Count(p => p.Status == "Pending" && p.IsDeleted == false);
+                var activeProperties = properties.Count(p => p.Status == "Approved" && p.IsDeleted == false);
+                var newInquiries = properties.Count(p => p.Status == "Rejected" && p.IsDeleted == false);
+                var soldProperties = properties.Count(p => p.Status == "Sold" && p.IsDeleted == false);
 
                 // Get sold properties grouped by month for the chart
                 var soldPropertiesByMonth = properties
-                    .Where(p => p.Status == "Sold" && p.SoldDate != null)
+                    .Where(p => p.Status == "Sold" && p.SoldDate != null && p.IsDeleted == false)
                     .GroupBy(p => new { Month = p.SoldDate.Value.Month, Year = p.SoldDate.Value.Year })
                     .Select(g => new
                     {
@@ -613,7 +616,7 @@ namespace Propertease.Controllers
                     .ToList();
                 // In your Dashboard action method, you already have:
                 var propertyTypeDistribution = properties
-                    .Where(p => p.Status == "Approved")
+                    .Where(p => p.Status == "Approved" && p.IsDeleted == false)
                     .GroupBy(p => p.PropertyType)
                     .Select(g => new
                     {
@@ -990,8 +993,8 @@ namespace Propertease.Controllers
             // Get all properties belonging to this seller
             var properties = await _context.properties
                 .Include(p => p.PropertyImages)
-                .Where(p => p.SellerId == userId && p.Status!= "Sold")
-                .OrderByDescending(p => p.Id)
+                .Where(p => p.SellerId == userId && p.Status!= "Sold" && p.IsDeleted==false)
+                .OrderByDescending(p => p.SoldDate)
                 .ToListAsync();
 
             // Get boosted properties for this seller
@@ -1021,12 +1024,11 @@ namespace Propertease.Controllers
 
             // Get all viewing requests for these properties
             var viewingRequests = await _context.PropertyViewingRequests
-            .Include(r => r.Properties)
-            .Include(r => r.Buyer)
-            .Where(r => sellerProperties.Contains(r.PropertyId) && r.Status == "Pending")
-            .OrderByDescending(r => r.RequestedAt)
-            .ToListAsync();
-
+                .Include(r => r.Properties)
+                .Include(r => r.Buyer)
+                .Where(r => sellerProperties.Contains(r.PropertyId) && (r.Status == "Pending" || r.Status == "Approved"))
+                .OrderByDescending(r => r.RequestedAt)
+                .ToListAsync();
 
             return View(viewingRequests);
         }
@@ -1285,7 +1287,7 @@ namespace Propertease.Controllers
             // Get all properties belonging to this seller that are marked as sold
             var soldProperties = await _context.properties
                 .Include(p => p.PropertyImages)
-                .Where(p => p.SellerId == sellerId && p.Status == "Sold")
+                .Where(p => p.SellerId == sellerId && p.Status == "Sold" && p.IsDeleted==false)
                 .ToListAsync();
 
             // Get all completed viewing requests for these properties

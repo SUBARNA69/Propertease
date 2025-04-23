@@ -34,6 +34,7 @@ namespace Propertease.Models
         public string? PasswordResetToken { get; set; }
         public DateTime? PasswordResetTokenExpiry { get; set; }
         public DateTime? CreatedAt { get; set; } = DateTime.Now; // When the user registered
+        public bool? IsDeleted { get; set; } = false; // Soft delete flag
         public ICollection<Properties>? Properties { get; set; } // Properties owned by the seller
         public ICollection<ForumPost>? ForumPosts { get; set; }
         public ICollection<ForumComment>? ForumComments { get; set; }

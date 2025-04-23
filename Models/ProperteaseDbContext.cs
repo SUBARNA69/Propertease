@@ -23,11 +23,9 @@ namespace Propertease.Models
         public DbSet<Apartment> Apartments { get; set; }
         public DbSet<PropertyImage> PropertyImages { get; set; }
         public DbSet<ForumPost> ForumPosts { get; set; }
-        public DbSet<PropertyView> PropertyViews { get; set; }
         public DbSet<ForumComment> ForumComments { get; set; }
         //public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
         public DbSet<BuyerRating> BuyerRatings { get; set; }
-        public DbSet<PropertyComment> PropertyComments { get; set; }
         public DbSet<SellerRating> SellerRatings { get; set; }
         public DbSet<Favorite> Favorites { get; set; }
         //public DbSet<Payment> Payments { get; set; }

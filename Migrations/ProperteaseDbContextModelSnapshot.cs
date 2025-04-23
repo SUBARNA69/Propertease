@@ -17,7 +17,7 @@ namespace Propertease.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -461,7 +461,7 @@ namespace Propertease.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PropertyComments");
+                    b.ToTable("PropertyComment");
                 });
 
             modelBuilder.Entity("Propertease.Models.PropertyImage", b =>
@@ -508,7 +508,7 @@ namespace Propertease.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PropertyViews");
+                    b.ToTable("PropertyView");
                 });
 
             modelBuilder.Entity("Propertease.Models.PropertyViewingRequest", b =>
@@ -637,6 +637,9 @@ namespace Propertease.Migrations
 
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("bit");

@@ -16,27 +16,45 @@
 </head>
 <body class="bg-gray-100">
     <div class="flex justify-center p-4">
-        <form action="@Url.Action("AddProperty", "Seller")" method="post" enctype="multipart/form-data" class="space-y-6 p-8 bg-white rounded-lg shadow-md max-w-lg w-full">
-            <!-- Property Type -->
-            <div>
-                <label for="PropertyType" class="block mb-2 text-sm font-medium text-gray-900">Property Type</label>
-                <select id="PropertyType" name="PropertyType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                    <option value="House">House</option>
-                    <option value="Apartment">Apartment</option>
-                    <option value="Land">Land</option>
-                </select>
-            </div>
+        <form action="@Url.Action("AddProperty", "Seller")" method="post" enctype="multipart/form-data" class="space-y-6 p-8 bg-white rounded-lg shadow-md max-w-4xl w-full">
+            <!-- Top Section: Property Type, Title, Price -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Left Column -->
+                <div>
+                    <!-- Property Type -->
+                    <div class="mb-4">
+                        <label for="PropertyType" class="block mb-2 text-sm font-medium text-gray-900">Property Type</label>
+                        <select id="PropertyType" name="PropertyType" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            <option value="House">House</option>
+                            <option value="Apartment">Apartment</option>
+                            <option value="Land">Land</option>
+                        </select>
+                    </div>
 
-            <!-- Property Title -->
-            <div>
-                <label for="Title" class="block mb-2 text-sm font-medium text-gray-900">Property Title</label>
-                <input id="Title" name="Title" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter property title">
-            </div>
+                    <!-- Property Title -->
+                    <div class="mb-4">
+                        <label for="Title" class="block mb-2 text-sm font-medium text-gray-900">Property Title</label>
+                        <input id="Title" name="Title" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter property title">
+                    </div>
+                </div>
 
-            <!-- Price -->
-            <div>
-                <label for="Price" class="block mb-2 text-sm font-medium text-gray-900">Price</label>
-                <input id="Price" name="Price" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="$0.00">
+                <!-- Right Column -->
+                <div>
+                    <!-- Price -->
+                    <div class="mb-4">
+                        <label for="Price" class="block mb-2 text-sm font-medium text-gray-900">Price</label>
+                        <input id="Price" name="Price" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="$0.00">
+                    </div>
+
+                    <!-- Road Access Dropdown -->
+                    <div class="mb-4">
+                        <label for="RoadAccess" class="block mb-2 text-sm font-medium text-gray-900">Road Access</label>
+                        <select id="RoadAccess" name="RoadAccess" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- Description -->
@@ -46,7 +64,7 @@
             </div>
 
             <!-- Location Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Province Dropdown -->
                 <div>
                     <label for="Province" class="block mb-2 text-sm font-medium text-gray-900">Province</label>
@@ -75,15 +93,6 @@
                     <label for="City" class="block mb-2 text-sm font-medium text-gray-900">City</label>
                     <input id="City" name="City" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="City">
                 </div>
-
-                <!-- Road Access Dropdown -->
-                <div>
-                    <label for="RoadAccess" class="block mb-2 text-sm font-medium text-gray-900">Road Access</label>
-                    <select id="RoadAccess" name="RoadAccess" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                        <option value="Yes">Yes</option>
-                        <option value="No">No</option>
-                    </select>
-                </div>
             </div>
 
             <!-- Map Section: Location Selection -->
@@ -97,24 +106,28 @@
             <!-- Property Specific Fields -->
             <div id="property-specific-fields"></div>
 
-            <!-- 3D Model Upload -->
-            <div id="3d-model-upload" class="hidden">
-                <label for="ThreeDModel" class="block mb-2 text-sm font-medium text-gray-900">Upload 3D Model</label>
-                <input id="ThreeDModel" name="ThreeDModel" type="file" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" accept=".obj,.fbx,.glb">
-                <p class="mt-1 text-sm text-gray-500">Supported formats: .obj, .fbx, .glb</p>
+            <!-- Two-column layout for model and photo uploads -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 3D Model Upload -->
+                <div id="3d-model-upload" class="hidden">
+                    <label for="ThreeDModel" class="block mb-2 text-sm font-medium text-gray-900">Upload 3D Model</label>
+                    <input id="ThreeDModel" name="ThreeDModel" type="file" class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" accept=".obj,.fbx,.glb">
+                    <p class="mt-1 text-sm text-gray-500">Supported formats: .obj, .fbx, .glb</p>
+                </div>
+
+                <!-- Photo Upload -->
+                <div>
+                    <label class="block mb-2 text-sm font-medium text-gray-900" for="photo">Upload Photos</label>
+                    <input id="photo" name="photo" type="file" multiple class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" accept=".jpg,.jpeg,.png,.gif">
+                    <p class="mt-1 text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
+
+                    <!-- Validation Message -->
+                    <span class="text-sm text-red-600">@Html.ValidationMessage("photo")</span>
+                </div>
             </div>
 
-            <!-- Photo Upload -->
-            <div>
-                <label class="block mb-2 text-sm font-medium text-gray-900" for="photo">Upload Photos</label>
-                <input id="photo" name="photo" type="file" multiple class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none" accept=".jpg,.jpeg,.png,.gif">
-                <p class="mt-1 text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
-
-                <!-- Preview Uploaded Images -->
-                <div id="image-preview" class="mt-4 grid grid-cols-3 gap-2"></div>
-                <!-- Validation Message -->
-                <span class="text-sm text-red-600">@Html.ValidationMessage("photo")</span>
-            </div>
+            <!-- Preview Uploaded Images -->
+            <div id="image-preview" class="mt-4 grid grid-cols-4 gap-2"></div>
 
             <!-- Submit Button -->
             <div class="flex justify-between">
@@ -215,34 +228,34 @@
 
                 if (propertyType === 'House') {
                     propertyFields.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
-                                <label for="Bedrooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Bedrooms</label>
-                                <input id="Bedrooms" name="Bedrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of bedrooms">
+                                <label for="Bedrooms" class="block mb-2 text-sm font-medium text-gray-900">Bedrooms</label>
+                                <input id="Bedrooms" name="Bedrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Bedrooms">
                             </div>
                             <div>
-                                <label for="Kitchens" class="block mb-2 text-sm font-medium text-gray-900">Number of Kitchens</label>
-                                <input id="Kitchens" name="Kitchens" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of kitchens">
+                                <label for="Kitchens" class="block mb-2 text-sm font-medium text-gray-900">Kitchens</label>
+                                <input id="Kitchens" name="Kitchens" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Kitchens">
                             </div>
                             <div>
-                                <label for="SittingRooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Sitting Rooms</label>
-                                <input id="SittingRooms" name="SittingRooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of sitting rooms">
+                                <label for="SittingRooms" class="block mb-2 text-sm font-medium text-gray-900">Sitting Rooms</label>
+                                <input id="SittingRooms" name="SittingRooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Sitting Rooms">
                             </div>
                             <div>
-                                <label for="Bathrooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Bathrooms</label>
-                                <input id="Bathrooms" name="Bathrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of bathrooms">
+                                <label for="Bathrooms" class="block mb-2 text-sm font-medium text-gray-900">Bathrooms</label>
+                                <input id="Bathrooms" name="Bathrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Bathrooms">
                             </div>
                             <div>
-                                <label for="Floors" class="block mb-2 text-sm font-medium text-gray-900">Number of Floors</label>
-                                <input id="Floors" name="Floors" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of floors">
+                                <label for="Floors" class="block mb-2 text-sm font-medium text-gray-900">Floors</label>
+                                <input id="Floors" name="Floors" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Floors">
                             </div>
                             <div>
                                 <label for="LandArea" class="block mb-2 text-sm font-medium text-gray-900">Land Area</label>
-                                <input id="LandArea" name="LandArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter land area">
+                                <input id="LandArea" name="LandArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Land Area">
                             </div>
                             <div>
                                 <label for="BuildupArea" class="block mb-2 text-sm font-medium text-gray-900">House Area</label>
-                                <input id="BuildupArea" name="BuildupArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter buildup area">
+                                <input id="BuildupArea" name="BuildupArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="House Area">
                             </div>
                             <div>
                                 <label for="BuiltYear" class="block mb-2 text-sm font-medium text-gray-900">Built Year</label>
@@ -261,26 +274,26 @@
                     `;
                 } else if (propertyType === 'Apartment') {
                     propertyFields.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label for="Rooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Rooms</label>
-                                <input id="Rooms" name="Rooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of rooms">
+                                <label for="Rooms" class="block mb-2 text-sm font-medium text-gray-900">Rooms</label>
+                                <input id="Rooms" name="Rooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Rooms">
                             </div>
                             <div>
-                                <label for="Kitchens" class="block mb-2 text-sm font-medium text-gray-900">Number of Kitchens</label>
-                                <input id="Kitchens" name="Kitchens" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of kitchens">
+                                <label for="Kitchens" class="block mb-2 text-sm font-medium text-gray-900">Kitchens</label>
+                                <input id="Kitchens" name="Kitchens" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Kitchens">
                             </div>
                             <div>
-                                <label for="SittingRooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Sitting Rooms</label>
-                                <input id="SittingRooms" name="SittingRooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of sitting rooms">
+                                <label for="SittingRooms" class="block mb-2 text-sm font-medium text-gray-900">Sitting Rooms</label>
+                                <input id="SittingRooms" name="SittingRooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Sitting Rooms">
                             </div>
                             <div>
-                                <label for="Bathrooms" class="block mb-2 text-sm font-medium text-gray-900">Number of Bathrooms</label>
-                                <input id="Bathrooms" name="Bathrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter number of bathrooms">
+                                <label for="Bathrooms" class="block mb-2 text-sm font-medium text-gray-900">Bathrooms</label>
+                                <input id="Bathrooms" name="Bathrooms" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Bathrooms">
                             </div>
                             <div>
                                 <label for="RoomSize" class="block mb-2 text-sm font-medium text-gray-900">Room Size</label>
-                                <input id="RoomSize" name="RoomSize" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter room size">
+                                <input id="RoomSize" name="RoomSize" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Room Size">
                             </div>
                             <div>
                                 <label for="BuiltYear" class="block mb-2 text-sm font-medium text-gray-900">Built Year</label>
@@ -290,10 +303,10 @@
                     `;
                 } else if (propertyType === 'Land') {
                     propertyFields.innerHTML = `
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label for="LandArea" class="block mb-2 text-sm font-medium text-gray-900">Land Area</label>
-                                <input id="LandArea" name="LandArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Enter land area">
+                                <input id="LandArea" name="LandArea" type="number" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Land Area">
                             </div>
                             <div>
                                 <label for="LandType" class="block mb-2 text-sm font-medium text-gray-900">Land Type</label>

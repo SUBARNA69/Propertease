@@ -335,7 +335,7 @@ namespace Propertease.Controllers
         public IActionResult ApprovedProperties()
         {
             var approvedProperties = _context.properties
-                                             .Where(p => p.Status == "Approved")
+                                             .Where(p => p.Status == "Approved" && p.IsDeleted == false)
                                              .ToList();
 
             return View(approvedProperties);
@@ -345,6 +345,7 @@ namespace Propertease.Controllers
         {
             var properties = _context.properties
                 .Include(p => p.PropertyImages)
+                .Where(p => p.IsDeleted == false && p.IsDeleted == false)
                 .ToList();
 
             return View(properties);
@@ -357,7 +358,8 @@ namespace Propertease.Controllers
             var property = await _context.properties.FindAsync(id);
             if (property != null)
             {
-                _context.properties.Remove(property);
+                property.IsDeleted = true;
+                _context.properties.Update(property);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("AllProperties");
@@ -367,7 +369,7 @@ namespace Propertease.Controllers
         public IActionResult UsersManagement()
         {
             var users = _context.Users
-                .Where(u => u.Role != "Admin") // Exclude admin users
+                .Where(u => u.Role != "Admin" && u.IsDeleted==false) // Exclude admin users
                 .ToList();
             return View(users);
         }
@@ -552,7 +554,8 @@ namespace Propertease.Controllers
             var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
-                _context.Users.Remove(user);
+                user.IsDeleted = true;
+                _context.Users.Update(user);
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction("UsersManagement");

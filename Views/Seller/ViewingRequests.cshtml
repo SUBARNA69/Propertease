@@ -5,41 +5,40 @@
 }
 
 <div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Property Viewing Requests</h1>
+    <div class="bg-white rounded-lg shadow-lg p-6 mb-8 max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Property Viewing Requests</h1>
 
         @if (TempData["SuccessMessage"] != null)
         {
-            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                <p>@TempData["SuccessMessage"]</p>
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-700 p-4 mb-4 max-w-2xl mx-auto" role="alert">
+                <p class="text-center">@TempData["SuccessMessage"]</p>
             </div>
         }
 
         @if (TempData["ErrorMessage"] != null)
         {
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                <p>@TempData["ErrorMessage"]</p>
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-4 max-w-2xl mx-auto" role="alert">
+                <p class="text-center">@TempData["ErrorMessage"]</p>
             </div>
         }
 
         @if (!Model.Any())
         {
-            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-4" role="alert">
-                <p>You don't have any viewing requests yet.</p>
+            <div class="bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 mb-4 max-w-2xl mx-auto" role="alert">
+                <p class="text-center">You don't have any viewing requests yet.</p>
             </div>
         }
         else
         {
             <div class="overflow-x-auto">
-                <table class="min-w-full bg-white">
+                <table class="w-full bg-white rounded-lg overflow-hidden">
                     <thead class="bg-gray-100">
                         <tr>
-                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer</th>
-                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                            <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Buyer</th>
+                            <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                            <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -47,15 +46,15 @@
                         {
                             <tr class="hover:bg-gray-50">
                                 <td class="py-4 px-4">
-                                    <div class="flex items-center">
+                                    <div class="flex items-center justify-center">
                                         @if (request.Properties?.PropertyImages?.FirstOrDefault() != null)
                                         {
-                                            <img src="/Images/@request.Properties.PropertyImages.First().Photo" alt="Property" class="h-10 w-10 rounded-md object-cover mr-3">
+                                            <img src="/Images/@request.Properties.PropertyImages.First().Photo" alt="Property" class="h-16 w-16 rounded-md object-cover mr-3">
                                         }
                                         else
                                         {
-                                            <div class="h-10 w-10 rounded-md bg-gray-200 mr-3 flex items-center justify-center">
-                                                <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <div class="h-16 w-16 rounded-md bg-gray-200 mr-3 flex items-center justify-center">
+                                                <svg class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                                 </svg>
                                             </div>
@@ -66,90 +65,92 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-4 px-4">
+                                <td class="py-4 px-4 text-center">
                                     <div class="text-sm font-medium text-gray-900">@request.BuyerName</div>
                                     <div class="text-sm text-gray-500">@request.BuyerEmail</div>
+                                    <div class="text-sm text-gray-500">@request.BuyerContact</div>
                                 </td>
-                                <td class="py-4 px-4">
-                                    <div class="text-sm text-gray-900">@request.BuyerContact</div>
-                                </td>
-                                <td class="py-4 px-4">
+                                <td class="py-4 px-4 text-center">
                                     <div class="text-sm text-gray-900">@request.ViewingDate.ToString("MMM dd, yyyy")</div>
                                     <div class="text-sm text-gray-500">@request.ViewingTime</div>
                                 </td>
-                                <td class="py-4 px-4">
+                                <td class="py-4 px-4 text-center">
                                     @switch (request.Status)
                                     {
                                         case "Pending":
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                                 Pending
                                             </span>
                                             break;
                                         case "Approved":
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                                 Approved
                                             </span>
                                             break;
                                         case "Rejected":
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
                                                 Rejected
                                             </span>
                                             break;
                                         case "Completed":
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
                                                 Sold
                                             </span>
                                             break;
                                         case "Viewed":
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                                 Viewed
                                             </span>
                                             break;
                                         default:
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
                                                 @request.Status
                                             </span>
                                             break;
                                     }
                                 </td>
                                 <td class="py-4 px-4">
-                                    <div class="flex space-x-2">
+                                    <div class="flex flex-row space-x-2 items-center justify-center">
                                         @if (request.Status == "Pending")
                                         {
-                                            <form asp-action="ApproveRequest" method="post" class="inline">
-                                                <input type="hidden" name="id" value="@request.Id" />
-                                                <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-1 px-2 rounded">
-                                                    Approve
-                                                </button>
-                                            </form>
-                                            <form asp-action="RejectRequest" method="post" class="inline">
-                                                <input type="hidden" name="id" value="@request.Id" />
-                                                <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-1 px-2 rounded">
-                                                    Reject
-                                                </button>
-                                            </form>
+                                            <div class="flex space-x-2">
+                                                <form asp-action="ApproveRequest" method="post" class="inline">
+                                                    <input type="hidden" name="id" value="@request.Id" />
+                                                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold py-2 px-3 rounded transition duration-300">
+                                                        Approve
+                                                    </button>
+                                                </form>
+                                                <form asp-action="RejectRequest" method="post" class="inline">
+                                                    <input type="hidden" name="id" value="@request.Id" />
+                                                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold py-2 px-3 rounded transition duration-300">
+                                                        Reject
+                                                    </button>
+                                                </form>
+                                            </div>
                                         }
                                         @if (request.Status == "Approved")
                                         {
-                                            <form asp-action="MarkAsSold" method="post" class="inline">
-                                                <input type="hidden" name="id" value="@request.Id" />
-                                                <button type="submit" class="bg-purple-500 hover:bg-purple-600 text-white text-xs font-bold py-1 px-2 rounded">
-                                                    Mark Sold
-                                                </button>
-                                            </form>
-                                            <form asp-action="MarkAsNotSold" method="post" class="inline">
-                                                <input type="hidden" name="id" value="@request.Id" />
-                                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-2 rounded">
-                                                    Not Sold
-                                                </button>
-                                            </form>
+                                            <div class="flex space-x-2">
+                                                <form asp-action="MarkAsSold" method="post" class="inline">
+                                                    <input type="hidden" name="id" value="@request.Id" />
+                                                    <button type="submit" class="bg-purple-500 hover:bg-purple-600 text-white text-xs font-bold py-2 px-3 rounded transition duration-300">
+                                                        Mark Sold
+                                                    </button>
+                                                </form>
+                                                <form asp-action="MarkAsNotSold" method="post" class="inline">
+                                                    <input type="hidden" name="id" value="@request.Id" />
+                                                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded transition duration-300">
+                                                        Not Sold
+                                                    </button>
+                                                </form>
+                                            </div>
                                         }
-                                        <a href="@Url.Action("ViewPropertyDetails", new { id = request.PropertyId })" class="bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold py-1 px-2 rounded inline-flex items-center">
-                                            <span>View</span>
-                                        </a>
-                                        <button type="button" onclick="showRequestDetails(@request.Id)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1 px-2 rounded">
-                                            Details
-                                        </button>
+                                            <a href="@Url.Action("ViewPropertyDetails", new { id = request.PropertyId })" class="bg-gray-500 hover:bg-gray-600 text-white text-xs font-bold py-2 px-3 rounded inline-flex items-center transition duration-300">
+                                                <span>View</span>
+                                            </a>
+                                            <button type="button" onclick="showRequestDetails(@request.Id)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-2 px-3 rounded transition duration-300">
+                                                Details
+                                            </button>
                                     </div>
                                 </td>
                             </tr>
@@ -160,22 +161,22 @@
         }
     </div>
 
-    <!-- Request Details Modal (Hidden by default) -->
+    <!-- Improved Request Details Modal -->
     <div id="requestDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold text-gray-900" id="modalTitle">Request Details</h3>
-                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-lg w-full mx-4 transform transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-900" id="modalTitle">Request Details</h3>
+                <button type="button" onclick="closeModal()" class="text-gray-400 hover:text-gray-500 transition duration-300">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
-            <div id="modalContent">
+            <div id="modalContent" class="text-gray-700">
                 <!-- Content will be populated by JavaScript -->
             </div>
-            <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" onclick="closeModal()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+            <div class="mt-8 flex justify-end">
+                <button type="button" onclick="closeModal()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
                     Close
                 </button>
             </div>
@@ -184,9 +185,8 @@
 </div>
 
 
-    <script>
-        // Function to show request details in modal
-      // Function to show request details in modal
+<script>
+    // Function to show request details in modal
     function showRequestDetails(requestId) {
         // Fetch request details via AJAX
         fetch(`/Seller/GetRequestDetails/${requestId}`)
@@ -194,48 +194,90 @@
             .then(data => {
                 document.getElementById('modalTitle').textContent = `Request for ${data.propertyTitle}`;
 
-                // Populate modal content
+                // Populate modal content with improved styling
                 let content = `
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500">Buyer Information</h4>
-                            <p class="mt-1">${data.buyerName}</p>
-                            <p>${data.buyerEmail}</p>
-                            <p>${data.buyerContact}</p>
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-blue-800 uppercase tracking-wider mb-2">Buyer Information</h4>
+                            <div class="flex flex-col space-y-1">
+                                <p class="text-lg font-medium">${data.buyerName}</p>
+                                <p class="flex items-center">
+                                    <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                    </svg>
+                                    ${data.buyerEmail}
+                                </p>
+                                <p class="flex items-center">
+                                    <svg class="h-4 w-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    ${data.buyerContact}
+                                </p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500">Viewing Details</h4>
-                            <p class="mt-1">Date: ${new Date(data.viewingDate).toLocaleDateString()}</p>
-                            <p>Time: ${data.viewingTime}</p>
+
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-green-800 uppercase tracking-wider mb-2">Viewing Schedule</h4>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <span class="font-medium">${new Date(data.viewingDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="h-5 w-5 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span class="font-medium">${data.viewingTime}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-500">Additional Notes</h4>
-                            <p class="mt-1">${data.notes || 'No additional notes provided.'}</p>
+
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="text-sm font-medium text-gray-700 uppercase tracking-wider mb-2">Additional Notes</h4>
+                            <p class="italic">${data.notes || 'No additional notes provided.'}</p>
                         </div>
                     </div>
                 `;
 
                 document.getElementById('modalContent').innerHTML = content;
-                document.getElementById('requestDetailsModal').classList.remove('hidden');
+
+                // Show modal with animation
+                const modal = document.getElementById('requestDetailsModal');
+                modal.classList.remove('hidden');
+
+                // Add entrance animation classes
+                const modalContent = modal.querySelector('.bg-white');
+                modalContent.classList.add('scale-100');
+                modalContent.classList.remove('scale-95');
             })
             .catch(error => {
                 console.error('Error fetching request details:', error);
             });
     }
 
-        // Function to close modal
-        function closeModal() {
-            document.getElementById('requestDetailsModal').classList.add('hidden');
-                    }
-                @if (TempData["ShowRatingPrompt"] != null && (bool)TempData["ShowRatingPrompt"])
-                {
-                        <input type="hidden" id="currentPropertyId" value="@TempData["PropertyId"]" />
-                        <partial name="_RatingPromptPartial" />
-                        <script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                const propertyId = document.getElementById('currentPropertyId').value;
-                                showRatingPrompt(propertyId);
-                            });
-                        </script>
-                }
+    // Function to close modal
+    function closeModal() {
+        // Add exit animation
+        const modal = document.getElementById('requestDetailsModal');
+        const modalContent = modal.querySelector('.bg-white');
+
+        // Hide after animation completes
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 200);
+    }
+
+    @if (TempData["ShowRatingPrompt"] != null && (bool)TempData["ShowRatingPrompt"])
+    {
+            <input type="hidden" id="currentPropertyId" value="@TempData["PropertyId"]" />
+            <partial name="_RatingPromptPartial" />
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const propertyId = document.getElementById('currentPropertyId').value;
+                    showRatingPrompt(propertyId);
+                });
     </script>
+    }
+</script>
