@@ -1113,7 +1113,9 @@ namespace Propertease.Controllers
 
                 // Redirect to success page or back to details
                 TempData["SuccessMessage"] = "Viewing request submitted successfully!";
-                return RedirectToAction("Details", new { id = request.PropertyId });
+                //return RedirectToAction("Details", new { id = request.PropertyId });
+                return RedirectToAction("MyViewingRequests");
+
             }
             catch (Exception ex)
             {
@@ -1128,8 +1130,91 @@ namespace Propertease.Controllers
                 return RedirectToAction("Details", new { id = request.PropertyId });
             }
 }
+        [HttpGet]
+        public async Task<IActionResult> MyViewingRequests()
+        {
+            // Get the current user ID
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int buyerId))
+            {
+                TempData["ErrorMessage"] = "You must be logged in to view your requests.";
+                return RedirectToAction("Login", "Account");
+            }
 
-            [HttpGet]
+            // Retrieve all viewing requests for this user
+            var viewingRequests = await _context.PropertyViewingRequests
+                .Include(r => r.Properties)
+                .Where(r => r.BuyerId == buyerId && r.Status=="Pending" && r.Properties.IsDeleted==false)
+                .OrderByDescending(r => r.RequestedAt)
+                .ToListAsync();
+
+            return View(viewingRequests);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelViewingRequest(int id)
+        {
+            // Get the current user ID
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId) || !int.TryParse(userId, out int buyerId))
+            {
+                TempData["ErrorMessage"] = "You must be logged in to cancel a request.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Find the viewing request
+            var viewingRequest = await _context.PropertyViewingRequests
+                .FirstOrDefaultAsync(r => r.Id == id && r.BuyerId == buyerId);
+
+            if (viewingRequest == null)
+            {
+                TempData["ErrorMessage"] = "Viewing request not found or you are not authorized to cancel it.";
+                return RedirectToAction(nameof(MyViewingRequests));
+            }
+
+            // Check if the request is in a status that can be canceled (Pending)
+            if (viewingRequest.Status != "Pending")
+            {
+                TempData["ErrorMessage"] = "Only pending requests can be canceled.";
+                return RedirectToAction(nameof(MyViewingRequests));
+            }
+
+            try
+            {
+                // Update the status to "Canceled"
+                viewingRequest.Status = "Canceled";
+                _context.Update(viewingRequest);
+                await _context.SaveChangesAsync();
+
+                // Get property details for notification
+                var property = await _context.properties
+                    .FirstOrDefaultAsync(p => p.Id == viewingRequest.PropertyId);
+
+                if (property != null)
+                {
+                    // Send notification to seller
+                    await _notificationService.CreateNotificationAsync(
+                        "Viewing Request Canceled",
+                        $"A viewing request for your property '{property.Title}' has been canceled.",
+                        "ViewingCancellation",
+                        property.SellerId,
+                        property.Id
+                    );
+                }
+
+                TempData["SuccessMessage"] = "Viewing request canceled successfully!";
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                _logger.LogError(ex, "Error canceling property viewing request");
+                TempData["ErrorMessage"] = "An error occurred while canceling the request: " + ex.Message;
+            }
+
+            return RedirectToAction(nameof(MyViewingRequests));
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Forum()
         {
             // Fetch all forum posts with their related user and comments
