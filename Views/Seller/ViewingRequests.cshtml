@@ -47,9 +47,9 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="py-4 px-4">
                                     <div class="flex items-center justify-center">
-                                        @if (request.Properties?.PropertyImages?.FirstOrDefault() != null)
+                                        @if (request.Properties.PropertyImages.FirstOrDefault() != null)
                                         {
-                                            <img src="/Images/@request.Properties.PropertyImages.First().Photo" alt="Property" class="h-16 w-16 rounded-md object-cover mr-3">
+                                            <img src="~/Images/@request.Properties.PropertyImages.First().Photo" alt="Property" class="h-16 w-16 rounded-md object-cover mr-3">
                                         }
                                         else
                                         {

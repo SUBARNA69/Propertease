@@ -45,7 +45,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500">Approved</p>
-                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Approved") ?? 0)</h2>
+                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Approved" && p.IsDeleted == false) ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -59,7 +59,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500">Pending</p>
-                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Pending") ?? 0)</h2>
+                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Pending" && p.IsDeleted==false) ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -73,7 +73,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500">Rejected</p>
-                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Rejected") ?? 0)</h2>
+                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Rejected" && p.IsDeleted == false) ?? 0)</h2>
                 </div>
             </div>
         </div>
@@ -87,7 +87,7 @@
                 </div>
                 <div>
                     <p class="text-xs font-medium text-gray-500">Sold</p>
-                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Sold") ?? 0)</h2>
+                    <h2 class="text-base font-semibold text-gray-900">@(Model?.Count(p => p.Status == "Sold" && p.IsDeleted == false) ?? 0)</h2>
                 </div>
             </div>
         </div>

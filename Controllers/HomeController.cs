@@ -1085,7 +1085,7 @@ namespace Propertease.Controllers
             }
 
             // Set RequestedAt to current time
-            request.RequestedAt = DateTime.UtcNow;
+            request.RequestedAt = DateTime.UtcNow.AddMinutes(345);
             // Set initial status to Pending
             request.Status = "Pending";
 

@@ -32,7 +32,7 @@ namespace Propertease.Models
         public DateTime ViewingDate { get; set; }
 
         [Required]
-        public string ViewingTime { get; set; }
+        public string ViewingTime { get; set; } 
 
         public string Notes { get; set; }
 

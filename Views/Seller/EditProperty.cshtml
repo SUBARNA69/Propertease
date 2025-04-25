@@ -10,7 +10,27 @@
             height: 300px;
             border-radius: 0.5rem;
         }
-    </style>
+
+   
+    /* Add this to your existing styles */
+    .deleted-image {
+        position: relative;
+    }
+
+    .deleted-image::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(220, 38, 38, 0.2);
+        border: 2px dashed rgba(220, 38, 38, 0.5);
+        border-radius: 0.5rem;
+        pointer-events: none;
+    }
+</style>
+  
 
 
 <div class="container mx-auto p-6 max-w-6xl">
@@ -39,7 +59,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-gray-700 font-medium mb-2" for="Price">Price (₹)</label>
+                        <label class="block text-gray-700 font-medium mb-2" for="Price">Price</label>
                         <input asp-for="Price" type="number" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                         <span asp-validation-for="Price" class="text-red-500 text-sm"></span>
                     </div>
@@ -276,7 +296,7 @@
                         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
                             @foreach (var image in ViewBag.ExistingImages)
                             {
-                                <div class="relative group">
+                                <div class="relative group image-container">
                                     <img src="~/Images/@image" alt="Property image" class="w-full h-32 object-cover rounded-lg">
                                     <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
                                         <div class="flex space-x-2">
@@ -291,7 +311,8 @@
                                 </div>
                             }
                         </div>
-                        <p class="text-sm text-gray-500 mt-2">Hover over an image and click the trash icon to mark it for deletion.</p>
+                        <p class="text-sm text-gray-500 mt-2">Hover over an image and click the trash icon to mark it for deletion. Deleted images will be removed when you save changes.</p>
+                        <div id="deleted-images-summary" class="mt-2 text-sm text-red-500"></div>
                     </div>
                 }
 
@@ -419,6 +440,52 @@
                     }
                 });
             }
+            const deleteImageCheckboxes = document.querySelectorAll('input[name="ImagesToDelete"]');
+    const imageContainers = document.querySelectorAll('.image-container');
+
+    deleteImageCheckboxes.forEach(checkbox => {
+        const deleteLabel = document.querySelector(`label[for="${checkbox.id}"]`);
+
+        if (deleteLabel) {
+            deleteLabel.addEventListener('click', function(e) {
+                // Prevent the default checkbox behavior
+                e.preventDefault();
+
+                // Find the parent container of this image
+                const imageContainer = checkbox.closest('.relative.group');
+
+                if (imageContainer) {
+                    // Mark checkbox as checked (for form submission)
+                    checkbox.checked = true;
+
+                    // Visually remove the image from the UI
+                    imageContainer.style.opacity = '0.3';
+                    imageContainer.classList.add('deleted-image');
+
+                    // Add a "restore" button
+                    const restoreButton = document.createElement('button');
+                    restoreButton.type = 'button';
+                    restoreButton.className = 'absolute top-2 right-2 bg-green-500 text-white p-1 rounded-full hover:bg-green-600';
+                    restoreButton.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>';
+                    restoreButton.title = 'Restore image';
+
+                    restoreButton.addEventListener('click', function() {
+                        // Uncheck the checkbox
+                        checkbox.checked = false;
+
+                        // Restore the image
+                        imageContainer.style.opacity = '1';
+                        imageContainer.classList.remove('deleted-image');
+
+                        // Remove the restore button
+                        this.remove();
+                    });
+
+                    imageContainer.appendChild(restoreButton);
+                }
+            });
+        }
+    });
         });
     </script>
 

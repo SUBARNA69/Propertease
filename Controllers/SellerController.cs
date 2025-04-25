@@ -98,6 +98,7 @@ namespace Propertease.Controllers
                 Longitude = addUserRequest.Longitude, // Add Longitude
                 Status = "Pending",
                 CreatedAt = DateTime.Now,
+                SoldDate = null,
                 ThreeDModel = threeDModelFileName, // Store the filename for reference
 
                 SellerId = int.Parse(sellerId), // Automatically assign SellerId
@@ -307,8 +308,8 @@ namespace Propertease.Controllers
             var properties = await _context.properties
                 .Where(p => p.SellerId == sellerId && !p.IsDeleted)
                 .Include(p => p.PropertyImages)
-                .OrderByDescending(p => p.Status == "Approved") // ✅ Approved ones first
-                .ThenByDescending(p => p.CreatedAt) // Optional: then order by newest
+                .OrderByDescending(p => p.Status == "Approved" || p.Status=="Pending") // ✅ Approved ones first
+                .ThenByDescending(p => p.SoldDate) // Optional: then order by newest
                 .ToListAsync();
 
             if (properties == null || !properties.Any())
@@ -1025,6 +1026,7 @@ namespace Propertease.Controllers
             // Get all viewing requests for these properties
             var viewingRequests = await _context.PropertyViewingRequests
                 .Include(r => r.Properties)
+                      .ThenInclude(p => p.PropertyImages)
                 .Include(r => r.Buyer)
                 .Where(r => sellerProperties.Contains(r.PropertyId) && (r.Status == "Pending" || r.Status == "Approved"))
                 .OrderByDescending(r => r.RequestedAt)
