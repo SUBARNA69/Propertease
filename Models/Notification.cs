@@ -26,7 +26,7 @@ namespace Propertease.Models
         [Required]
         public int RecipientId { get; set; } // User ID of the recipient
 
-        public int? RelatedPropertyId { get; set; } // Optional: Property ID if notification is related to a property
+        public int? RelatedPropertyId { get; set; } 
 
         // Navigation properties
         [ForeignKey("RecipientId")]

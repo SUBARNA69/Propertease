@@ -1528,27 +1528,6 @@ namespace Propertease.Controllers
 
             return View(ratings);
         }
-        // Add this method to the HomeController class to track property views
-        //private async Task TrackPropertyView(int propertyId)
-        //{
-        //    // Only track views for authenticated users
-        //    if (User.Identity.IsAuthenticated)
-        //    {
-        //        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-        //        // Create a new property view record
-        //        var propertyView = new PropertyView
-        //        {
-        //            UserId = userId,
-        //            PropertyId = propertyId,
-        //            ViewedAt = DateTime.Now
-        //        };
-
-        //        // Add to database
-        //        _context.PropertyViews.Add(propertyView);
-        //        await _context.SaveChangesAsync();
-        //    }
-        //}
 
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -1439,8 +1439,6 @@ namespace Propertease.Controllers
             TempData["SuccessMessage"] = "Thank you for your rating and review!";
             return RedirectToAction("SoldProperties");
         }
-
-       
     }
     
 }

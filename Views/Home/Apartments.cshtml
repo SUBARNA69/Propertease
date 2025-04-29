@@ -13,114 +13,19 @@
 <!-- Add custom CSS -->
 <link rel="stylesheet" href="~/css/apartments.css">
 
+
 <!-- Hero Section -->
-<section class="relative hero-gradient py-16 overflow-hidden">
-    <div class="absolute inset-0 overflow-hidden">
-        <div class="absolute right-0 top-0 -mr-40 -mt-40 w-96 h-96 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 opacity-70"></div>
-        <div class="absolute left-0 bottom-0 -ml-40 -mb-40 w-96 h-96 rounded-full bg-gradient-to-r from-indigo-100 to-purple-100 opacity-70"></div>
-    </div>
+<section  class="relative hero-gradient pt-16 pb-16 mt-14 overflow-hidden">
+    
     <div class="max-w-screen-xl mx-auto px-4 relative z-10">
         <div class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 leading-tight">Apartments & <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-700">Flats</span></h1>
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-4 text-gray-900 leading-tight">Apartments & Flats</h1>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto">Discover modern living spaces with premium amenities in prime urban locations</p>
         </div>
     </div>
 </section>
 
-<!-- Filter Section -->
-<section class="py-8 bg-white">
-    <div class="max-w-screen-xl mx-auto px-4">
-        <div class="filter-card">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-                <h2 class="filter-title">Filter Apartments</h2>
-                <div class="flex items-center">
-                    <span class="text-gray-500 mr-2">@Model.Count() Properties Found</span>
-                    <button id="resetFilters" class="btn-reset">
-                        <i class="fa-solid fa-rotate-left"></i> Reset
-                    </button>
-                </div>
-            </div>
 
-            <form id="filterForm" class="filter-form">
-                <!-- Price Range Filter -->
-                <div class="md:col-span-3">
-                    <label for="price-range" class="filter-label">Price Range (Rs.)</label>
-                    <div id="price-range" class="mb-4"></div>
-                    <div class="price-range-labels">
-                        <span id="price-min">Rs. 0</span>
-                        <span id="price-max">Rs. 15,000,000</span>
-                    </div>
-                    <input type="hidden" id="min-price" name="minPrice" value="0">
-                    <input type="hidden" id="max-price" name="maxPrice" value="15000000">
-                </div>
-
-                <!-- Location Filter -->
-                <div class="md:col-span-2">
-                    <label for="location" class="filter-label">Location</label>
-                    <select id="location" name="location" class="filter-select">
-                        <option value="">All Locations</option>
-                        @{
-                            var locations = Model.Select(p => p.City).Distinct().OrderBy(c => c);
-                            foreach (var location in locations)
-                            {
-                                <option value="@location">@location</option>
-                            }
-                        }
-                    </select>
-                </div>
-
-                <!-- Bedrooms Filter -->
-                <div class="md:col-span-2">
-                    <label for="bedrooms" class="filter-label">Bedrooms</label>
-                    <select id="bedrooms" name="bedrooms" class="filter-select">
-                        <option value="">Any</option>
-                        <option value="1">1+</option>
-                        <option value="2">2+</option>
-                        <option value="3">3+</option>
-                        <option value="4">4+</option>
-                    </select>
-                </div>
-
-                <!-- Floor Filter (Apartment-specific) -->
-                <div class="md:col-span-2">
-                    <label for="floor" class="filter-label">Floor</label>
-                    <select id="floor" name="floor" class="filter-select">
-                        <option value="">Any Floor</option>
-                        <option value="ground">Ground Floor</option>
-                        <option value="1-3">1st - 3rd Floor</option>
-                        <option value="4-8">4th - 8th Floor</option>
-                        <option value="9+">9th Floor & Above</option>
-                    </select>
-                </div>
-
-                <!-- Sort By Filter -->
-                <div class="md:col-span-2">
-                    <label for="sort" class="filter-label">Sort By</label>
-                    <select id="sort" name="sort" class="filter-select">
-                        <option value="newest">Newest First</option>
-                        <option value="price_low">Price: Low to High</option>
-                        <option value="price_high">Price: High to Low</option>
-                    </select>
-                </div>
-
-                <!-- Apply Filters Button -->
-                <div class="md:col-span-1 flex items-end">
-                    <button type="submit" class="btn-filter">
-                        <i class="fa-solid fa-filter"></i> Apply
-                    </button>
-                </div>
-            </form>
-
-            <!-- Active Filters -->
-            <div id="activeFilters" class="mt-4 hidden">
-                <div class="flex flex-wrap items-center">
-                    <span class="text-sm font-medium text-gray-700 mr-2">Active Filters:</span>
-                    <div id="filterBadges" class="flex flex-wrap"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
 <!-- Properties Grid -->
 <section class="py-12 bg-gray-50">

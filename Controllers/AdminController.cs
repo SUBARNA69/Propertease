@@ -183,7 +183,6 @@ namespace Propertease.Controllers
 
             return View();
         }
-
         // Action for displaying requests (pending properties)
         public IActionResult AdminRequests()
         {
@@ -194,7 +193,6 @@ namespace Propertease.Controllers
 
             return View(pendingProperties);
         }
-
         // Action to view property details
         public async Task<IActionResult> ViewPropertyDetails(int id)
         {
@@ -208,7 +206,6 @@ namespace Propertease.Controllers
 
             return View(propertyDetails);
         }
-
         // Action to approve a property
         [HttpPost]
         public async Task<IActionResult> ApproveProperty(int id)
@@ -268,7 +265,6 @@ namespace Propertease.Controllers
             }
             return RedirectToAction("AdminRequests");
         }
-
         // Action to reject a property
         [HttpPost]
         public async Task<IActionResult> RejectProperty(int id)
@@ -330,7 +326,6 @@ namespace Propertease.Controllers
             }
             return RedirectToAction("AdminRequests");
         }
-
         // Action to view approved properties
         public IActionResult ApprovedProperties()
         {
@@ -340,7 +335,6 @@ namespace Propertease.Controllers
 
             return View(approvedProperties);
         }
-
         public IActionResult AllProperties()
         {
             var properties = _context.properties
@@ -350,7 +344,6 @@ namespace Propertease.Controllers
 
             return View(properties);
         }
-
         // Action to delete a property
         [HttpPost]
         public async Task<IActionResult> DeleteProperty(int id)
@@ -364,7 +357,6 @@ namespace Propertease.Controllers
             }
             return RedirectToAction("AllProperties");
         }
-
         // Action to display the user list in the UsersManagement view
         public IActionResult UsersManagement()
         {
@@ -373,7 +365,6 @@ namespace Propertease.Controllers
                 .ToList();
             return View(users);
         }
-
         [HttpPost]
         public async Task<IActionResult> SendVerificationEmail(int id)
         {
@@ -535,7 +526,6 @@ namespace Propertease.Controllers
                 return File(fileBytes, contentType, fileName);
             }
         }
-
         // Action to view user details
         public async Task<IActionResult> ViewUserDetails(int id)
         {
@@ -546,7 +536,6 @@ namespace Propertease.Controllers
             }
             return View(user);
         }
-
         // Action to delete a user
         [HttpPost]
         public async Task<IActionResult> DeleteUser(int id)
@@ -560,7 +549,6 @@ namespace Propertease.Controllers
             }
             return RedirectToAction("UsersManagement");
         }
-
         [HttpGet]
         public async Task<IActionResult> BoostEarnings()
         {

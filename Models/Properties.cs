@@ -10,24 +10,18 @@ namespace Propertease.Models
         [Required]
         public string PropertyType { get; set; } // e.g., Apartment, House, Land
         public string Title { get; set; }
-
         public decimal Price { get; set; }
-
         public string Description { get; set; }
-
         // Location Details
         [Required]
         public string District { get; set; }
-
         [Required]
         public string City { get; set; }
-
         [Required]
         public string Province { get; set; }
         public string RoadAccess { get; set; }
         public bool IsDeleted { get; set; } = false;
-
-        public string? ThreeDModel { get; set; } // You can modify this to store path or URL for 3D model if applicable
+        public string? ThreeDModel { get; set; } 
         public DateTime? SoldDate { get; set; } = DateTime.Now;
         public int SellerId { get; set; }   // Foreign Key
         public string Status { get; set; }
